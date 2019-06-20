@@ -2,10 +2,12 @@
 
 #define VERSION "0.1"
 
-// rheo_error.c
+// rheo_error.c {{{
+
 void rheo_ferr(const char *mesg);
 void rheo_warn(const char *mesg);
 
+// }}}
 // rheo_adc.c {{{
 
 typedef struct rheo_adc_ctrl {
@@ -23,6 +25,9 @@ void rheo_adc_close(rheo_adc_ctrl *h);
 unsigned int rheo_read_adc_value(rheo_adc_ctrl *h, unsigned int channel);
 
 // }}}
+// rheo_control.c {{{
 
+double rheo_PID(double tuning[3], double input);
 
+// }}}
 // vim: foldmethod=marker ft=c
