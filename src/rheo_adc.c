@@ -12,7 +12,7 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 unsigned int
-rheo_read_adc_value(rheo_adc_ctrl *h, unsigned int channel)
+read_adc_value(adc_handle *h, unsigned int channel)
 {
 
   int ret;
@@ -33,7 +33,7 @@ rheo_read_adc_value(rheo_adc_ctrl *h, unsigned int channel)
 
   ret = ioctl(h->fd, SPI_IOC_MESSAGE(1), &tr);
   if (ret < 1)
-    rheo_ferr("can't send spi message");
+    ferr("can't send spi message");
   
   unsigned int total = 0;
   for (unsigned int i = 0; i < L; i++) {
@@ -45,14 +45,14 @@ rheo_read_adc_value(rheo_adc_ctrl *h, unsigned int channel)
 
 
 
-rheo_adc_ctrl *
-rheo_adc_open(const char *device)
+adc_handle *
+adc_open(const char *device)
 {
   int fd = open(device, O_RDWR);
   if (fd < 0)
-    rheo_ferr("could not open spi device");
+    ferr("could not open spi device");
 
-  rheo_adc_ctrl *h = malloc(sizeof(rheo_adc_ctrl));
+  adc_handle *h = malloc(sizeof(adc_handle));
 
   h->device = device;
   h->fd = fd;
@@ -68,7 +68,7 @@ rheo_adc_open(const char *device)
 
 
 void
-rheo_adc_close(rheo_adc_ctrl *h)
+adc_close(adc_handle *h)
 {
   close(h->fd);
   free(h);
