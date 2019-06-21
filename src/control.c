@@ -1,5 +1,12 @@
 #include "rheo.h"
 
+void *
+ctlfunc_from_int(int i)
+{
+  // TODO
+  return NULL;
+}
+
 unsigned int
 pid_control(double input, control_params *params)
 {
