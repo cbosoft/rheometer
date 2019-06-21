@@ -14,7 +14,7 @@ void
 inthandle(int signo)
 {
   if (signo == SIGINT) {
-    fprintf(stderr, "\nctrl-c pressed!\n");
+    fprintf(stderr, "\r");
     cancelled = 1;
   }
 }
@@ -50,25 +50,42 @@ main (int argc, const char ** argv)
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, t_d))
     ferr("could not create adc thread");
-
-  while (!t_d->log_ready) nsleep(100);
-  while (!t_d->adc_ready) nsleep(100);
+  
+  // Order is important here.
   //while (!t_d->tmp_ready) nsleep(100);
+  while (!t_d->adc_ready) nsleep(100);
+  //while (!t_d->ctl_ready) nsleep(100);
   //while (!t_d->opt_ready) nsleep(100);
+  while (!t_d->log_ready) nsleep(100);
 
-
-  while (!cancelled) {
+  unsigned int tish = 0;
+  while ( (!cancelled) && (tish <= t_d->run_d->length_s) ) {
     sleep(1);
+    tish ++;
+    //fprintf(stderr, "TISH=%u,LEN=%u",tish,length);
     display_thread_data(t_d);
   }
-
   t_d->stopped = 1;
+
+  if (cancelled)
+    fprintf(stderr, "\033[33mCancelled!\033[0m\n");
+  fprintf(stderr, "Waiting for threads to rejoin...\n");
   
   if (pthread_join(log_thread, NULL))
     ferr("log_thread could not rejoin");
   if (pthread_join(adc_thread, NULL))
     ferr("adc_thread could not rejoin");
+  //if (pthread_join(tmp_thread, NULL))
+  //  ferr("tmp_thread could not rejoin");
+  //if (pthread_join(opt_thread, NULL))
+  //  ferr("opt_thread could not rejoin");
+  //if (pthread_join(ctl_thread, NULL))
+  //  ferr("ctl_thread could not rejoin");
+  
+  //fprintf(stderr, "Cleaning logs...\n");
+  // TODO: clean up logs into single .tar.bz2 file
 
+  fprintf(stderr, "Done!\n");
   free_thread_data(t_d);
   return 0;
 }
