@@ -8,7 +8,9 @@
 void
 ferr (const char* mesg)
 {
-  fprintf(stderr, "\033[31mFATAL ERROR!\033[0m : %s\n  (%d)  %s\n", mesg, errno, strerror(errno));
+  fprintf(stderr, "\033[31mFATAL ERROR!\033[0m : %s\n", mesg);
+  if (errno)
+    fprintf(stderr, "  (%d)  %s\n", errno, strerror(errno));
   exit(1);
 }
 
