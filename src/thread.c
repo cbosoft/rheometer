@@ -3,13 +3,14 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <glob.h>
 #include <sys/time.h>
 
 #include "rheo.h"
 
 
 thread_data *
-new_thread_data()
+init(int argc, const char **argv)
 {
   thread_data *rv = malloc(sizeof(thread_data));
   
@@ -25,6 +26,30 @@ new_thread_data()
   rv->log_ready = 0;
   rv->tmp_ready = 0;
   rv->error_string = "all is well";
+
+  parse_args(argc, argv, rv);
+
+  const char *log_dir = "logs";
+  const char *genpref = "rpir";
+  char *controlscheme = "constant-XX";
+
+  char *date = calloc(15, sizeof(char));
+  time_t rawtime;
+  struct tm *timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(date, 50, "%Y-%m-%d", timeinfo);
+
+  char *pattern = calloc(256, sizeof(char));
+  sprintf(pattern, "%s/%s_%s(*)_%s_%s.csv", log_dir, genpref, date, controlscheme, rv->tag);
+
+  glob_t glob_res;
+  glob((const char *)pattern, GLOB_NOSORT, NULL, &glob_res);
+  free(pattern);
+
+  char *log_pref = calloc(256, sizeof(char));
+  sprintf(log_pref, "%s/%s_%s(%lu)_%s_%s", log_dir, genpref, date, glob_res.gl_pathc, controlscheme, rv->tag);
+  rv->log_pref = log_pref;
   return rv;
 }
 
@@ -35,7 +60,6 @@ void
 free_thread_data(thread_data *dat)
 {
   adc_close(dat->adc_h);
-  free_run_data(dat->run_d);
   free(dat->time_s);
   free(dat->time_us);
   free(dat->adc);

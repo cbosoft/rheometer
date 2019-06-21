@@ -14,22 +14,10 @@ log_thread_func(void *vtd) {
   
   struct timeval tv;
   unsigned long *sec, *usec, *psec, *pusec;
-  
-  char *logpref = "logs/rpir";
-  char *logsuff = ".csv";
-  char *date = calloc(50, sizeof(char));
-  char *controlscheme = "constantXX";
-  time_t rawtime;
-  struct tm *timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  // TODO: replace hour-minute-second with (count)
-  strftime(date, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
-  
-  char *logpath = calloc(256, sizeof(char));
-  sprintf(logpath, "%s_%s_%s_%s%s", logpref, date, controlscheme, td->run_d->tag, logsuff);
 
-  fprintf(stderr, "Logging initialised; log file \033[34;1m\"%s\"\033[0m\n", logpath);
+  char *logpath = calloc(256, sizeof(char));
+  sprintf(logpath, "%s.csv", td->log_pref);
+  fprintf(stderr, "Main log file \033[34;1m\"%s\"\033[0m\n", logpath);
 
   FILE *log_fp = fopen(logpath, "w");
 
@@ -59,6 +47,7 @@ log_thread_func(void *vtd) {
   }
 
   fclose(log_fp);
+  free(logpath);
   
   return NULL;
 }
