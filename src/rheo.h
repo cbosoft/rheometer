@@ -1,4 +1,7 @@
 #pragma once
+
+#include <stdio.h>
+
 // macros {{{
 
 #define VERSION "0.1"
@@ -37,6 +40,7 @@ typedef struct thread_data{
   const char *tag;
   const char *log_pref;
   char **log_paths;
+  FILE **opt_log_fps;
   unsigned int log_count;
 
   // control stuff
@@ -76,6 +80,7 @@ void *log_thread_func(void *rtd);
 
 void ferr(const char *mesg);
 void warn(const char *mesg);
+void info(const char *mesg);
 
 // }}}
 // adc.c {{{
@@ -88,7 +93,8 @@ void *adc_thread_func(void *rtd);
 // }}}
 // opt.c {{{
 
-void *opt_thread_func(void *rtd);
+void opt_setup(thread_data *td);
+void opt_mark(FILE *fp);
 
 // }}}
 // control.c {{{
@@ -99,6 +105,13 @@ double control_PID(double tuning[3], double input);
 // args.h {{{
 
 void parse_args(int argc, const char **argv, thread_data *td);
+
+// }}}
+// motor.c {{{
+
+void motor_setup();
+void motor_warmup(unsigned int target);
+void motor_shutdown();
 
 // }}}
 // vim: foldmethod=marker ft=c

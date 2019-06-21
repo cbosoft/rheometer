@@ -48,10 +48,11 @@ init(int argc, const char **argv)
   free(pattern);
 
   char *log_pref = calloc(256, sizeof(char));
-  sprintf(log_pref, "%s/%s_%s(%lu)_%s_%s", log_dir, genpref, date, glob_res.gl_pathc, controlscheme, rv->tag);
+  sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, controlscheme, rv->tag);
   rv->log_pref = log_pref;
-  rv->log_paths = calloc(100, sizeof(char *));
+  rv->log_paths = calloc(10, sizeof(char *));
   rv->log_count = 0;
+  rv->opt_log_fps = calloc(OPTENC_COUNT, sizeof(FILE *));
   return rv;
 }
 

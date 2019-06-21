@@ -1,37 +1,32 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
+#include <sys/time.h>
+
+#include <wiringPi.h>
+
 #include "rheo.h"
 
 static const uint8_t opt_pins[OPTENC_COUNT] = {16, 20, 21};
 
-void *
-opt_thread(void *vtd)
+void
+opt_setup(thread_data *td)
 {
-  thread_data *td = (thread_data *)vtd;
-
-  char *gpio_paths[OPTENC_COUNT];
-  FILE *logs[OPTENC_COUNT];
-  for (uint8_t pi = 0; pi < OPTENC_COUNT; pi++) {
-    td->log_paths[td->log_count] = calloc(265, sizeof(char));
-    gpio_paths[pi] = calloc(265, sizeof(char));
-    sprintf(td->log_paths[td->log_count], "%s_opt%d-combined.csv", td->log_pref, opt_pins[pi]);
-    logs[pi] = fopen(td->log_paths[td->log_count], "w");
+  for (uint8_t i = 0; i < OPTENC_COUNT; i++) {
+    td->log_paths[i+1] = calloc(265, sizeof(char));
+    sprintf(td->log_paths[i+1], "%s_opt%d-combined.csv", td->log_pref, opt_pins[i]);
+    td->opt_log_fps[i] = fopen(td->log_paths[i+1], "w");
     td->log_count ++;
+    pinMode(opt_pins[i], INPUT);
   }
+}
 
-  // TODO: init GPIOs
-
-  td->opt_ready = 1;
-  while ( (!td->errored) && (!td->stopped) ) {
-    // TODO: for each gpio, check if is same as prev val
-    nsleep(10000);
-  }
-
-  for (uint8_t pi = 0; pi < OPTENC_COUNT; pi++) {
-    fclose(logs[pi]);
-    free(gpio_paths[pi]);
-  }
-
-  return NULL;
+void
+opt_mark(FILE *logf) 
+{
+  struct timeval tv;
+  gettimeofday(&tv, 0);
+  fprintf(logf, "%lu.06%lu", tv.tv_sec, tv.tv_usec);
+  fflush(logf);
 }

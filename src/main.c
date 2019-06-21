@@ -5,6 +5,8 @@
 #include <signal.h>
 #include <sys/time.h>
 
+#include <wiringPi.h>
+
 #include "rheo.h"
 
 
@@ -31,45 +33,62 @@ display_thread_data(thread_data *td) {
 }
 
 
+
 int
 main (int argc, const char ** argv)
 {
-  // wiringPi is badly written and will require a reboot if it
-  // is not run with root, rather than erroring out.
   if (getuid() != 0)
-    ferr("Must be run as root.");
+    ferr("Hardware PWM needs root.");
+  
+  fprintf(stderr, "rheometer v%s\n", VERSION);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
   thread_data *td = init(argc, argv);
-  td->adc_h = adc_open("/dev/spidev0.1");
-  
-  //pthread_t *optenc_threads = setup_optenc_threads();
 
+  td->adc_h = adc_open("/dev/spidev0.1");
+  info("connected to ADC");
+  
   pthread_t log_thread;
   if (pthread_create(&log_thread, NULL, log_thread_func, td))
     ferr("could not create log thread");
-  
-  //TODO: gpio + pwm
-  if (wiringPiSetupGpio() == -1)
-    ferr("could not set up wiringpi");
-
-  pinMode(18, PWM_OUTPUT); // TODO: check 18 is correct for motor PWM pin
-  // set frequency?
-  pwmWrite(18, 512);
+  info("started log thread");
 
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
     ferr("could not create adc thread");
+  info("started adc thread");
+
+  if (wiringPiSetupGpio() == -1)
+    ferr("failed to set up wiringpi lib");
+  info("setup gpio");
+  
+  motor_setup();
+  info("setup motor");
+
+  opt_setup(td);
+  void opt_trip_16(void) { opt_mark(td->opt_log_fps[0]); }
+  void opt_trip_20(void) { opt_mark(td->opt_log_fps[1]); }
+  void opt_trip_21(void) { opt_mark(td->opt_log_fps[2]); }
+  if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("failed to set up GPIO interrupt");
+  if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("failed to set up GPIO interrupt");
+  if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("failed to set up GPIO interrupt");
+  info("setup optical encoder");
+
   
   // Order is important here.
   //while (!td->tmp_ready) nsleep(100);
   while (!td->adc_ready) nsleep(100);
+  info("adc thread ready!");
   //while (!td->ctl_ready) nsleep(100);
-  //while (!td->opt_ready) nsleep(100);
   while (!td->log_ready) nsleep(100);
+  info("log thread ready!");
 
+  info("warming up motor...");
+  motor_warmup(256);
+
+  info("begin!");
   unsigned int tish = 0;
   while ( (!cancelled) && (tish <= td->length_s) ) {
     sleep(1);
@@ -77,6 +96,12 @@ main (int argc, const char ** argv)
     display_thread_data(td);
   }
   td->stopped = 1;
+
+  for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
+    fclose(td->opt_log_fps[i]);
+  }
+
+  motor_shutdown();
 
   if (cancelled)
     fprintf(stderr, "\033[33mCancelled!\033[0m\n");
