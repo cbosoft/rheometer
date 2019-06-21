@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -pedantic
 LINK = -lpthread
 HDR = src/rheo.h
-RHEO = obj/rheo.o obj/rheo_adc.o obj/rheo_error.o obj/rheo_thread.o obj/rheo_args.o
+RHEO = obj/main.o obj/adc.o obj/error.o obj/thread.o obj/args.o obj/log.o obj/control.o
 
 
 rheometer: $(RHEO) $(HDR)

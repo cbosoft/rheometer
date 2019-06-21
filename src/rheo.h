@@ -48,34 +48,38 @@ typedef struct thread_data{
 
 
 
-// rheo_thread.c {{{
+// thread.c {{{
 
 thread_data *new_thread_data();
 void nsleep(unsigned int delay_ns);
 void free_thread_data(thread_data *dat);
-void *log_thread_func(void *rt_d);
-void *adc_thread_func(void *rt_d);
 
 // }}}
-// rheo_error.c {{{
+// log.c {{{ 
+
+void *log_thread_func(void *rt_d);
+
+// }}}
+// error.c {{{
 
 void ferr(const char *mesg);
 void warn(const char *mesg);
 
 // }}}
-// rheo_adc.c {{{
+// adc.c {{{
 
 adc_handle *adc_open(const char *device);
 void adc_close(adc_handle *h);
 unsigned int read_adc_value(adc_handle *h, unsigned int channel);
+void *adc_thread_func(void *rt_d);
 
 // }}}
-// rheo_control.c {{{
+// control.c {{{
 
 double control_PID(double tuning[3], double input);
 
 // }}}
-// rheo_args.h {{{
+// args.h {{{
 
 run_data *parse_args(int argc, const char **argv);
 void free_run_data(run_data *r_d);
