@@ -78,10 +78,10 @@ main (int argc, const char ** argv)
 
   
   // Order is important here.
-  //while (!td->tmp_ready) nsleep(100);
+  //while (!td->tmp_ready) nsleep(100); // TODO: temperature
   while (!td->adc_ready) nsleep(100);
   info("adc thread ready!");
-  //while (!td->ctl_ready) nsleep(100);
+  //while (!td->ctl_ready) nsleep(100); // TODO: control
   while (!td->log_ready) nsleep(100);
   info("log thread ready!");
 
@@ -104,8 +104,8 @@ main (int argc, const char ** argv)
   motor_shutdown();
 
   if (cancelled)
-    fprintf(stderr, "\033[33mCancelled!\033[0m\n");
-  fprintf(stderr, "Waiting for threads to rejoin...\n");
+    warn("received interrupt.");
+  info("waiting for threads to rejoin...");
   
   if (pthread_join(log_thread, NULL))
     ferr("log_thread could not rejoin");
@@ -118,10 +118,10 @@ main (int argc, const char ** argv)
   //if (pthread_join(ctl_thread, NULL))
   //  ferr("ctl_thread could not rejoin");
   
-  //fprintf(stderr, "Cleaning logs...\n");
+  //info("cleaning logs...");
   // TODO: clean up logs into single .tar.bz2 file
 
-  fprintf(stderr, "Done!\n");
+  info("done!");
   free_thread_data(td);
   return 0;
 }
