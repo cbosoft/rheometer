@@ -20,14 +20,14 @@ inthandle(int signo)
 }
 
 void
-display_thread_data(thread_data *t_d) {
-  fprintf(stderr, "t = %lu.%06lu ", (*t_d->time_s), (*t_d->time_us));
+display_thread_data(thread_data *td) {
+  fprintf(stderr, "t = %lu.%06lu ", (*td->time_s), (*td->time_us));
 
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-    fprintf(stderr, "%5lu ", t_d->adc[channel]);
+    fprintf(stderr, "%5lu ", td->adc[channel]);
   }
 
-  fprintf(stderr, "%f\n", (*t_d->temperature));
+  fprintf(stderr, "%f\n", (*td->temperature));
 }
 
 
@@ -37,35 +37,34 @@ main (int argc, const char ** argv)
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
-  thread_data *t_d = new_thread_data();
-  t_d->adc_h = adc_open("/dev/spidev0.1");
-  t_d->run_d = parse_args(argc, argv);
+  thread_data *td = new_thread_data();
+  td->adc_h = adc_open("/dev/spidev0.1");
+  td->run_d = parse_args(argc, argv);
   
   //pthread_t *optenc_threads = setup_optenc_threads();
 
   pthread_t log_thread;
-  if (pthread_create(&log_thread, NULL, log_thread_func, t_d))
+  if (pthread_create(&log_thread, NULL, log_thread_func, td))
     ferr("could not create log thread");
 
   pthread_t adc_thread;
-  if (pthread_create(&adc_thread, NULL, adc_thread_func, t_d))
+  if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
     ferr("could not create adc thread");
   
   // Order is important here.
-  //while (!t_d->tmp_ready) nsleep(100);
-  while (!t_d->adc_ready) nsleep(100);
-  //while (!t_d->ctl_ready) nsleep(100);
-  //while (!t_d->opt_ready) nsleep(100);
-  while (!t_d->log_ready) nsleep(100);
+  //while (!td->tmp_ready) nsleep(100);
+  while (!td->adc_ready) nsleep(100);
+  //while (!td->ctl_ready) nsleep(100);
+  //while (!td->opt_ready) nsleep(100);
+  while (!td->log_ready) nsleep(100);
 
   unsigned int tish = 0;
-  while ( (!cancelled) && (tish <= t_d->run_d->length_s) ) {
+  while ( (!cancelled) && (tish <= td->run_d->length_s) ) {
     sleep(1);
     tish ++;
-    //fprintf(stderr, "TISH=%u,LEN=%u",tish,length);
-    display_thread_data(t_d);
+    display_thread_data(td);
   }
-  t_d->stopped = 1;
+  td->stopped = 1;
 
   if (cancelled)
     fprintf(stderr, "\033[33mCancelled!\033[0m\n");
@@ -86,6 +85,6 @@ main (int argc, const char ** argv)
   // TODO: clean up logs into single .tar.bz2 file
 
   fprintf(stderr, "Done!\n");
-  free_thread_data(t_d);
+  free_thread_data(td);
   return 0;
 }

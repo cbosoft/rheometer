@@ -57,7 +57,7 @@ void free_thread_data(thread_data *dat);
 // }}}
 // log.c {{{ 
 
-void *log_thread_func(void *rt_d);
+void *log_thread_func(void *rtd);
 
 // }}}
 // error.c {{{
@@ -71,7 +71,7 @@ void warn(const char *mesg);
 adc_handle *adc_open(const char *device);
 void adc_close(adc_handle *h);
 unsigned int read_adc_value(adc_handle *h, unsigned int channel);
-void *adc_thread_func(void *rt_d);
+void *adc_thread_func(void *rtd);
 
 // }}}
 // control.c {{{

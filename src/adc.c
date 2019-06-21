@@ -78,22 +78,22 @@ adc_close(adc_handle *h)
 
 
 void *
-adc_thread_func(void *vt_d) {
-  thread_data *t_d = (thread_data *)vt_d;
-  adc_handle *adc_h = t_d->adc_h;
+adc_thread_func(void *vtd) {
+  thread_data *td = (thread_data *)vtd;
+  adc_handle *adc_h = td->adc_h;
   
   unsigned long *adc, *padc;
 
-  t_d->adc_ready = 1;
-  while ( (!t_d->stopped) && (!t_d->errored) ) {
+  td->adc_ready = 1;
+  while ( (!td->stopped) && (!td->errored) ) {
     
     adc = malloc(ADC_COUNT*sizeof(unsigned long));
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
       adc[channel] = read_adc_value(adc_h, channel);
     }
     
-    padc = t_d->adc;
-    t_d->adc = adc;
+    padc = td->adc;
+    td->adc = adc;
 
     free(padc);
 
