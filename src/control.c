@@ -1,13 +1,13 @@
 #include "rheo.h"
 
-double 
+unsigned int
 pid_control(double input, control_params *params)
 {
   // TODO
   return 0.0;
 }
 
-double
+unsigned int
 constant_control(double input, control_params *params)
 {
   return params->c;

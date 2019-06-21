@@ -34,6 +34,11 @@ display_thread_data(thread_data *td) {
 int
 main (int argc, const char ** argv)
 {
+  // wiringPi is badly written and will require a reboot if it
+  // is not run with root, rather than erroring out.
+  if (getuid() != 0)
+    ferr("Must be run as root.");
+
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
@@ -47,8 +52,12 @@ main (int argc, const char ** argv)
     ferr("could not create log thread");
   
   //TODO: gpio + pwm
-  //wiringPiSetupGpio();
-  //TODO: setUpPWM(pin 18?);
+  if (wiringPiSetupGpio() == -1)
+    ferr("could not set up wiringpi");
+
+  pinMode(18, PWM_OUTPUT); // TODO: check 18 is correct for motor PWM pin
+  // set frequency?
+  pwmWrite(18, 512);
 
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
