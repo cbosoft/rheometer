@@ -1,13 +1,17 @@
 #pragma once
-#include <stdint.h>
+// macros {{{
 
 #define VERSION "0.1"
 #define ADC_COUNT 8
 #define OPTENC_COUNT 3
 
-//const int optenc_pins[OPTENC_COUNT] = {16, 20, 21};
+// }}}
+// types and enums {{{
 
 typedef enum control_scheme {constant, pid} control_scheme_enum;
+
+// }}}
+// structs {{{
 
 typedef struct adc_handle {
   const char *device;
@@ -32,21 +36,23 @@ typedef struct thread_data{
   control_scheme_enum control_scheme;
   const char *tag;
   const char *log_pref;
+  char **log_paths;
+  unsigned int log_count;
 
   // control stuff
   adc_handle *adc_h;
-  uint8_t log_ready;
-  uint8_t adc_ready;
-  uint8_t tmp_ready;
-  uint8_t opt_ready;
-  uint8_t stopped;
-  uint8_t errored;
+  unsigned int log_ready;
+  unsigned int adc_ready;
+  unsigned int tmp_ready;
+  unsigned int opt_ready;
+  unsigned int stopped;
+  unsigned int errored;
   const char *error_string;
 
 } thread_data;
 
 
-
+// }}}
 // thread.c {{{
 
 thread_data *init(int argc, const char** argv);
@@ -71,6 +77,11 @@ adc_handle *adc_open(const char *device);
 void adc_close(adc_handle *h);
 unsigned int read_adc_value(adc_handle *h, unsigned int channel);
 void *adc_thread_func(void *rtd);
+
+// }}}
+// opt.c {{{
+
+void *opt_thread_func(void *rtd);
 
 // }}}
 // control.c {{{
