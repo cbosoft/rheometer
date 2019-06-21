@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -pedantic
-LINK = 
+LINK = -lpthread
 HDR = src/rheo.h
-RHEO = src/rheo.o src/rheo_adc.o
+RHEO = src/rheo.o src/rheo_adc.o src/rheo_error.o src/rheo_thread.o src/rheo_args.o
 
 src/%.o: src/%.c $(HDR)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)
