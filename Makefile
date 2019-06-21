@@ -2,15 +2,19 @@ CC = gcc
 CFLAGS = -Wall -pedantic
 LINK = -lpthread
 HDR = src/rheo.h
-RHEO = src/rheo.o src/rheo_adc.o src/rheo_error.o src/rheo_thread.o src/rheo_args.o
+RHEO = obj/rheo.o obj/rheo_adc.o obj/rheo_error.o obj/rheo_thread.o obj/rheo_args.o
 
-src/%.o: src/%.c $(HDR)
-	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)
 
-rheometer: $(RHEO)
+rheometer: $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
+obj/%.o: src/%.c obj $(HDR)
+	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)
+
+obj:
+	mkdir obj
+
 clean:
-	rm -rf src/*.o rheometer
+	rm -rf obj rheometer
 
 
