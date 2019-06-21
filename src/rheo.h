@@ -114,4 +114,9 @@ void motor_warmup(unsigned int target);
 void motor_shutdown();
 
 // }}}
+// tar.c {{{
+
+void tidy_logs(thread_data *td);
+
+// }}}
 // vim: foldmethod=marker ft=c

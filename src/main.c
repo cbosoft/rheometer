@@ -118,10 +118,9 @@ main (int argc, const char ** argv)
   //if (pthread_join(ctl_thread, NULL))
   //  ferr("ctl_thread could not rejoin");
   
-  //info("cleaning logs...");
-  // TODO: clean up logs into single .tar.bz2 file
-
-  info("done!");
+  info("cleaning up...");
+  tidy_logs(td);
   free_thread_data(td);
+  info("done!");
   return 0;
 }
