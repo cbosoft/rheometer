@@ -51,6 +51,13 @@ typedef struct thread_data{
 
 } thread_data;
 
+typedef struct control_params {
+  double c;
+  double kp;
+  double ki;
+  double kd;
+} control_params;
+
 
 // }}}
 // thread.c {{{

@@ -1,6 +1,14 @@
 #include "rheo.h"
 
 double 
-rheo_PID(double tuning[3], double input)
+pid_control(double input, control_params *params)
 {
+  // TODO
+  return 0.0;
+}
+
+double
+constant_control(double input, control_params *params)
+{
+  return params->c;
 }
