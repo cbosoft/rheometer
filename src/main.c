@@ -45,6 +45,10 @@ main (int argc, const char ** argv)
   pthread_t log_thread;
   if (pthread_create(&log_thread, NULL, log_thread_func, td))
     ferr("could not create log thread");
+  
+  //TODO: gpio + pwm
+  //wiringPiSetupGpio();
+  //TODO: setUpPWM(pin 18?);
 
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
