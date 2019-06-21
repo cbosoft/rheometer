@@ -37,9 +37,8 @@ main (int argc, const char ** argv)
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
-  thread_data *td = new_thread_data();
+  thread_data *td = init(argc, argv);
   td->adc_h = adc_open("/dev/spidev0.1");
-  td->run_d = parse_args(argc, argv);
   
   //pthread_t *optenc_threads = setup_optenc_threads();
 
@@ -59,7 +58,7 @@ main (int argc, const char ** argv)
   while (!td->log_ready) nsleep(100);
 
   unsigned int tish = 0;
-  while ( (!cancelled) && (tish <= td->run_d->length_s) ) {
+  while ( (!cancelled) && (tish <= td->length_s) ) {
     sleep(1);
     tish ++;
     display_thread_data(td);

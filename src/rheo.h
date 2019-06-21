@@ -9,12 +9,6 @@
 
 typedef enum control_scheme {constant, pid} control_scheme_enum;
 
-typedef struct run_data {
-  unsigned int length_s;
-  control_scheme_enum control_scheme;
-  const char *tag;
-} run_data;
-
 typedef struct adc_handle {
   const char *device;
   int fd;
@@ -33,9 +27,14 @@ typedef struct thread_data{
   float *temperature;
   float *speed_ind;
 
+  // run_data
+  unsigned int length_s;
+  control_scheme_enum control_scheme;
+  const char *tag;
+  const char *log_pref;
+
   // control stuff
   adc_handle *adc_h;
-  run_data *run_d;
   uint8_t log_ready;
   uint8_t adc_ready;
   uint8_t tmp_ready;
@@ -50,7 +49,7 @@ typedef struct thread_data{
 
 // thread.c {{{
 
-thread_data *new_thread_data();
+thread_data *init(int argc, const char** argv);
 void nsleep(unsigned int delay_ns);
 void free_thread_data(thread_data *dat);
 
@@ -81,8 +80,7 @@ double control_PID(double tuning[3], double input);
 // }}}
 // args.h {{{
 
-run_data *parse_args(int argc, const char **argv);
-void free_run_data(run_data *r_d);
+void parse_args(int argc, const char **argv, thread_data *td);
 
 // }}}
 // vim: foldmethod=marker ft=c

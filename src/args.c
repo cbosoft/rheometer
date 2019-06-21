@@ -2,18 +2,10 @@
 
 #include "rheo.h"
 
-run_data *
-parse_args(int argc, const char **argv) 
-{
-  run_data *rv = malloc(sizeof(run_data));
-  rv->tag = "DELME";
-  rv->length_s = 60;
-
-  return rv;
-}
-
 void
-free_run_data(run_data *r_d)
+parse_args(int argc, const char **argv, thread_data *td) 
 {
-  free(r_d);
+  td->length_s = 60;
+  td->tag = "DELME";
+  td->control_scheme = 0;
 }
