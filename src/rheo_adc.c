@@ -73,3 +73,34 @@ adc_close(adc_handle *h)
   close(h->fd);
   free(h);
 }
+
+
+
+
+void *
+adc_thread_func(void *vt_d) {
+  thread_data *t_d = (thread_data *)vt_d;
+  adc_handle *adc_h = t_d->adc_h;
+  
+  unsigned long *adc, *padc;
+
+  t_d->adc_ready = 1;
+  while ( (!t_d->stopped) && (!t_d->errored) ) {
+    
+    adc = malloc(ADC_COUNT*sizeof(unsigned long));
+    for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
+      adc[channel] = read_adc_value(adc_h, channel);
+    }
+    
+    padc = t_d->adc;
+    t_d->adc = adc;
+
+    free(padc);
+
+    nsleep(10000);
+
+  }
+
+
+  return NULL;
+}
