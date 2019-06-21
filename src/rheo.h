@@ -11,7 +11,7 @@
 // }}}
 // types and enums {{{
 
-typedef enum control_scheme {constant, pid} control_scheme_enum;
+typedef enum control_scheme {control_constant, control_pid} control_scheme_enum;
 
 // }}}
 // structs {{{
