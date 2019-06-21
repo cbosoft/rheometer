@@ -18,7 +18,6 @@ void
 warn (const char* mesg)
 {
   fprintf(stderr, "\033[33mWARNING!\033[0m : %s\n", mesg);
-  exit(1);
 }
 
 void
