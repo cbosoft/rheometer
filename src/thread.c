@@ -50,6 +50,8 @@ init(int argc, const char **argv)
   char *log_pref = calloc(256, sizeof(char));
   sprintf(log_pref, "%s/%s_%s(%lu)_%s_%s", log_dir, genpref, date, glob_res.gl_pathc, controlscheme, rv->tag);
   rv->log_pref = log_pref;
+  rv->log_paths = calloc(100, sizeof(char *));
+  rv->log_count = 0;
   return rv;
 }
 
@@ -60,6 +62,9 @@ void
 free_thread_data(thread_data *dat)
 {
   adc_close(dat->adc_h);
+  for (unsigned int i = 0; i < dat->log_count; i++) {
+    free(dat->log_paths[i]);
+  }
   free(dat->time_s);
   free(dat->time_us);
   free(dat->adc);

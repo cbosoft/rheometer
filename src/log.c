@@ -15,11 +15,12 @@ log_thread_func(void *vtd) {
   struct timeval tv;
   unsigned long *sec, *usec, *psec, *pusec;
 
-  char *logpath = calloc(256, sizeof(char));
-  sprintf(logpath, "%s.csv", td->log_pref);
-  fprintf(stderr, "Main log file \033[34;1m\"%s\"\033[0m\n", logpath);
 
-  FILE *log_fp = fopen(logpath, "w");
+  td->log_paths[td->log_count] = calloc(256, sizeof(char));
+  sprintf(td->log_paths[td->log_count], "%s.csv", td->log_pref);
+
+  FILE *log_fp = fopen(td->log_paths[td->log_count], "w");
+  td->log_count ++;
 
   td->log_ready = 1;
   while ( (!td->stopped) && (!td->errored) ) {
@@ -47,7 +48,6 @@ log_thread_func(void *vtd) {
   }
 
   fclose(log_fp);
-  free(logpath);
   
   return NULL;
 }
