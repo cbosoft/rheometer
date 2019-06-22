@@ -40,12 +40,12 @@ main (int argc, const char ** argv)
   if (getuid() != 0)
     ferr("Hardware PWM needs root.");
   
-  fprintf(stderr, "rheometer v%s\n", VERSION);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
   thread_data *td = init(argc, argv);
+  fprintf(stderr, "rheometer v%s\n", VERSION);
 
   td->adc_h = adc_open("/dev/spidev0.1");
   info("connected to ADC");
