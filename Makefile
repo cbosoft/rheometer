@@ -6,7 +6,10 @@ RHEO = obj/main.o obj/adc.o obj/error.o obj/thread.o obj/args.o obj/log.o obj/co
 WPI = wpi/libwiringPi.so
 
 
-rheometer: $(WPI) $(RHEO) $(HDR)
+rheometer: $(RHEO) $(HDR)
+	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
+
+debug: $(WPI) $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
 obj/%.o: src/%.c obj $(HDR)
@@ -17,12 +20,10 @@ obj:
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) $(CFLAGS) -shared -o $@ $< -lpthread
-
-wpiin: wpi/libwiringPi.so
-	sudo ln -s wpi/libwiringPi.so /usr/lib/.
-	sudo ln -s wpi/wiringPi.h /usr/include/.
+	sudo cp -s wpi/libwiringPi.so /usr/lib/.
+	sudo cp -s wpi/wiringPi.h /usr/include/.
 
 clean:
-	rm -rf obj rheometer
+	rm -rf obj rheometer wpi/*.so
 
 
