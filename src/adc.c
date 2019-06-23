@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+#include <wiringPi.h>
 
 #include "rheo.h"
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -14,7 +15,7 @@
 unsigned int
 read_adc_value(adc_handle *h, unsigned int channel)
 {
-
+#ifndef DEBUG
   int ret;
   uint8_t tx[] = {
     4 + (channel>>2), (channel&3)<<6, 0
@@ -41,6 +42,9 @@ read_adc_value(adc_handle *h, unsigned int channel)
   }
 
   return total;
+#else
+  return 314;
+#endif
 }
 
 
@@ -48,6 +52,7 @@ read_adc_value(adc_handle *h, unsigned int channel)
 adc_handle *
 adc_open(const char *device)
 {
+#ifndef DEBUG
   int fd = open(device, O_RDWR);
   if (fd < 0)
     ferr("could not open spi device");
@@ -63,6 +68,10 @@ adc_open(const char *device)
   h->bits = 8;
 
   return h;
+#else
+  adc_handle *h = malloc(sizeof(adc_handle));
+  return h;
+#endif
 }
 
 
@@ -70,7 +79,9 @@ adc_open(const char *device)
 void
 adc_close(adc_handle *h)
 {
+#ifndef DEBUG
   close(h->fd);
+#endif
   free(h);
 }
 
