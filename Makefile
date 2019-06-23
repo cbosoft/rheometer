@@ -3,9 +3,10 @@ CFLAGS = -Wall -pedantic
 LINK = -lwiringPi -lpthread
 HDR = src/rheo.h
 RHEO = obj/main.o obj/adc.o obj/error.o obj/thread.o obj/args.o obj/log.o obj/control.o obj/motor.o obj/opt.o obj/tar.o
+WPI = wpi/libwiringPi.so
 
 
-rheometer: $(RHEO) $(HDR)
+rheometer: $(WPI) $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
 obj/%.o: src/%.c obj $(HDR)
@@ -17,9 +18,9 @@ obj:
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) $(CFLAGS) -shared -o $@ $< -lpthread
 
-fakewiringpi: wpi/libwiringPi.so
-	sudo cp wpi/libwiringPi.so /usr/lib/.
-	sudo cp wpi/wiringPi.h /usr/include/.
+wpiin: wpi/libwiringPi.so
+	sudo ln -s wpi/libwiringPi.so /usr/lib/.
+	sudo ln -s wpi/wiringPi.h /usr/include/.
 
 clean:
 	rm -rf obj rheometer
