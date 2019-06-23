@@ -8,12 +8,11 @@
 
 #include "rheo.h"
 
-
 thread_data *
-init(int argc, const char **argv)
+create_thread_data()
 {
   thread_data *rv = malloc(sizeof(thread_data));
-  
+
   rv->time_s = malloc(sizeof(unsigned long));
   rv->time_us = malloc(sizeof(unsigned long));
   rv->adc = malloc(ADC_COUNT * sizeof(float));
@@ -26,9 +25,12 @@ init(int argc, const char **argv)
   rv->log_ready = 0;
   rv->tmp_ready = 0;
   rv->error_string = "all is well";
+   return rv;
+}
 
-  parse_args(argc, argv, rv);
-
+void
+init(int argc, const char **argv, thread_data *td)
+{
   const char *log_dir = "logs";
   const char *genpref = "rpir";
   char *controlscheme = "constant-XX";
@@ -41,19 +43,18 @@ init(int argc, const char **argv)
   strftime(date, 50, "%Y-%m-%d", timeinfo);
 
   char *pattern = calloc(256, sizeof(char));
-  sprintf(pattern, "%s/%s_%s(*)_%s_%s.csv", log_dir, genpref, date, controlscheme, rv->tag);
+  sprintf(pattern, "%s/%s_%s(*)_%s_%s.csv", log_dir, genpref, date, controlscheme, td->tag);
 
   glob_t glob_res;
   glob((const char *)pattern, GLOB_NOSORT, NULL, &glob_res);
   free(pattern);
 
   char *log_pref = calloc(256, sizeof(char));
-  sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, controlscheme, rv->tag);
-  rv->log_pref = log_pref;
-  rv->log_paths = calloc(10, sizeof(char *));
-  rv->log_count = 0;
-  rv->opt_log_fps = calloc(OPTENC_COUNT, sizeof(FILE *));
-  return rv;
+  sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, controlscheme, td->tag);
+  td->log_pref = log_pref;
+  td->log_paths = calloc(10, sizeof(char *));
+  td->log_count = 0;
+  td->opt_log_fps = calloc(OPTENC_COUNT, sizeof(FILE *));
 }
 
 

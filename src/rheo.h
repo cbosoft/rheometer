@@ -66,7 +66,8 @@ typedef struct control_params {
 // }}}
 // thread.c {{{
 
-thread_data *init(int argc, const char** argv);
+thread_data *create_thread_data(void);
+void init(int argc, const char** argv, thread_data *td);
 void nsleep(unsigned int delay_ns);
 void free_thread_data(thread_data *dat);
 
@@ -106,6 +107,7 @@ double control_PID(double tuning[3], double input);
 // args.h {{{
 
 void parse_args(int argc, const char **argv, thread_data *td);
+void usage();
 
 // }}}
 // motor.c {{{

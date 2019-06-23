@@ -37,15 +37,14 @@ display_thread_data(thread_data *td) {
 int
 main (int argc, const char ** argv)
 {
-  if (getuid() != 0)
-    ferr("Hardware PWM needs root.");
-  
+  thread_data *td = create_thread_data();
+
+  parse_args(argc, argv, td);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
-  thread_data *td = init(argc, argv);
-  fprintf(stderr, "rheometer v%s\n", VERSION);
+  init(argc, argv, td);
 
   td->adc_h = adc_open("/dev/spidev0.1");
   info("connected to ADC");
