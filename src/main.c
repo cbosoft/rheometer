@@ -22,14 +22,26 @@ inthandle(int signo)
 }
 
 void
-display_thread_data(thread_data *td) {
-  fprintf(stderr, "t = %lu.%06lu ", (*td->time_s), (*td->time_us));
+display_titles(void)
+{
+  fprintf(stderr, "\033[1m%20s ", "t");
+  for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
+    fprintf(stderr, "%5u ", channel);
+  fprintf(stderr, "%5s ", "ca");
+  fprintf(stderr, "%5s\033[0m\n", "T");
+}
+
+void
+display_thread_data(thread_data_t *td) {
+  fprintf(stderr, "%14lu.%06lu ", (*td->time_s), (*td->time_us));
 
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     fprintf(stderr, "%5lu ", td->adc[channel]);
   }
 
-  fprintf(stderr, "%f\n", (*td->temperature));
+  fprintf(stderr, "%5u ", td->last_ca);
+
+  fprintf(stderr, "%2.3f\n", (*td->temperature));
 }
 
 
@@ -37,7 +49,7 @@ display_thread_data(thread_data *td) {
 int
 main (int argc, const char ** argv)
 {
-  thread_data *td = create_thread_data();
+  thread_data_t *td = create_thread_data();
 
   parse_args(argc, argv, td);
 
@@ -46,25 +58,12 @@ main (int argc, const char ** argv)
 
   init(argc, argv, td);
 
-  td->adc_h = adc_open("/dev/spidev0.1");
+  td->adc_handle = adc_open("/dev/spidev0.1");
   info("connected to ADC");
-  
-  pthread_t log_thread;
-  if (pthread_create(&log_thread, NULL, log_thread_func, td))
-    ferr("could not create log thread");
-  info("started log thread");
-
-  pthread_t adc_thread;
-  if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
-    ferr("could not create adc thread");
-  info("started adc thread");
 
   if (wiringPiSetupGpio() == -1)
     ferr("failed to set up wiringpi lib");
   info("setup gpio");
-  
-  motor_setup();
-  info("setup motor");
 
   opt_setup(td);
   void opt_trip_16(void) { opt_mark(td->opt_log_fps[0]); }
@@ -73,17 +72,38 @@ main (int argc, const char ** argv)
   if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("failed to set up GPIO interrupt");
   if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("failed to set up GPIO interrupt");
   if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("failed to set up GPIO interrupt");
-  info("setup optical encoder");
+  info("set up optical encoder");
 
-  
-  // Order is important here.
-  //while (!td->tmp_ready) nsleep(100); // TODO: temperature
+  // pthread_t tmp_thread;
+  // if (pthread_create(&tmp_thread, NULL, tmp_thread_func, td))
+  //   ferr("could not create thermometer thread");
+  // info("started thermometer thread");
+  // while (!td->tmp_ready) nsleep(100);
+  // info("....... thermometer thread ready!"); // TODO: temperature
+
+  pthread_t adc_thread;
+  if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
+    ferr("could not create adc thread");
+  info("started adc thread");
   while (!td->adc_ready) nsleep(100);
-  info("adc thread ready!");
-  //while (!td->ctl_ready) nsleep(100); // TODO: control
-  while (!td->log_ready) nsleep(100);
-  info("log thread ready!");
+  info("....... adc thread ready!");
 
+  pthread_t ctl_thread;
+  if (pthread_create(&ctl_thread, NULL, ctl_thread_func, td))
+    ferr("could not create adc thread");
+  info("started control thread");
+  while (!td->ctl_ready) nsleep(100);
+  info("....... control thread ready!");
+
+  pthread_t log_thread;
+  if (pthread_create(&log_thread, NULL, log_thread_func, td))
+    ferr("could not create log thread");
+  info("started log thread");
+  while (!td->log_ready) nsleep(100);
+  info("....... log thread ready!");
+
+  motor_setup();
+  info("set up motor");
   info("warming up motor...");
   motor_warmup(256);
 
@@ -92,6 +112,8 @@ main (int argc, const char ** argv)
   while ( (!cancelled) && (tish <= td->length_s) ) {
     sleep(1);
     tish ++;
+    if ((tish % 10) == 1)
+      display_titles();
     display_thread_data(td);
   }
   td->stopped = 1;
@@ -105,17 +127,26 @@ main (int argc, const char ** argv)
   if (cancelled)
     warn("received interrupt.");
   info("waiting for threads to rejoin...");
-  
+
   if (pthread_join(log_thread, NULL))
-    ferr("log_thread could not rejoin");
+    ferr("log thread could not rejoin");
+  else
+    info("log thread rejoined");
+
+  if (pthread_join(ctl_thread, NULL))
+    ferr("control thread could not rejoin");
+  else
+    info("control thread rejoined");
+
   if (pthread_join(adc_thread, NULL))
-    ferr("adc_thread could not rejoin");
-  //if (pthread_join(tmp_thread, NULL))
-  //  ferr("tmp_thread could not rejoin");
-  //if (pthread_join(opt_thread, NULL))
-  //  ferr("opt_thread could not rejoin");
-  //if (pthread_join(ctl_thread, NULL))
-  //  ferr("ctl_thread could not rejoin");
+    ferr("adc thread could not rejoin");
+  else
+    info("adc thread rejoined");
+  
+  // if (pthread_join(tmp_thread, NULL))
+  //   ferr("thermometer thread could not rejoin");
+  // else
+  //   info("thermometer thread rejoined");
   
   info("cleaning up...");
   tidy_logs(td);
