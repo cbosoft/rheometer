@@ -1,14 +1,16 @@
 #include <string.h>
+#include <wiringPi.h>
 
 #include "rheo.h"
 
-typedef unsigned int (*control_func)(thread_data *, control_params *);
 
 static const char *control_schemes[] = {
   "constant",
   "pid",
   ""
 };
+
+
 
 int
 ctlidx_from_str(const char *s)
@@ -21,30 +23,69 @@ ctlidx_from_str(const char *s)
   return -1;
 }
 
-control_func
-ctlfunc_from_int(int i)
-{
-  switch (i) {
-    case control_constant:
-      break;
-    case control_pid:
-      break;
-    default:
-      ferr("somehow executing impossible code, ya done goofed.");
-      break;
-  }
-  return NULL;
-}
+
+
 
 unsigned int
-pid_control(double input, control_params *params)
+pid_control(thread_data_t *td)
 {
   // TODO
   return 0.0;
 }
 
+
+
+
 unsigned int
-constant_control(double input, control_params *params)
+constant_control(thread_data_t *td)
 {
-  return params->c;
+  return (unsigned int)(td->control_params->c * 10.24);
+}
+
+
+
+
+control_func_t
+ctlfunc_from_int(int i)
+{
+  switch (i) {
+    case control_constant:
+      return &constant_control;
+    case control_pid:
+      return &pid_control;
+    default:
+      ferr("unrecognised control scheme index");
+      break;
+  }
+  return NULL;
+}
+
+
+
+
+void *
+ctl_thread_func(void *vtd) 
+{
+  thread_data_t *td = (thread_data_t *)vtd;
+  
+  control_func_t ctlfunc = ctlfunc_from_int(ctlidx_from_str(td->control_scheme));
+  
+  td->ctl_ready = 1;
+
+  while ( (!td->stopped) && (!td->errored) ) {
+
+    unsigned int control_action = ctlfunc(td);
+
+    if (control_action > 1024)
+      control_action = 1024;
+
+    pwmWrite(PWM_PIN, control_action);
+
+    td->last_ca = control_action;
+
+    nsleep(td->control_params->sleep_ns);
+
+  }
+
+  return NULL;
 }
