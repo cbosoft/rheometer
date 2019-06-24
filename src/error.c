@@ -8,16 +8,16 @@
 void
 ferr (const char* mesg)
 {
-  fprintf(stderr, "\033[31mFATAL ERROR!\033[0m %s\n", mesg);
+  fprintf(stderr, "  \033[31mFATAL ERROR!\033[0m %s\n", mesg);
   if (errno)
-    fprintf(stderr, "  (%d)  %s\n", errno, strerror(errno));
+    fprintf(stderr, "  \033[31m-->\033[0m(%d)  %s\n", errno, strerror(errno));
   exit(1);
 }
 
 void
 argerr(const char* mesg)
 {
-  fprintf(stderr, "\033[31mUSAGE ERROR!\033[0m %s\n", mesg);
+  fprintf(stderr, "  \033[41mUSAGE ERROR!\033[0m %s\n", mesg);
   usage();
   exit(1);
 }
@@ -25,11 +25,11 @@ argerr(const char* mesg)
 void
 warn (const char* mesg)
 {
-  fprintf(stderr, "\033[33mWARNING!\033[0m %s\n", mesg);
+  fprintf(stderr, "  \033[33mWARNING!\033[0m %s\n", mesg);
 }
 
 void
 info (const char *mesg)
 {
-  fprintf(stderr, "\033[34m%s\033[0m\n", mesg);
+  fprintf(stderr, "  \033[34m%s\033[0m\n", mesg);
 }
