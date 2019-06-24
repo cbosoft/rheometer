@@ -27,6 +27,7 @@ display_titles(void)
   fprintf(stderr, "\033[1m%20s ", "t");
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
     fprintf(stderr, "%5u ", channel);
+  fprintf(stderr, "%5s ", "spd");
   fprintf(stderr, "%5s ", "ca");
   fprintf(stderr, "%5s\033[0m\n", "T");
 }
@@ -38,6 +39,12 @@ display_thread_data(thread_data_t *td) {
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     fprintf(stderr, "%5lu ", td->adc[channel]);
   }
+  
+  double speed = 0.0;
+  for (unsigned int i = 0; i < OPTENC_COUNT; i++)
+    speed += td->speed_ind[i];
+  speed /= 3.0;
+  fprintf(stderr, "%5f ", speed);
 
   fprintf(stderr, "%5u ", td->last_ca);
 
@@ -66,9 +73,9 @@ main (int argc, const char ** argv)
   info("setup gpio");
 
   opt_setup(td);
-  void opt_trip_16(void) { opt_mark(td->opt_log_fps[0]); }
-  void opt_trip_20(void) { opt_mark(td->opt_log_fps[1]); }
-  void opt_trip_21(void) { opt_mark(td->opt_log_fps[2]); }
+  void opt_trip_16(void) { opt_mark(td, 0); }
+  void opt_trip_20(void) { opt_mark(td, 1); }
+  void opt_trip_21(void) { opt_mark(td, 2); }
   if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("failed to set up GPIO interrupt");
   if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("failed to set up GPIO interrupt");
   if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("failed to set up GPIO interrupt");
