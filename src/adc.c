@@ -57,7 +57,7 @@ adc_open(const char *device)
   if (fd < 0)
     ferr("could not open spi device");
 
-  adc_handle *h = malloc(sizeof(adc_handle));
+  adc_handle_t *h = malloc(sizeof(adc_handle_t));
 
   h->device = device;
   h->fd = fd;
