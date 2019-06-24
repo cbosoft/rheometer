@@ -8,15 +8,17 @@
 
 #include "rheo.h"
 
-thread_data *
+thread_data_t *
 create_thread_data()
 {
-  thread_data *rv = malloc(sizeof(thread_data));
+  thread_data_t *rv = malloc(sizeof(thread_data_t));
 
   rv->time_s = malloc(sizeof(unsigned long));
   rv->time_us = malloc(sizeof(unsigned long));
   rv->adc = malloc(ADC_COUNT * sizeof(float));
   rv->temperature = malloc(sizeof(float));
+
+  rv->last_ca = 0;
 
   rv->stopped = 0;
   rv->errored = 0;
@@ -24,12 +26,15 @@ create_thread_data()
   rv->opt_ready = 0;
   rv->log_ready = 0;
   rv->tmp_ready = 0;
+
+  rv->adc_busy = 0;
+
   rv->error_string = "all is well";
    return rv;
 }
 
 void
-init(int argc, const char **argv, thread_data *td)
+init(int argc, const char **argv, thread_data_t *td)
 {
   const char *log_dir = "logs";
   const char *genpref = "rpir";
@@ -61,17 +66,17 @@ init(int argc, const char **argv, thread_data *td)
 
 
 void
-free_thread_data(thread_data *dat)
+free_thread_data(thread_data_t *td)
 {
-  adc_close(dat->adc_h);
-  for (unsigned int i = 0; i < dat->log_count; i++) {
-    free(dat->log_paths[i]);
+  adc_close(td->adc_handle);
+  for (unsigned int i = 0; i < td->log_count; i++) {
+    free(td->log_paths[i]);
   }
-  free(dat->time_s);
-  free(dat->time_us);
-  free(dat->adc);
-  free(dat->temperature);
-  free(dat);
+  free(td->time_s);
+  free(td->time_us);
+  free(td->adc);
+  free(td->temperature);
+  free(td);
 }
 
 
