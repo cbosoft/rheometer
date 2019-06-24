@@ -4,8 +4,6 @@
 
 #include "rheo.h"
 
-#define PWM_PIN 18
-
 void
 motor_setup()
 {
