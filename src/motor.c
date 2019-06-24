@@ -18,7 +18,9 @@ motor_warmup(unsigned int target)
   pwmWrite(PWM_PIN, 800);
   nsleep(1500*1000*1000);
   pwmWrite(PWM_PIN, target);
+#ifndef DEBUG
   sleep(3);
+#endif
 }
 
 void
