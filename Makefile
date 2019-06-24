@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -pedantic
 LINK = -lwiringPi -lpthread
 HDR = src/rheo.h
-RHEO = obj/main.o obj/adc.o obj/error.o obj/thread.o obj/args.o obj/log.o obj/control.o obj/motor.o obj/opt.o obj/tar.o
+RHEO = obj/main.o obj/adc.o obj/error.o obj/thread.o obj/args.o obj/log.o obj/control.o obj/motor.o obj/opt.o obj/tar.o obj/cJSON.o
 WPI = wpi/libwiringPi.so
 
 
@@ -10,7 +10,7 @@ rheometer: $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
 debug: $(WPI) $(RHEO) $(HDR)
-	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
+	$(CC) $(CFLAGS) $(RHEO) -o rheometer $(LINK)
 
 obj/%.o: src/%.c obj $(HDR)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)

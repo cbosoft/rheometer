@@ -3,18 +3,18 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "cJSON.h"
 #include "rheo.h"
 
 void
 usage ()
 {
-  // TODO
   fprintf(stderr, 
       "\n"
       "  \033[1mrheometer\033[0m control program (v"VERSION")\n"
       "\n"
-      "  Usage:\n"
-      "    rheometer [-t|--tag <tag>] -l|--length <length> -c|--control-scheme <control scheme>\n"
+      "  Usage: (as root)\n"
+      "    rheometer -l|--length <length> -c|--control-scheme <control scheme> [-t|--tag <tag>]\n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -64,6 +64,154 @@ parse_length_string(const char *length_s_str) {
 }
 
 void
+get_control_scheme_parameter(cJSON *json, const char *paramname, const char *schemename, const char *description, double *value)
+{
+  cJSON *dbl = cJSON_GetObjectItem(json, paramname);
+
+  if (dbl == NULL) {
+    char err_mesg[1000] = {0};
+    sprintf(err_mesg, "%s requires a parameter \"%s\" (%s)", schemename, paramname, description);
+    cJSON_Delete(json);
+    ferr(err_mesg);
+  }
+
+  if (!cJSON_IsNumber(dbl)) {
+    char err_mesg[1000] = {0};
+    sprintf(err_mesg, "%s requires \"%s\" to be a number (%s)", schemename, paramname, description);
+  }
+  
+  (*value) = dbl->valuedouble;
+}
+
+void
+get_optional_control_scheme_parameter(cJSON *json, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
+{
+  cJSON *param = cJSON_GetObjectItem(json, paramname);
+
+  if (param == NULL)
+    return;
+
+  if (cJSON_IsNumber(param)) {
+
+    if (dbl_value == NULL) {
+
+      if (int_value == NULL) {
+        char err_mesg[1000] = {0};
+        sprintf(err_mesg, "JSON parse error. \"%s\" is not expected to be a number (%s).", paramname, description);
+        ferr(err_mesg);
+      }
+      else {
+        (*int_value) = param->valueint;
+      }
+
+    }
+    else {
+      (*dbl_value) = param->valuedouble;
+    }
+
+  } 
+  else if (cJSON_IsString(param)) {
+
+    if (str_value == NULL) {
+        char err_mesg[1000] = {0};
+        sprintf(err_mesg, "JSON parse error. \"%s\" is not expected to be a string (%s).", paramname, description);
+        ferr(err_mesg);
+    }
+    else {
+      (*str_value) = param->valuestring;
+    }
+  }
+}
+
+
+
+void
+parse_contol_scheme_string(thread_data_t *td, const char *control_scheme_string)
+{
+  if (access(control_scheme_string, F_OK) == -1) {
+    argerr("control scheme must be a json file describing the scheme.");
+  }
+
+  FILE *fp = fopen(control_scheme_string, "r");
+
+  if (fp == NULL)
+    ferr("Something went wrong while opening control scheme.");
+  
+  char ch;
+  unsigned int count = 0, i = 0;
+
+  while ((ch = fgetc(fp)) != EOF)
+    count++;
+
+  if (fseek(fp, 0L, SEEK_SET) != 0)
+    ferr("Something went wrong repositioning file.");
+
+  char *json_str = calloc(count, sizeof(char));
+  while ((ch = fgetc(fp)) != EOF) {
+    json_str[i] = ch;
+    i++;
+  }
+
+  fclose(fp);
+
+  cJSON *json = cJSON_Parse(json_str);
+
+  if (json == NULL) {
+    const char *eptr = cJSON_GetErrorPtr();
+    char err_mesg[1000] = {0};
+    if (eptr != NULL)
+      sprintf(err_mesg, "JSON parse failed before %s", eptr);
+    else
+      sprintf(err_mesg, "JSON parse failed.");
+    cJSON_Delete(json);
+    ferr(err_mesg);
+  }
+
+  cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "name");
+  if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
+    td->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
+    strcpy(td->control_scheme, control_scheme_name_json->valuestring);
+  }
+  else {
+    cJSON_Delete(json);
+    ferr("Control scheme json must name a scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
+  }
+  
+  int schemeidx = ctlidx_from_str(td->control_scheme);
+  if (schemeidx < 0) {
+    cJSON_Delete(json);
+    ferr("Control scheme json must name a known scheme.\n  i.e. \"constant\" or \"pid\"");
+  }
+
+  control_params_t *params = malloc(sizeof(control_params_t));
+  params->c = 0.0;
+  params->kp = 0.0;
+  params->ki = 0.0;
+  params->kd = 0.0;
+  params->sleep_ns = 100*1000*1000;
+
+  if (schemeidx == ctlidx_from_str("constant")) {
+    get_control_scheme_parameter(json, "c", "constant", "output value, double", &params->c);
+  }
+  else {
+    get_control_scheme_parameter(json, "kp", "pid", "proportional control coefficient, double", &params->kp);
+    get_control_scheme_parameter(json, "ki", "pid", "integral control coefficient, double", &params->ki);
+    get_control_scheme_parameter(json, "kd", "pid", "derivative control coefficient, double", &params->kd);
+  }
+
+  // optional params
+  get_optional_control_scheme_parameter(json, "sleep_ns", "interval between control calculations, nanosecons", NULL, &params->sleep_ns, NULL);
+
+  cJSON_Delete(json);
+
+  td->control_params = params;
+
+}
+
+
+
+
+void
 check_argc(int i, int argc) 
 {
   if (i >= argc) {
@@ -72,15 +220,12 @@ check_argc(int i, int argc)
 }
 
 void
-parse_args(int argc, const char **argv, thread_data *td) 
+parse_args(int argc, const char **argv, thread_data_t *td) 
 {
   if (getuid() != 0)
     argerr("Hardware PWM needs root.");
 
-  td->length_s = 60;
   td->tag = "DELME";
-  td->control_scheme = 0;
-
   unsigned int cs_set = 0, l_set = 0;
 
   for (unsigned int i = 1; i < argc; i++) {
@@ -91,9 +236,9 @@ parse_args(int argc, const char **argv, thread_data *td)
       l_set = 1;
     }
     else if (s_match_either(argv[i], "-c", "--control-scheme")) {
-      // TODO
       i++;
       check_argc(i, argc);
+      parse_contol_scheme_string(td, argv[i]);
       cs_set = 1;
     }
     else if (s_match_either(argv[i], "-t", "--tag")) {
@@ -119,6 +264,10 @@ parse_args(int argc, const char **argv, thread_data *td)
       "  Running with options:\n"
       "    tag: \"%s\"\n"
       "    control scheme: %s\n"
+      "      c: %.3f\n"
+      "      kp: %.3f\n"
+      "      ki: %.3f\n"
+      "      kd: %.3f\n"
       "    length: %us\n",
-      VERSION, td->tag, "CONTROLSCHEME", td->length_s);
+      VERSION, td->tag, td->control_scheme, td->control_params->c, td->control_params->kp, td->control_params->ki, td->control_params->kd, td->length_s);
 }
