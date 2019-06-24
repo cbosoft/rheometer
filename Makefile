@@ -2,7 +2,17 @@ CC = gcc
 CFLAGS = -Wall -pedantic
 LINK = -lwiringPi -lpthread
 HDR = src/rheo.h
-RHEO = obj/main.o obj/adc.o obj/error.o obj/thread.o obj/args.o obj/log.o obj/control.o obj/motor.o obj/opt.o obj/tar.o obj/cJSON.o
+RHEO = obj/main.o \
+			 obj/adc.o \
+			 obj/error.o \
+			 obj/thread.o \
+			 obj/args.o \
+			 obj/log.o \
+			 obj/control.o \
+			 obj/motor.o \
+			 obj/opt.o \
+			 obj/tar.o \
+			 obj/cJSON.o
 WPI = wpi/libwiringPi.so
 
 
