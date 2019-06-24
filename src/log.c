@@ -10,11 +10,13 @@
 
 void *
 log_thread_func(void *vtd) {
-  thread_data *td = (thread_data *)vtd;
+  thread_data_t *td = (thread_data_t *)vtd;
+
+  if (td->log_pref == NULL)
+    ferr("data must be initialised before logging is started.");
   
   struct timeval tv;
   unsigned long *sec, *usec, *psec, *pusec;
-
 
   td->log_paths[td->log_count] = calloc(256, sizeof(char));
   sprintf(td->log_paths[td->log_count], "%s.csv", td->log_pref);
@@ -41,6 +43,7 @@ log_thread_func(void *vtd) {
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
       fprintf(log_fp, "%lu,", td->adc[channel]);
     }
+    fprintf(log_fp, "%u", td->last_ca);
     fprintf(log_fp, "%f\n", (*td->temperature));
 
     
