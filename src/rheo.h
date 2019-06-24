@@ -42,7 +42,9 @@ typedef struct thread_data_t {
   unsigned long *time_us;
   unsigned long *adc;
   float *temperature;
+
   float *speed_ind;
+  float *ptimes;
 
   // run_data
   unsigned int length_s;
@@ -107,7 +109,7 @@ void *adc_thread_func(void *rtd);
 // opt.c {{{
 
 void opt_setup(thread_data_t *td);
-void opt_mark(FILE *fp);
+void opt_mark(thread_data_t *td, unsigned int i);
 
 // }}}
 // control.c {{{

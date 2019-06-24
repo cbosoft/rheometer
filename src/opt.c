@@ -23,10 +23,22 @@ opt_setup(thread_data_t *td)
 }
 
 void
-opt_mark(FILE *logf) 
+opt_mark(thread_data_t *td, unsigned int i)
 {
   struct timeval tv;
   gettimeofday(&tv, 0);
-  fprintf(logf, "%lu.06%lu", tv.tv_sec, tv.tv_usec);
-  fflush(logf);
+  fprintf(td->opt_log_fps[i], "%lu.06%lu\n", tv.tv_sec, tv.tv_usec);
+  fflush(td->opt_log_fps[i]);
+
+  float secs = (float)(tv.tv_sec % 1000);
+  float usecs = (float)tv.tv_usec;
+  float time = secs + (0.000001*usecs);
+
+  float dtime = time - td->ptimes[i];
+  td->ptimes[i] = time;
+
+  float speed = (60.0 * 0.25) / dtime; // RPM
+
+  td->speed_ind[i] = (speed + td->speed_ind[i]) / 2.0;
+  
 }
