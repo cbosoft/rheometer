@@ -128,6 +128,8 @@ get_optional_control_scheme_parameter(cJSON *json, const char *paramname, const 
 void
 parse_contol_scheme_string(thread_data_t *td, const char *control_scheme_string)
 {
+  info("reading control scheme");
+
   if (access(control_scheme_string, F_OK) == -1) {
     argerr("control scheme must be a json file describing the scheme.");
   }
@@ -140,20 +142,24 @@ parse_contol_scheme_string(thread_data_t *td, const char *control_scheme_string)
   char ch;
   unsigned int count = 0, i = 0;
 
-  while ((ch = fgetc(fp)) != EOF)
+  while ( (unsigned char)(ch = fgetc(fp)) != (unsigned char)EOF ) {
     count++;
+    if (count > 1000)
+      ferr("control scheme is certainly not over 1000 characters long.");
+  }
 
   if (fseek(fp, 0L, SEEK_SET) != 0)
     ferr("Something went wrong repositioning file.");
 
-  char *json_str = calloc(count, sizeof(char));
-  while ((ch = fgetc(fp)) != EOF) {
+  char *json_str = calloc(count+1, sizeof(char));
+  while ( (unsigned char)(ch = fgetc(fp)) != (unsigned char)EOF) {
     json_str[i] = ch;
     i++;
   }
 
   fclose(fp);
 
+  info("parsing control scheme");
   cJSON *json = cJSON_Parse(json_str);
 
   if (json == NULL) {
