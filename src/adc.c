@@ -13,7 +13,7 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 unsigned int
-read_adc_value(adc_handle *h, unsigned int channel)
+read_adc_value(adc_handle_t *h, unsigned int channel)
 {
 #ifndef DEBUG
   int ret;
@@ -49,7 +49,7 @@ read_adc_value(adc_handle *h, unsigned int channel)
 
 
 
-adc_handle *
+adc_handle_t *
 adc_open(const char *device)
 {
 #ifndef DEBUG
@@ -69,7 +69,7 @@ adc_open(const char *device)
 
   return h;
 #else
-  adc_handle *h = malloc(sizeof(adc_handle));
+  adc_handle_t *h = malloc(sizeof(adc_handle_t));
   return h;
 #endif
 }
@@ -77,7 +77,7 @@ adc_open(const char *device)
 
 
 void
-adc_close(adc_handle *h)
+adc_close(adc_handle_t *h)
 {
 #ifndef DEBUG
   close(h->fd);
@@ -90,8 +90,7 @@ adc_close(adc_handle *h)
 
 void *
 adc_thread_func(void *vtd) {
-  thread_data *td = (thread_data *)vtd;
-  adc_handle *adc_h = td->adc_h;
+  thread_data_t *td = (thread_data_t *)vtd;
   
   unsigned long *adc, *padc;
 
@@ -100,7 +99,7 @@ adc_thread_func(void *vtd) {
     
     adc = malloc(ADC_COUNT*sizeof(unsigned long));
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-      adc[channel] = read_adc_value(adc_h, channel);
+      adc[channel] = read_adc_value(td->adc_handle, channel);
     }
     
     padc = td->adc;

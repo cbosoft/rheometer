@@ -11,7 +11,7 @@
 static const uint8_t opt_pins[OPTENC_COUNT] = {16, 20, 21};
 
 void
-opt_setup(thread_data *td)
+opt_setup(thread_data_t *td)
 {
   for (uint8_t i = 0; i < OPTENC_COUNT; i++) {
     td->log_paths[i+1] = calloc(265, sizeof(char));
