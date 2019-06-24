@@ -7,25 +7,35 @@
 #define VERSION "0.1"
 #define ADC_COUNT 8
 #define OPTENC_COUNT 3
+#define PWM_PIN 18
 
 // }}}
-// types and enums {{{
+// types, structs, and enums {{{
 
 typedef enum control_scheme {control_constant, control_pid} control_scheme_enum;
 
-// }}}
-// structs {{{
-
-typedef struct adc_handle {
+typedef struct adc_handle_t {
   const char *device;
   int fd;
   unsigned int mode;
   unsigned int bits;
   unsigned int speed;
   unsigned int delay;
-} adc_handle;
+} adc_handle_t;
 
-typedef struct thread_data{
+
+
+typedef struct control_params_t {
+  double c;
+  double kp;
+  double ki;
+  double kd;
+  unsigned int sleep_ns;
+} control_params_t;
+
+
+
+typedef struct thread_data_t {
 
   // actual data
   unsigned long *time_s;
@@ -36,7 +46,9 @@ typedef struct thread_data{
 
   // run_data
   unsigned int length_s;
-  control_scheme_enum control_scheme;
+  char *control_scheme;
+  control_params_t *control_params;
+  unsigned int last_ca;
   const char *tag;
   const char *log_pref;
   char **log_paths;
@@ -44,32 +56,31 @@ typedef struct thread_data{
   unsigned int log_count;
 
   // control stuff
-  adc_handle *adc_h;
+  adc_handle_t *adc_handle;
   unsigned int log_ready;
   unsigned int adc_ready;
   unsigned int tmp_ready;
   unsigned int opt_ready;
+  unsigned int ctl_ready;
+
+  unsigned int adc_busy;
+  
   unsigned int stopped;
   unsigned int errored;
   const char *error_string;
 
-} thread_data;
+} thread_data_t;
 
-typedef struct control_params {
-  double c;
-  double kp;
-  double ki;
-  double kd;
-} control_params;
+typedef unsigned int (*control_func_t)(thread_data_t *);
 
 
 // }}}
 // thread.c {{{
 
-thread_data *create_thread_data(void);
-void init(int argc, const char** argv, thread_data *td);
+thread_data_t *create_thread_data(void);
+void init(int argc, const char** argv, thread_data_t *td);
 void nsleep(unsigned int delay_ns);
-void free_thread_data(thread_data *dat);
+void free_thread_data(thread_data_t *dat);
 
 // }}}
 // log.c {{{ 
@@ -87,26 +98,28 @@ void info(const char *mesg);
 // }}}
 // adc.c {{{
 
-adc_handle *adc_open(const char *device);
-void adc_close(adc_handle *h);
-unsigned int read_adc_value(adc_handle *h, unsigned int channel);
+adc_handle_t *adc_open(const char *device);
+void adc_close(adc_handle_t *h);
+unsigned int read_adc_value(adc_handle_t *h, unsigned int channel);
 void *adc_thread_func(void *rtd);
 
 // }}}
 // opt.c {{{
 
-void opt_setup(thread_data *td);
+void opt_setup(thread_data_t *td);
 void opt_mark(FILE *fp);
 
 // }}}
 // control.c {{{
 
 double control_PID(double tuning[3], double input);
+int ctlidx_from_str(const char *s);
+void *ctl_thread_func(void *vtd);
 
 // }}}
-// args.h {{{
+// args.c {{{
 
-void parse_args(int argc, const char **argv, thread_data *td);
+void parse_args(int argc, const char **argv, thread_data_t *td);
 void usage();
 
 // }}}
@@ -119,7 +132,7 @@ void motor_shutdown();
 // }}}
 // tar.c {{{
 
-void tidy_logs(thread_data *td);
+void tidy_logs(thread_data_t *td);
 
 // }}}
 // vim: foldmethod=marker ft=c
