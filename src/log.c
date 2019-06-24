@@ -17,11 +17,11 @@ log_thread_func(void *vtd) {
   
   struct timeval tv;
   unsigned long *sec, *usec, *psec, *pusec;
+  
+  td->log_paths[0] = calloc(256, sizeof(char));
+  sprintf(td->log_paths[0], "%s.csv", td->log_pref);
 
-  td->log_paths[td->log_count] = calloc(256, sizeof(char));
-  sprintf(td->log_paths[td->log_count], "%s.csv", td->log_pref);
-
-  FILE *log_fp = fopen(td->log_paths[td->log_count], "w");
+  FILE *log_fp = fopen(td->log_paths[0], "w");
   td->log_count ++;
 
   td->log_ready = 1;
