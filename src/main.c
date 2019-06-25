@@ -254,6 +254,11 @@ main (int argc, const char ** argv)
   info("cleaning up...");
   tidy_logs(td);
   free_thread_data(td);
+#ifndef DEBUG
+  system("gpio unexport 16");
+  system("gpio unexport 20");
+  system("gpio unexport 21");
+#endif
   info("done!");
   return 0;
 }
