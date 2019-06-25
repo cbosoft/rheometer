@@ -25,6 +25,24 @@ ctlidx_from_str(const char *s)
 
 
 
+void
+calculate_speed(thread_data_t *td) 
+{
+  float dt_tot = 0.0;
+  unsigned int count = 0;
+  for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
+    for (unsigned int j = 1; j < SPD_HIST; j++, count++) {
+      if (td->ptimes[j] == 0)
+        break;
+      dt_tot += td->ptimes[j] - td->ptimes[j-1];
+    }
+  }
+  float dt_av = dt_tot / ((float)count);
+  td->speed_ind = ((1.0/6.0) / dt_av) * 60.0; // RPM
+}
+
+
+
 
 unsigned int
 pid_control(thread_data_t *td)
