@@ -8,9 +8,11 @@
 #define ADC_COUNT 8
 #define OPTENC_COUNT 3
 #define PWM_PIN 18
+#define SPD_HIST 1000
 
 #define BOLD  "\033[1m"
 #define RESET "\033[0m"
+
 #define FGBLACK   "\033[30m"
 #define FGRED     "\033[31m"
 #define FGGREEN   "\033[32m"
@@ -28,6 +30,7 @@
 #define BGMAGENTA "\033[45m"
 #define BGCYAN    "\033[46m"
 #define BGWHITE   "\033[47m"
+
 #define TAGDEFAULT "DELME"
 
 // }}}
