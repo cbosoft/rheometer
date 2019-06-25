@@ -8,7 +8,7 @@
 #define ADC_COUNT 8
 #define OPTENC_COUNT 3
 #define PWM_PIN 18
-#define SPD_HIST 1000
+#define SPD_HIST 100
 
 #define BOLD  "\033[1m"
 #define RESET "\033[0m"
