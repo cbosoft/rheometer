@@ -38,6 +38,8 @@
 
 typedef enum control_scheme {control_constant, control_pid} control_scheme_enum;
 
+// control scheme {{{
+
 typedef struct adc_handle_t {
   const char *device;
   int fd;
@@ -47,7 +49,8 @@ typedef struct adc_handle_t {
   unsigned int delay;
 } adc_handle_t;
 
-
+// }}}
+// control_params_t {{{
 
 typedef struct control_params_t {
   // constant
@@ -63,7 +66,8 @@ typedef struct control_params_t {
   unsigned int sleep_ns;
 } control_params_t;
 
-
+// }}}
+// thread_data_t {{{
 
 typedef struct thread_data_t {
 
@@ -82,7 +86,7 @@ typedef struct thread_data_t {
   control_params_t *control_params;
   unsigned int last_ca;
   const char *tag;
-  const char *log_pref;
+  char *log_pref;
   char **log_paths;
   FILE **opt_log_fps;
   unsigned int log_count;
@@ -105,6 +109,7 @@ typedef struct thread_data_t {
 
 typedef unsigned int (*control_func_t)(thread_data_t *);
 
+// }}}
 
 // }}}
 // display.c {{{
