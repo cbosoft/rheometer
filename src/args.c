@@ -6,6 +6,11 @@
 #include "cJSON.h"
 #include "rheo.h"
 
+#define EITHER(A,B,C) ( (strcmp(A, B) == 0) || (strcmp(A, C) == 0) )
+
+
+
+
 void
 usage(void)
 {
@@ -20,22 +25,14 @@ usage(void)
   );
 }
 
+
+
+
 void
 help(void)
 {
   usage();
   fprintf(stderr,
-      // "  Description\n"
-      // "\n"
-      // "  Using PWM to control speed, measured using an array of optical encoders, the \n"
-      // "  rheometer sets a strain rate, and records stress. However, the inverse is also\n"
-      // "  possible.\n"
-      // "\n"
-      // "  The control program (this software) uses the (excellent) wiringPi library \n"
-      // "  to access the GPIO and the PWM, which requires root access. Control is spec'd\n"
-      // "  in JSON files, describing control parameters such as coefficient tuning and\n"
-      // "  set points.\n"
-      //"\n"
       "  Options:\n"
       "    -l | --length    Length of run, can be given in seconds or minutes, dictated\n"
       "                     by a suffixed character. e.g. \"10s\" is 10 seconds, \"10m\"\n"
@@ -54,16 +51,12 @@ help(void)
   );
 }
 
-unsigned int
-s_match_either(const char *a, const char *b, const char *c)
-{
-  if ( (strcmp(a, b) == 0) || (strcmp(a, c) == 0))
-    return 1;
-  return 0;
-}
+
+
 
 unsigned int
-parse_length_string(const char *length_s_str) {
+parse_length_string(const char *length_s_str)
+{
   unsigned int len = strlen(length_s_str);
 
   // is just numbers?
@@ -97,6 +90,9 @@ parse_length_string(const char *length_s_str) {
   return -1; //unsigned, so this is actually INT_MAX?
 }
 
+
+
+
 void
 get_control_scheme_parameter(cJSON *json, const char *paramname, const char *schemename, const char *description, double *value)
 {
@@ -116,6 +112,9 @@ get_control_scheme_parameter(cJSON *json, const char *paramname, const char *sch
   
   (*value) = dbl->valuedouble;
 }
+
+
+
 
 void
 get_optional_control_scheme_parameter(cJSON *json, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
@@ -268,24 +267,24 @@ parse_args(int argc, const char **argv, thread_data_t *td)
   unsigned int cs_set = 0, l_set = 0;
 
   for (unsigned int i = 1; i < argc; i++) {
-    if (s_match_either(argv[i], "-l", "--length")) {
+    if (EITHER(argv[i], "-l", "--length")) {
       i++;
       check_argc(i, argc);
       td->length_s = parse_length_string(argv[i]);
       l_set = 1;
     }
-    else if (s_match_either(argv[i], "-c", "--control-scheme")) {
+    else if (EITHER(argv[i], "-c", "--control-scheme")) {
       i++;
       check_argc(i, argc);
       parse_contol_scheme_string(td, argv[i]);
       cs_set = 1;
     }
-    else if (s_match_either(argv[i], "-t", "--tag")) {
+    else if (EITHER(argv[i], "-t", "--tag")) {
       i++;
       check_argc(i, argc);
       td->tag = argv[i];
     }
-    else if (s_match_either(argv[i], "-h", "--help")) {
+    else if (EITHER(argv[i], "-h", "--help")) {
       help();
       exit(0);
     }
@@ -302,7 +301,7 @@ parse_args(int argc, const char **argv, thread_data_t *td)
 
   // finished setting args
   fprintf(stderr, 
-      "  \033[1mrheometer\033[0m v%s\n"
+      "  "BOLD"rheometer"RESET" v"VERSION"\n"
       "  Running with options:\n"
       "    tag: \"%s\"\n"
       "    control scheme: %s\n"
@@ -311,5 +310,5 @@ parse_args(int argc, const char **argv, thread_data_t *td)
       "      ki: %.3f\n"
       "      kd: %.3f\n"
       "    length: %us\n",
-      VERSION, td->tag, td->control_scheme, td->control_params->c, td->control_params->kp, td->control_params->ki, td->control_params->kd, td->length_s);
+      td->tag, td->control_scheme, td->control_params->c, td->control_params->kp, td->control_params->ki, td->control_params->kd, td->length_s);
 }
