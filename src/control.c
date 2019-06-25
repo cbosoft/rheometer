@@ -92,6 +92,8 @@ ctl_thread_func(void *vtd)
 
   while ( (!td->stopped) && (!td->errored) ) {
 
+    calculate_speed(td);
+
     unsigned int control_action = ctlfunc(td);
 
     if (control_action > 1024)
