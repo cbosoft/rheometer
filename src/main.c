@@ -42,15 +42,9 @@ display_thread_data(thread_data_t *td) {
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     fprintf(stderr, "%5lu ", td->adc[channel]);
   }
-  
-  double speed = 0.0;
-  for (unsigned int i = 0; i < OPTENC_COUNT; i++)
-    speed += td->speed_ind[i];
-  speed /= 3.0;
-  fprintf(stderr, "%5f ", speed);
 
+  fprintf(stderr, "%5f ", td->speed_ind);
   fprintf(stderr, "%5u ", td->last_ca);
-
   fprintf(stderr, "%2.3f\n", (*td->temperature));
 }
 
