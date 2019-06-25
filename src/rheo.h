@@ -107,6 +107,13 @@ typedef unsigned int (*control_func_t)(thread_data_t *);
 
 
 // }}}
+// display.c {{{
+
+char *centre(char *s, unsigned int w);
+void display_thread_data(thread_data_t *td);
+void display_titles();
+
+// }}}
 // thread.c {{{
 
 thread_data_t *create_thread_data(void);
