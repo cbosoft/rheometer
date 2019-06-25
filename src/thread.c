@@ -61,7 +61,6 @@ init(int argc, const char **argv, thread_data_t *td)
   td->log_count = 0;
   td->opt_log_fps = calloc(OPTENC_COUNT, sizeof(FILE *));
 
-  td->speed_ind = calloc(OPTENC_COUNT, sizeof(float));
   td->ptimes = calloc(OPTENC_COUNT, sizeof(float));
 }
 
@@ -77,7 +76,6 @@ free_thread_data(thread_data_t *td)
   }
   free(td->time_s);
   free(td->time_us);
-  free(td->speed_ind);
   free(td->ptimes);
   free(td->adc);
   free(td->temperature);
