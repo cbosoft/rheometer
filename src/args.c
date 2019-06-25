@@ -194,6 +194,7 @@ parse_contol_scheme_string(thread_data_t *td, const char *control_scheme_string)
 
   info("parsing control scheme");
   cJSON *json = cJSON_Parse(json_str);
+  free(json_str);
 
   if (json == NULL) {
     const char *eptr = cJSON_GetErrorPtr();

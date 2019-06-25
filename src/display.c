@@ -114,25 +114,25 @@ display_thread_data(thread_data_t *td)
     // warn or something?
   }
 
-  char *time = calloc(21, sizeof(char));
+  char *time = calloc(50, sizeof(char));
   sprintf(time, "%lu.%06lu", (*td->time_s), (*td->time_us));
   char *ctime = centre(time, timew);
   
   char **adcval = calloc(ADC_COUNT, sizeof(char *));
   char **cadcval = calloc(ADC_COUNT, sizeof(char *));
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-    adcval[channel] = calloc(8, sizeof(char));
+    adcval[channel] = calloc(20, sizeof(char));
     sprintf(adcval[channel], "%lu", td->adc[channel]);
     cadcval[channel] = centre(adcval[channel], restw);
   }
 
-  char *speed = calloc(6, sizeof(char));
+  char *speed = calloc(20, sizeof(char));
   sprintf(speed, "%f", td->speed_ind);
   char *cspeed = centre(speed, restw);
-  char *ca = calloc(6, sizeof(char));
+  char *ca = calloc(20, sizeof(char));
   sprintf(ca, "%u", td->last_ca);
   char *cca = centre(ca, restw);
-  char *temp = calloc(6, sizeof(char));
+  char *temp = calloc(20, sizeof(char));
   sprintf(temp, "%f\n", (*td->temperature));
   char *ctemp = centre(temp, restw);
 

@@ -25,12 +25,12 @@ nsleep(unsigned int delay_ns)
 thread_data_t *
 create_thread_data()
 {
-  thread_data_t *rv = malloc(sizeof(thread_data_t));
+  thread_data_t *rv = calloc(1, sizeof(thread_data_t));
 
-  rv->time_s = malloc(sizeof(unsigned long));
-  rv->time_us = malloc(sizeof(unsigned long));
-  rv->adc = malloc(ADC_COUNT * sizeof(float));
-  rv->temperature = malloc(sizeof(float));
+  rv->time_s = calloc(1, sizeof(unsigned long));
+  rv->time_us = calloc(1, sizeof(unsigned long));
+  rv->adc = calloc(ADC_COUNT, sizeof(float));
+  rv->temperature = calloc(1, sizeof(float));
 
   rv->last_ca = 0;
 
@@ -79,7 +79,7 @@ init(int argc, const char **argv, thread_data_t *td)
 
   td->ptimes = calloc(OPTENC_COUNT, sizeof(float *));
   for (unsigned int i = 0; i < OPTENC_COUNT; i++)
-    td->ptimes[i] = calloc(SPD_HIST, sizeof(float *));
+    td->ptimes[i] = calloc(SPD_HIST, sizeof(float));
 
   free(date);
 }
