@@ -32,9 +32,10 @@ calculate_speed(thread_data_t *td)
   unsigned int count = 0;
   for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
     for (unsigned int j = 1; j < SPD_HIST; j++, count++) {
-      if (td->ptimes[j] == 0)
+      if (td->ptimes[i][j] == 0)
         break;
-      dt_tot += td->ptimes[j] - td->ptimes[j-1];
+      // ptimes... low index is newest
+      dt_tot += td->ptimes[i][j-1] - td->ptimes[i][j];
     }
   }
   float dt_av = dt_tot / ((float)count);
