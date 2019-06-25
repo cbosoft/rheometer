@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include <wiringPi.h>
@@ -21,31 +22,110 @@ inthandle(int signo)
   }
 }
 
+
+char *centre(char *s, unsigned int w)
+{
+  char *rv = calloc(w+1, sizeof(char));
+  char padchar = ' ';
+  
+  unsigned int l = strlen(s);
+  if (l > w) {
+    for (unsigned int i = 0; i < w; i++) {
+      rv[i] = s[i];
+    }
+  }
+  else {
+    unsigned int diff = w - l;
+    unsigned int p = ( (diff % 2) == 1 ) ? ((diff-1)/2) : (diff/2);
+    unsigned int i = 0;
+
+    for (; i < p; i++)
+      rv[i] = padchar;
+
+    for (; i < (p+l); i++)
+      rv[i] = s[i-p];
+
+    for (; i < w; i++)
+      rv[i] = padchar;
+  }
+  return rv;
+}
+
 void
 display_titles(void)
 {
-  fprintf(stderr, "\033[1m%20s ", "t");
-  for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
-    fprintf(stderr, "%5u ", channel);
-  fprintf(stderr, "%5s ", "spd");
-  fprintf(stderr, "%5s ", "ca");
-  fprintf(stderr, "%5s\033[0m\n", "T");
-}
+  char *time = centre("time", 20);
+  fprintf(stderr, "%s%s ", BOLD, time);
+  for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
+    char *adcv = calloc(10, sizeof(char));
+    sprintf(adcv, "adc%u", channel);
+    char *cadcv = centre(adcv, 5);
+    fprintf(stderr, "%s ", cadcv);
+    free(cadcv);
+    free(adcv);
+  }
+  char *speed = centre("speed", 5);
+  fprintf(stderr, "%s ", speed);
+  char *ca = centre("ca", 5);
+  fprintf(stderr, "%5s ", ca);
+  char *temp = centre("temp", 5);
+  fprintf(stderr, "%5s%s\r", temp, RESET);
 
+  free(time);
+  free(speed);
+  free(ca);
+  free(temp);
+}
 
 
 
 void
 display_thread_data(thread_data_t *td) {
-  fprintf(stderr, "%14lu.%06lu ", (*td->time_s), (*td->time_us));
-
+  char *time = calloc(21, sizeof(char));
+  sprintf(time, "%lu.%06lu", (*td->time_s), (*td->time_us));
+  char *ctime = centre(time, 20);
+  
+  char **adcval = calloc(ADC_COUNT, sizeof(char *));
+  char **cadcval = calloc(ADC_COUNT, sizeof(char *));
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-    fprintf(stderr, "%5lu ", td->adc[channel]);
+    adcval[channel] = calloc(8, sizeof(char));
+    sprintf(adcval[channel], "%5lu", td->adc[channel]);
+    cadcval[channel] = centre(adcval[channel], 5);
   }
 
-  fprintf(stderr, "%5f ", td->speed_ind);
-  fprintf(stderr, "%5u ", td->last_ca);
-  fprintf(stderr, "%2.3f\n", (*td->temperature));
+  char *speed = calloc(6, sizeof(char));
+  sprintf(speed, "%5f", td->speed_ind);
+  char *cspeed = centre(speed, 5);
+  char *ca = calloc(6, sizeof(char));
+  sprintf(ca, "%5u", td->last_ca);
+  char *cca = centre(ca, 5);
+  char *temp = calloc(6, sizeof(char));
+  sprintf(temp, "%2.3f\n", (*td->temperature));
+  char *ctemp = centre(temp, 5);
+
+  fprintf(stderr, "%s ", ctime);
+  for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
+    fprintf(stderr, "%s ", cadcval[channel]);
+  }
+  fprintf(stderr, "%s %s %s\n", cspeed, cca, ctemp);
+
+  free(temp);
+  free(ca);
+  free(speed);
+  for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
+    free(adcval[channel]);
+  }
+  free(adcval);
+  free(time);
+
+  free(ctemp);
+  free(cca);
+  free(cspeed);
+  for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
+    free(cadcval[channel]);
+  }
+  free(cadcval);
+  free(ctime);
 }
 
 
@@ -136,9 +216,8 @@ main (int argc, const char ** argv)
   while ( (!cancelled) && (tish <= td->length_s) ) {
     sleep(1);
     tish ++;
-    if ((tish % 10) == 1)
-      display_titles();
     display_thread_data(td);
+    display_titles();
   }
   td->stopped = 1;
 
