@@ -8,6 +8,20 @@
 
 #include "rheo.h"
 
+
+
+void
+nsleep(unsigned int delay_ns)
+{
+  struct timespec delay, res;
+  delay.tv_sec = 0;
+  delay.tv_nsec = delay_ns;
+  nanosleep(&delay, &res);
+}
+
+
+
+
 thread_data_t *
 create_thread_data()
 {
@@ -32,6 +46,9 @@ create_thread_data()
   rv->error_string = "all is well";
    return rv;
 }
+
+
+
 
 void
 init(int argc, const char **argv, thread_data_t *td)
@@ -85,15 +102,4 @@ free_thread_data(thread_data_t *td)
   free(td->adc);
   free(td->temperature);
   free(td);
-}
-
-
-
-void
-nsleep(unsigned int delay_ns)
-{
-  struct timespec delay, res;
-  delay.tv_sec = 0;
-  delay.tv_nsec = delay_ns;
-  nanosleep(&delay, &res);
 }
