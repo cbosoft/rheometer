@@ -7,15 +7,49 @@
 #include "rheo.h"
 
 void
-usage ()
+usage(void)
 {
   fprintf(stderr, 
       "\n"
-      "  \033[1mrheometer\033[0m control program (v"VERSION")\n"
+      "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
-      "  Usage: (as root)\n"
+      "  Usage:\n"
       "    rheometer -l|--length <length> -c|--control-scheme <control scheme> [-t|--tag <tag>]\n"
       "    rheometer -h|--help\n"
+      "\n"
+  );
+}
+
+void
+help(void)
+{
+  usage();
+  fprintf(stderr,
+      // "  Description\n"
+      // "\n"
+      // "  Using PWM to control speed, measured using an array of optical encoders, the \n"
+      // "  rheometer sets a strain rate, and records stress. However, the inverse is also\n"
+      // "  possible.\n"
+      // "\n"
+      // "  The control program (this software) uses the (excellent) wiringPi library \n"
+      // "  to access the GPIO and the PWM, which requires root access. Control is spec'd\n"
+      // "  in JSON files, describing control parameters such as coefficient tuning and\n"
+      // "  set points.\n"
+      //"\n"
+      "  Options:\n"
+      "    -l | --length    Length of run, can be given in seconds or minutes, dictated\n"
+      "                     by a suffixed character. e.g. \"10s\" is 10 seconds, \"10m\"\n"
+      "                     is 10 minutes. If ignored, the value is taken as seconds.\n"
+      "\n"
+      "    -c | --control-scheme    Control scheme JSON file path. The JSON object\n"
+      "                     describes the control scheme to use in the run. Each control\n"
+      "                     scheme has different parameters it requires. E.g. the\n"
+      "                     constant scheme only requires one parameter; \"c\" which is\n"
+      "                     the constant value. PID control requires three different\n"
+      "                     tuning params, and a set point.\n"
+      "\n"
+      "    -t | --tag       A short descriptive name for the test run. Underscores in the\n"
+      "                     tag will be replaced by hyphens. Optional, default is \""TAGDEFAULT"\".\n"
       "\n"
   );
 }
@@ -194,6 +228,7 @@ parse_contol_scheme_string(thread_data_t *td, const char *control_scheme_string)
   params->kp = 0.0;
   params->ki = 0.0;
   params->kd = 0.0;
+  params->set_point = 0.0;
   params->sleep_ns = 100*1000*1000;
 
   if (schemeidx == ctlidx_from_str("constant")) {
@@ -203,10 +238,11 @@ parse_contol_scheme_string(thread_data_t *td, const char *control_scheme_string)
     get_control_scheme_parameter(json, "kp", "pid", "proportional control coefficient, double", &params->kp);
     get_control_scheme_parameter(json, "ki", "pid", "integral control coefficient, double", &params->ki);
     get_control_scheme_parameter(json, "kd", "pid", "derivative control coefficient, double", &params->kd);
+    get_control_scheme_parameter(json, "setpoint", "pid", "set point/target, double", &params->set_point);
   }
 
   // optional params
-  get_optional_control_scheme_parameter(json, "sleep_ns", "interval between control calculations, nanosecons", NULL, &params->sleep_ns, NULL);
+  get_optional_control_scheme_parameter(json, "sleep_ns", "interval between control calculations, nanoseconds", NULL, &params->sleep_ns, NULL);
 
   cJSON_Delete(json);
 
@@ -228,9 +264,6 @@ check_argc(int i, int argc)
 void
 parse_args(int argc, const char **argv, thread_data_t *td) 
 {
-  if (getuid() != 0)
-    argerr("Hardware PWM needs root.");
-
   td->tag = "DELME";
   unsigned int cs_set = 0, l_set = 0;
 
@@ -253,13 +286,16 @@ parse_args(int argc, const char **argv, thread_data_t *td)
       td->tag = argv[i];
     }
     else if (s_match_either(argv[i], "-h", "--help")) {
-      usage();
+      help();
       exit(0);
     }
     else {
       argerr("given unknown arg");
     }
   }
+
+  if (getuid() != 0)
+    argerr("Hardware PWM needs root.");
 
   if (!cs_set || !l_set)
     argerr("Need to specify both length and control scheme.");
