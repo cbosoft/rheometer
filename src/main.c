@@ -32,6 +32,9 @@ display_titles(void)
   fprintf(stderr, "%5s\033[0m\n", "T");
 }
 
+
+
+
 void
 display_thread_data(thread_data_t *td) {
   fprintf(stderr, "%14lu.%06lu ", (*td->time_s), (*td->time_us));
