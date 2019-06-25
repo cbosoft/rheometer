@@ -33,12 +33,13 @@ opt_mark(thread_data_t *td, unsigned int i)
   float secs = (float)(tv.tv_sec % 1000);
   float usecs = (float)tv.tv_usec;
   float time = secs + (0.000001*usecs);
-
-  float dtime = time - td->ptimes[i];
-  td->ptimes[i] = time;
-
-  float speed = (60.0 * 0.25) / dtime; // RPM
-
-  td->speed_ind[i] = (speed + td->speed_ind[i]) / 2.0;
+  float *ptimes = calloc(SPD_HIST, sizeof(float)), *tmp;
   
+  ptimes[0] = time;
+  for (unsigned int j = 0; i < SPD_HIST; i++) {
+    ptimes[j+1] = td->ptimes[i][j];
+  }
+  tmp = td->ptimes[i];
+  td->ptimes[i] = ptimes;
+  free(tmp);
 }
