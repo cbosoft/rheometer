@@ -61,7 +61,9 @@ init(int argc, const char **argv, thread_data_t *td)
   td->log_count = 0;
   td->opt_log_fps = calloc(OPTENC_COUNT, sizeof(FILE *));
 
-  td->ptimes = calloc(OPTENC_COUNT, sizeof(float));
+  td->ptimes = calloc(OPTENC_COUNT, sizeof(float *));
+  for (unsigned int i = 0; i < OPTENC_COUNT; i++)
+    td->ptimes[i] = calloc(SPD_HIST, sizeof(float *));
 }
 
 
@@ -71,11 +73,12 @@ void
 free_thread_data(thread_data_t *td)
 {
   adc_close(td->adc_handle);
-  for (unsigned int i = 0; i < td->log_count; i++) {
+  for (unsigned int i = 0; i < td->log_count; i++)
     free(td->log_paths[i]);
-  }
   free(td->time_s);
   free(td->time_us);
+  for (unsigned int i = 0; i < OPTENC_COUNT; i++)
+    free(td->ptimes[i]);
   free(td->ptimes);
   free(td->adc);
   free(td->temperature);
