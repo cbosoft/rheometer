@@ -32,13 +32,14 @@ opt_mark(thread_data_t *td, unsigned int i)
 
   float secs = (float)(tv.tv_sec % 1000);
   float usecs = (float)tv.tv_usec;
-  float time = secs + (0.000001*usecs);
+  float time = secs + (0.001*0.001*usecs);
   float *ptimes = calloc(SPD_HIST, sizeof(float)), *tmp;
   
   ptimes[0] = time;
-  for (unsigned int j = 0; i < SPD_HIST; i++) {
+  for (unsigned int j = 0; j < (SPD_HIST-1); j++) {
     ptimes[j+1] = td->ptimes[i][j];
   }
+
   tmp = td->ptimes[i];
   td->ptimes[i] = ptimes;
   free(tmp);
