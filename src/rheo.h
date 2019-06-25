@@ -50,10 +50,16 @@ typedef struct adc_handle_t {
 
 
 typedef struct control_params_t {
+  // constant
   double c;
+  
+  // pid
   double kp;
   double ki;
   double kd;
+  double set_point;
+  
+  // universal
   unsigned int sleep_ns;
 } control_params_t;
 
@@ -67,8 +73,8 @@ typedef struct thread_data_t {
   unsigned long *adc;
   float *temperature;
 
-  float *speed_ind;
-  float *ptimes;
+  float speed_ind;
+  float **ptimes;
 
   // run_data
   unsigned int length_s;
