@@ -33,7 +33,7 @@ main (int argc, const char ** argv)
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
 
-  init(argc, argv, td);
+  init(td);
 
   td->adc_handle = adc_open("/dev/spidev0.1");
   info("connected to ADC");

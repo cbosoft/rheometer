@@ -52,7 +52,7 @@ create_thread_data()
 
 
 void
-init(int argc, const char **argv, thread_data_t *td)
+init(thread_data_t *td)
 {
   const char *log_dir = "logs";
   const char *genpref = "rpir";

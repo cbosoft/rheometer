@@ -154,7 +154,7 @@ void display_titles();
 // thread.c {{{
 
 thread_data_t *create_thread_data(void);
-void init(unsigned int argc, const char** argv, thread_data_t *td);
+void init(thread_data_t *td);
 void nsleep(unsigned int delay_ns);
 void free_thread_data(thread_data_t *dat);
 
@@ -197,7 +197,7 @@ void read_control_scheme(thread_data_t *td, const char *control_scheme_string);
 // }}}
 // args.c {{{
 
-void parse_args(int argc, const char **argv, thread_data_t *td);
+void parse_args(unsigned int argc, const char **argv, thread_data_t *td);
 void usage();
 
 // }}}
