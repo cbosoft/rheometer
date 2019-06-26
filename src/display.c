@@ -20,14 +20,16 @@ get_column_width(void)
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 
   unsigned int width_total = (unsigned int)ws.ws_col;
-  unsigned int min_cols = 7;
-  unsigned int number_cols = 12;
+  unsigned int min_cols = 8;
+  unsigned int number_cols = 14;
   unsigned int min_total = (number_cols * (min_cols+1));
 
-  if (width_total < min_total)
+  if (width_total < min_total) {
+    warn("screen too small");
     return min_cols;
+  }
 
-  unsigned int extra_each = (width_total - min_total) / (number_cols+1);
+  unsigned int extra_each = (width_total - min_total) / (number_cols);
 
   return min_cols + extra_each;
 }
