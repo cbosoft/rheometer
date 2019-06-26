@@ -4,8 +4,42 @@
 #include <sys/time.h>
 
 #include "rheo.h"
+#include "cJSON.h"
 
+#define CHECKJSON(C) if (C == NULL) { warn("Error creating run params JSON. \n  Write down the fill depth for this run!"); return; }
 
+void
+save_run_params_to_json(thread_data_t *td)
+{
+  cJSON *controlscheme = NULL, *length_s = NULL, *depth_mm = NULL;
+
+  cJSON *params = cJSON_CreateObject();
+  CHECKJSON(params);
+
+  controlscheme = cJSON_CreateString(td->control_scheme);
+  CHECKJSON(controlscheme);
+  cJSON_AddItemToObject(params, "controlscheme", controlscheme);
+
+  length_s = cJSON_CreateNumber(td->length_s);
+  CHECKJSON(length_s);
+  cJSON_AddItemToObject(params, "length_s", length_s);
+
+  depth_mm = cJSON_CreateNumber(td->fill_depth);
+  CHECKJSON(depth_mm);
+  cJSON_AddItemToObject(params, "depth_mm", depth_mm);
+
+  char *params_json_str = cJSON_Print(params);
+  char *params_path = calloc(300, sizeof(char));
+  sprintf(params_path, "%s_runparams.json", td->log_pref);
+  
+  FILE *fp = fopen(params_path, "w");
+  fprintf(fp, "%s\n", params_json_str);
+  fclose(fp);
+
+  free(params_path);
+  free(params_json_str);
+  cJSON_Delete(params);
+}
 
 
 void *
