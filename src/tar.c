@@ -32,7 +32,7 @@ tidy_logs(thread_data_t *td)
   cmdlen += 8; // ".tar.bz2"
   cmdlen += 1; // " "
   cmdlen += 1; // "\0"
-  cmdlen += 1000; // this is overkill, for some reason not calculating amount of memory correctly.
+  cmdlen += 100; // this is overkill, for some reason not calculating amount of memory correctly.
 
   char  *tar_cmd = calloc(cmdlen, sizeof(char));
   strcat(tar_cmd, "tar cjf ");
