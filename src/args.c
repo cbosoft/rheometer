@@ -160,7 +160,7 @@ parse_args(int argc, const char **argv, thread_data_t *td)
       "      "FGMAGENTA"ki"RESET": %.3f\n"
       "      "FGMAGENTA"kd"RESET": %.3f\n"
       "      "FGMAGENTA"set_point"RESET": %.3f\n"
-      "      "FGMAGENTA"control interval"RESET": %u us\n"
+      "      "FGMAGENTA"control interval"RESET": %f ms\n"
       "      "FGMAGENTA"controlled variable"RESET": %s\n"
       "    "FGYELLOW"length"RESET": %u s\n",
       td->tag, 
@@ -170,7 +170,7 @@ parse_args(int argc, const char **argv, thread_data_t *td)
         td->control_params->ki, 
         td->control_params->kd, 
         td->control_params->set_point, 
-        td->control_params->sleep_ns/1000,
+        (float)(td->control_params->sleep_ns)*0.001*0.001,
         td->control_params->is_stress_controlled ? "stress" : "strainrate",
       td->length_s);
 }
