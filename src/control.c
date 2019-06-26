@@ -3,28 +3,62 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
+
 #include <wiringPi.h>
 
 #include "rheo.h"
 #include "cJSON.h"
 
+#define PARAM_REQ 0
+#define PARAM_OPT 1
 
-static const char *control_schemes[] = {
-  "constant",
-  "pid"
-};
-
+#define STREQ(A,B) (strcmp(A, B) == 0)
 
 
-int
-ctlidx_from_str(const char *s)
+
+typedef enum control_scheme {
+  CONTROL_CONSTANT, 
+  CONTROL_PID,
+  CONTROL_SINE,
+  CONTROL_BISTABLE
+} control_scheme_enum;
+
+
+
+
+void
+control_help(void)
 {
-  for (unsigned int i = 0; i < sizeof(control_schemes)/sizeof(char *); i++) {
-    if (strcmp(s, control_schemes[i]) == 0)
-      return i;
-  }
-
-  return -1;
+  fprintf(stderr, 
+      "  "BOLD"Control Schemes"RESET"\n"
+      "    Control schemes are defined in JSON files (stored in the data/ directory).\n"
+      "    These JSON files dictate what function should be used, and what parameters \n"
+      "    are passed. Different functions and their associated parameters are discussed\n"
+      "    below. Scheme names, and all parameter names, are expected to be written in\n"
+      "    lowercase in the JSON file.\n"
+      "\n"
+      "  "BOLD"Constant voltage"RESET", 'constant'\n"
+      "    A constant is output, the only required parameter is \"c\", the constant (integer)\n"
+      "    control action to output.\n"
+      "\n"
+      "  "BOLD"PID control"RESET", 'pid'\n"
+      "    Uses the standard PID algoirithm to reject disturbance and maintain a set point:\n"
+      "      caₙ = ca₍ₙ₋₁₎ + (Kp × err) + (Σⁿ Ki × errₙ) + (Kd × derr/dt)\n"
+      "    The three tuning parameters (kp, ki, kd) are required, along with a single \n"
+      "    setpoint parameter. It is usual to not use all three parts of the algorithm, a\n"
+      "    section can be turned off by setting the relevant coefficient to zero.\n"
+      "\n"
+      "  "BOLD"Sine"RESET", 'sine'\n"
+      "    Sine function operating on the time the experiment has run for. Evaluated as:\n"
+      "      ca = ( sin( 2 × Pi × (t / period) ) × magnitude) + magnitude + mean\n"
+      "    This will produce a sine wave which varies around \"mean\" by an amount \"magnitude\"\n"
+      "    with period \"period\".\n"
+      "\n"
+      "  "BOLD"Bistable"RESET", 'bistable'\n"
+      "    Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.\n"
+      "\n"
+  );
 }
 
 
@@ -111,7 +145,42 @@ pid_control(thread_data_t *td)
 unsigned int
 constant_control(thread_data_t *td)
 {
-  return (unsigned int)(td->control_params->c * 10.24);
+  return (unsigned int)(td->control_params->c);
+}
+
+
+
+unsigned int
+sine_control(thread_data_t *td)
+{
+  double theta = 2.0 * PI * td->time_s_f / td->control_params->period;
+  double rv = ( (sin(theta) + 1.0) * (double)td->control_params->magnitude ) + td->control_params->magnitude;
+  return (unsigned int)rv;
+}
+
+
+
+unsigned int
+bistable_control(thread_data_t *td)
+{
+  unsigned int periods_passed = (unsigned int)(td->time_s_f / td->control_params->period);
+  return periods_passed % 2 ? td->control_params->upper : td->control_params->lower;
+}
+
+
+
+int
+ctlidx_from_str(const char *s)
+{
+  if STREQ(s, "constant")
+    return CONTROL_CONSTANT;
+  else if STREQ(s, "pid")
+    return CONTROL_PID;
+  else if STREQ(s, "sine")
+    return CONTROL_SINE;
+  else if STREQ(s, "bistable")
+    return CONTROL_BISTABLE;
+  return -1;
 }
 
 
@@ -121,10 +190,14 @@ control_func_t
 ctlfunc_from_int(int i)
 {
   switch (i) {
-    case control_constant:
+    case CONTROL_CONSTANT:
       return &constant_control;
-    case control_pid:
+    case CONTROL_PID:
       return &pid_control;
+    case CONTROL_SINE:
+      return &sine_control;
+    case CONTROL_BISTABLE:
+      return &bistable_control;
     default:
       ferr("unrecognised control scheme index");
       break;
@@ -170,35 +243,21 @@ ctl_thread_func(void *vtd)
 
 
 void
-get_control_scheme_parameter(cJSON *json, const char *paramname, const char *schemename, const char *description, double *value)
-{
-  cJSON *dbl = cJSON_GetObjectItem(json, paramname);
-
-  if (dbl == NULL) {
-    char err_mesg[1000] = {0};
-    sprintf(err_mesg, "%s requires a parameter \"%s\" (%s)", schemename, paramname, description);
-    cJSON_Delete(json);
-    ferr(err_mesg);
-  }
-
-  if (!cJSON_IsNumber(dbl)) {
-    char err_mesg[1000] = {0};
-    sprintf(err_mesg, "%s requires \"%s\" to be a number (%s)", schemename, paramname, description);
-  }
-  
-  (*value) = dbl->valuedouble;
-}
-
-
-
-
-void
-get_optional_control_scheme_parameter(cJSON *json, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
+get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemename, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
 {
   cJSON *param = cJSON_GetObjectItem(json, paramname);
 
-  if (param == NULL)
-    return;
+  if (param == NULL) {
+    if (type == PARAM_REQ) {
+      char err_mesg[1000] = {0};
+      sprintf(err_mesg, "%s requires a parameter \"%s\" (%s)", schemename, paramname, description);
+      cJSON_Delete(json);
+      ferr(err_mesg);
+    }
+    else {
+      return;
+    }
+  }
 
   if (cJSON_IsNumber(param)) {
 
@@ -247,7 +306,9 @@ get_optional_control_scheme_parameter(cJSON *json, const char *paramname, const 
 
   }
   else {
-    ferr("Unknown type encountered while processing control scheme JSON.");
+    char *err_mesg = calloc(1000, sizeof(char));
+    sprintf(err_mesg, "Unknown type encountered while processing control scheme JSON param: %s", paramname);
+    ferr(err_mesg);
   }
 }
 
@@ -313,13 +374,7 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
   int schemeidx = ctlidx_from_str(td->control_scheme);
   if (schemeidx < 0) {
     cJSON_Delete(json);
-    char *err_mesg = calloc(1000, sizeof(char));
-    strcat(err_mesg, "Control scheme JSON must name a known scheme. Known schemes:");
-    for (unsigned int i = 0; i < sizeof(control_schemes)/sizeof(char*); i++) {
-      strcat(err_mesg, "\n   - ");
-      strcat(err_mesg, control_schemes[i]);
-    }
-    ferr(err_mesg);
+    ferr("Control scheme JSON must name a known scheme. See rheometer -h for a list.");
   }
 
   control_params_t *params = malloc(sizeof(control_params_t));
@@ -330,22 +385,32 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
   params->set_point = 0.0;
   params->sleep_ns = 100*1000*1000;
   params->is_stress_controlled = 0;
-
-  if (schemeidx == ctlidx_from_str("constant")) {
-    get_control_scheme_parameter(json, "c", "constant", "output value, double", &params->c);
-  }
-  else {
-    get_control_scheme_parameter(json, "kp", "pid", "proportional control coefficient, double", &params->kp);
-    get_control_scheme_parameter(json, "ki", "pid", "integral control coefficient, double", &params->ki);
-    get_control_scheme_parameter(json, "kd", "pid", "derivative control coefficient, double", &params->kd);
-    get_control_scheme_parameter(json, "setpoint", "pid", "set point/target, double", &params->set_point);
-
-    // pid specific optional
-    get_optional_control_scheme_parameter(json, "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->sleep_ns, NULL);
+  
+  switch (schemeidx) {
+    case CONTROL_CONSTANT:
+      get_control_scheme_parameter(json, PARAM_REQ, "constant", "c", "output value, double", NULL, &params->c, NULL);
+      break;
+    case CONTROL_PID:
+      get_control_scheme_parameter(json, PARAM_REQ, "pid", "kp", "proportional control coefficient, double", &params->kp, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "pid", "ki", "integral control coefficient, double", &params->ki, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "pid", "kd", "derivative control coefficient, double", &params->kd, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "pid", "setpoint", "set point/target, double", &params->set_point, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_OPT, "pid", "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->is_stress_controlled, NULL);
+      break;
+    case CONTROL_SINE:
+      get_control_scheme_parameter(json, PARAM_REQ, "sine", "magnitude", "amplitude of the sine wave (mean to peak), double", &params->magnitude, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "sine", "mean", "mean value of the sine wave, double", &params->mean, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "sine", "period", "period of the sine wave in seconds, double", &params->period, NULL, NULL);
+      break;
+    case CONTROL_BISTABLE:
+      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "lower", "lower stable value, integer 0-1024", NULL, &params->lower, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "upper", "upper stable value, integer 0-1024", NULL, &params->upper, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "period", "switching period in seconds, double", &params->period, NULL, NULL);
+      break;
   }
 
   // optional params
-  get_optional_control_scheme_parameter(json, "sleep_ns", "interval between control calculations, nanoseconds", NULL, &params->sleep_ns, NULL);
+  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ns", "interval between control calculations, nanoseconds", NULL, &params->sleep_ns, NULL);
 
   cJSON_Delete(json);
 
