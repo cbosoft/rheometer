@@ -64,7 +64,7 @@ main (int argc, const char ** argv)
 
   motor_setup();
   info("warming up motor...");
-  motor_warmup(350);
+  motor_warmup(650);
   info("motor ready!");
 
   info("starting threads...");
