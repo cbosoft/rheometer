@@ -94,14 +94,21 @@ free_thread_data(thread_data_t *td)
   adc_close(td->adc_handle);
   for (unsigned int i = 0; i < td->log_count; i++)
     free(td->log_paths[i]);
-  free(td->time_s);
-  free(td->log_pref);
-  free(td->time_us);
-  free(td->errhist);
-  for (unsigned int i = 0; i < OPTENC_COUNT; i++)
-    free(td->ptimes[i]);
-  free(td->ptimes);
+
+  if (td->time_s != NULL) free(td->time_s);
+  if (td->time_us != NULL) free(td->time_us);
+
+  if (td->log_pref != NULL) free(td->log_pref);
+  if (td->errhist != NULL) free(td->errhist);
+  
+  if (td->ptimes != NULL) {
+    for (unsigned int i = 0; i < OPTENC_COUNT; i++)
+      if (td->ptimes[i] != NULL) free(td->ptimes[i]);
+    free(td->ptimes);
+  }
+
   free(td->adc);
   free(td->temperature);
+
   free(td);
 }
