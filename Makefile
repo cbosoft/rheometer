@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
-LINK = -lwiringPi -lpthread
+LINK = -lwiringPi -lpthread -lm
 HDR = src/rheo.h
 RHEO = obj/adc.o \
 			 obj/args.o \
