@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include <pthread.h>
 #include <sys/time.h>
 
 #include <wiringPi.h>
@@ -25,6 +26,9 @@ opt_setup(thread_data_t *td)
 void
 opt_mark(thread_data_t *td, unsigned int i)
 {
+  if (td->stopped)
+    pthread_exit(0);
+
   struct timeval tv;
   gettimeofday(&tv, 0);
   fprintf(td->opt_log_fps[i], "%lu.06%lu\n", tv.tv_sec, tv.tv_usec);
@@ -33,6 +37,7 @@ opt_mark(thread_data_t *td, unsigned int i)
   float secs = (float)(tv.tv_sec % 1000);
   float usecs = (float)tv.tv_usec;
   float time = secs + (0.001*0.001*usecs);
+
   float *ptimes = calloc(SPD_HIST, sizeof(float)), *tmp;
   
   ptimes[0] = time;

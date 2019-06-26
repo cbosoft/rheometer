@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
+#include <pthread.h>
 #include <sys/time.h>
 
 #include "rheo.h"
@@ -15,7 +17,7 @@ save_run_params_to_json(thread_data_t *td)
 
   cJSON *params = cJSON_CreateObject();
   CHECKJSON(params);
-
+  
   controlscheme = cJSON_CreateString(td->control_scheme);
   CHECKJSON(controlscheme);
   cJSON_AddItemToObject(params, "controlscheme", controlscheme);
@@ -35,6 +37,10 @@ save_run_params_to_json(thread_data_t *td)
   FILE *fp = fopen(params_path, "w");
   fprintf(fp, "%s\n", params_json_str);
   fclose(fp);
+  
+  td->log_paths[td->log_count] = calloc(256, sizeof(char));
+  strcpy(td->log_paths[td->log_count], params_path);
+  td->log_count ++;
 
   free(params_path);
   free(params_json_str);
@@ -85,6 +91,7 @@ log_thread_func(void *vtd) {
   }
 
   fclose(log_fp);
+  pthread_exit(0);
   
   return NULL;
 }

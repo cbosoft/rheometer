@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <wiringPi.h>
@@ -159,6 +160,8 @@ ctl_thread_func(void *vtd)
     nsleep(td->control_params->sleep_ns);
 
   }
+
+  pthread_exit(0);
 
   return NULL;
 }

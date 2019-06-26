@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -110,6 +111,8 @@ adc_thread_func(void *vtd) {
     nsleep(10000);
 
   }
+
+  pthread_exit(0);
 
 
   return NULL;
