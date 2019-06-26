@@ -42,15 +42,17 @@ calculate_control_indicators(thread_data_t *td)
     }
   }
 
+#ifndef DEBUG
+
   if (count == 0) {
     warn("speed requested but no optenc events have been recorded.");
   }
 
-#ifndef DEBUG
   float dt_av = dt_tot / ((float)count);
 #else
   float dt_av = (count == 0) ? 0.01 : dt_tot / ((float)count);
 #endif
+
   float speed_hz = ((1.0/6.0) / dt_av); // rotations per second
   td->speed_ind = speed_hz;
 
