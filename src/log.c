@@ -76,8 +76,20 @@ log_thread_func(void *vtd) {
     (*usec) = tv.tv_usec;
     td->time_s = sec;
     td->time_us = usec;
+
+    unsigned long dt_sec = (*sec) - td->start_time_s, dt_usec;
+    if ((*usec) < td->start_time_us) {
+      dt_sec -= 1;
+      dt_usec = td->start_time_us - (*usec);
+    }
+    else {
+      dt_usec = (*usec) - td->start_time_us;
+    }
+    td->time_s_f = (double)dt_sec + (0.001 * 0.001 * ((double)dt_usec));
+
     free(psec);
     free(pusec);
+
     
     fprintf(log_fp, "%lu.%06lu,", (*sec), (*usec));
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
