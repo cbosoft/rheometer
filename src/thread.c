@@ -97,6 +97,7 @@ free_thread_data(thread_data_t *td)
   free(td->time_s);
   free(td->log_pref);
   free(td->time_us);
+  free(td->errhist);
   for (unsigned int i = 0; i < OPTENC_COUNT; i++)
     free(td->ptimes[i]);
   free(td->ptimes);
