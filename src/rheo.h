@@ -61,8 +61,6 @@
 // }}}
 // types, structs, and enums {{{
 
-typedef enum control_scheme {control_constant, control_pid} control_scheme_enum;
-
 // control scheme {{{
 
 typedef struct adc_handle_t {
@@ -79,7 +77,7 @@ typedef struct adc_handle_t {
 
 typedef struct control_params_t {
   // constant
-  double c;
+  unsigned int c;
   
   // pid
   double kp;
@@ -87,6 +85,16 @@ typedef struct control_params_t {
   double kd;
   double set_point;
   unsigned int is_stress_controlled;
+
+  // sin
+  double period;
+  double magnitude;
+  double mean;
+
+  // bistable
+  // also period
+  unsigned int lower;
+  unsigned int upper;
   
   // universal
   unsigned int sleep_ns;
@@ -100,6 +108,9 @@ typedef struct thread_data_t {
   // actual data
   unsigned long *time_s;
   unsigned long *time_us;
+  unsigned long start_time_s;
+  unsigned long start_time_us;
+  double time_s_f;
   unsigned long *adc;
   float *temperature;
   
@@ -117,7 +128,7 @@ typedef struct thread_data_t {
   // run_data
   unsigned int length_s;
   float fill_depth;
-  const char *tag;
+  char *tag;
   char *log_pref;
   char **log_paths;
   FILE **opt_log_fps;
@@ -193,6 +204,7 @@ double control_PID(double tuning[3], double input);
 int ctlidx_from_str(const char *s);
 void *ctl_thread_func(void *vtd);
 void read_control_scheme(thread_data_t *td, const char *control_scheme_string);
+void control_help(void);
 
 // }}}
 // args.c {{{
