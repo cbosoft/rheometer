@@ -97,6 +97,7 @@ main (int argc, const char ** argv)
     display_titles();
   }
   td->stopped = 1;
+  fprintf(stderr, "\n");
 
   for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
     fclose(td->opt_log_fps[i]);

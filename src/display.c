@@ -7,33 +7,29 @@
 #include "rheo.h"
 
 
-int
-get_column_widths(unsigned int *timew, unsigned int* restw)
+
+static unsigned long start_secs = 0;
+
+
+
+
+unsigned int
+get_column_width(void)
 {
   struct winsize ws;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 
   unsigned int width_total = (unsigned int)ws.ws_col;
-  unsigned int min_time = 20;
-  unsigned int min_rest = 4;
-  unsigned int number_rest = 11;
-
-  // timew is at least 20 chars, the rest are at least 4 chars.
-  // there is one time column, and 11 other columns, plus a 
-  // space between each.
-  // this gives a total width of 20 + 11*(4+1) = 75 characters.
-
-  unsigned int min_total = min_time + (number_rest * (min_rest+1));
+  unsigned int min_cols = 7;
+  unsigned int number_cols = 12;
+  unsigned int min_total = (number_cols * (min_cols+1));
 
   if (width_total < min_total)
-    return 1;
+    return min_cols;
 
-  unsigned int extra_each = (width_total - min_total) / (number_rest+1);
+  unsigned int extra_each = (width_total - min_total) / (number_cols+1);
 
-  (*timew) = min_time + extra_each;
-  (*restw) = min_rest + extra_each;
-  
-  return 0;
+  return min_cols + extra_each;
 }
 
 
@@ -74,27 +70,23 @@ centre(char *s, unsigned int w)
 void
 display_titles(void)
 {
+  unsigned int colw = get_column_width();
 
-  unsigned int timew = 10, restw = 4;
-  if (get_column_widths(&timew, &restw)) {
-    // warn or something?
-  }
-
-  char *time = centre("time", timew);
+  char *time = centre("t (s)", colw);
   fprintf(stderr, "%s%s ", BOLD, time);
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     char *adcv = calloc(10, sizeof(char));
-    sprintf(adcv, "adc%u", channel);
-    char *cadcv = centre(adcv, restw);
+    sprintf(adcv, "A%u (b)", channel);
+    char *cadcv = centre(adcv, colw);
     fprintf(stderr, "%s ", cadcv);
     free(cadcv);
     free(adcv);
   }
-  char *speed = centre("speed", restw);
+  char *speed = centre("s (hz)", colw);
   fprintf(stderr, "%s ", speed);
-  char *ca = centre("ca", restw);
+  char *ca = centre("ca (b)", colw);
   fprintf(stderr, "%5s ", ca);
-  char *temp = centre("temp", restw);
+  char *temp = centre("T (C)", colw);
   fprintf(stderr, "%5s%s\r", temp, RESET);
 
   free(time);
@@ -109,32 +101,34 @@ void
 display_thread_data(thread_data_t *td)
 {
 
-  unsigned int timew = 10, restw = 4;
-  if (get_column_widths(&timew, &restw)) {
-    // warn or something?
-  }
+  unsigned int colw = get_column_width();
+  
+  unsigned long secs = (*td->time_s);
+  if (start_secs == 0)
+    start_secs = secs;
+  secs -= start_secs;
 
-  char *time = calloc(50, sizeof(char));
-  sprintf(time, "%lu.%06lu", (*td->time_s), (*td->time_us));
-  char *ctime = centre(time, timew);
+  char *time = calloc(5, sizeof(char));
+  sprintf(time, "%lu", secs);
+  char *ctime = centre(time, colw);
   
   char **adcval = calloc(ADC_COUNT, sizeof(char *));
   char **cadcval = calloc(ADC_COUNT, sizeof(char *));
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     adcval[channel] = calloc(20, sizeof(char));
     sprintf(adcval[channel], "%lu", td->adc[channel]);
-    cadcval[channel] = centre(adcval[channel], restw);
+    cadcval[channel] = centre(adcval[channel], colw);
   }
 
   char *speed = calloc(20, sizeof(char));
   sprintf(speed, "%f", td->speed_ind);
-  char *cspeed = centre(speed, restw);
+  char *cspeed = centre(speed, colw);
   char *ca = calloc(20, sizeof(char));
   sprintf(ca, "%u", td->last_ca);
-  char *cca = centre(ca, restw);
+  char *cca = centre(ca, colw);
   char *temp = calloc(20, sizeof(char));
-  sprintf(temp, "%f\n", (*td->temperature));
-  char *ctemp = centre(temp, restw);
+  sprintf(temp, "%f", (*td->temperature));
+  char *ctemp = centre(temp, colw);
 
   fprintf(stderr, "%s ", ctime);
   for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
