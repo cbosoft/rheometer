@@ -42,6 +42,7 @@ main (int argc, const char ** argv)
     ferr("failed to set up wiringpi lib");
   info("setup gpio");
 
+  // This is tentatively working now. It seems to need the unexporting at the end, or the interrupts won't work.
   opt_setup(td);
   pinMode(16, INPUT);
   pinMode(20, INPUT);
@@ -52,23 +53,6 @@ main (int argc, const char ** argv)
   if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("failed to set up GPIO interrupt");
   if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("failed to set up GPIO interrupt");
   if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("failed to set up GPIO interrupt");
-  /*
-    This doesn't seem to be working. The source uses the 'gpio' program to set the interrupts, but it
-    doesn't succeed unless I run the python first for some reason.
-
-    The line in the source:
-      execl ("/usr/local/bin/gpio", "gpio", "edge", pinS, modeS, (char *)NULL) ;
-    From:
-      https://github.com/WiringPi/WiringPi/blob/master/wiringPi/wiringPi.c
-
-    gpio program source at:
-      https://github.com/WiringPi/WiringPi/blob/master/gpio/gpio.c
-    
-    Try running this manually, see what it comes out with. Maybe its failing but not
-    failing properly? Try a MWE of the python prep script, could run that from this to set up GPIO properly?
-
-    Does the pin need to be setup as input first? :O
-   */
   info("set up optical encoder");
 
   // pthread_t tmp_thread;
@@ -145,12 +129,17 @@ main (int argc, const char ** argv)
   //   info("thermometer thread rejoined");
   
   info("cleaning up...");
+  save_run_params_to_json(td);
+  info("  params written");
   tidy_logs(td);
+  info("  logs tar'd");
   free_thread_data(td);
+  info("  data free'd");
 #ifndef DEBUG
   system("gpio unexport 16");
   system("gpio unexport 20");
   system("gpio unexport 21");
+  info("  gpios unexported");
 #endif
   info("done!");
   return 0;
