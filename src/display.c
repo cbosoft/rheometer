@@ -84,6 +84,10 @@ display_titles(void)
   }
   char *speed = centre("s (hz)", colw);
   fprintf(stderr, "%s ", speed);
+  char *strainrate = centre("GD (1/s)", colw);
+  fprintf(stderr, "%s ", strainrate);
+  char *stress = centre("S (Pa)", colw);
+  fprintf(stderr, "%s ", stress);
   char *ca = centre("ca (b)", colw);
   fprintf(stderr, "%5s ", ca);
   char *temp = centre("T (C)", colw);
@@ -91,6 +95,8 @@ display_titles(void)
 
   free(time);
   free(speed);
+  free(strainrate);
+  free(stress);
   free(ca);
   free(temp);
 }
@@ -123,9 +129,19 @@ display_thread_data(thread_data_t *td)
   char *speed = calloc(20, sizeof(char));
   sprintf(speed, "%f", td->speed_ind);
   char *cspeed = centre(speed, colw);
+
+  char *strainrate = calloc(20, sizeof(char));
+  sprintf(strainrate, "%f", td->strainrate_ind);
+  char *cstrainrate = centre(strainrate, colw);
+
+  char *stress = calloc(20, sizeof(char));
+  sprintf(stress, "%f", td->stress_ind);
+  char *cstress = centre(stress, colw);
+
   char *ca = calloc(20, sizeof(char));
   sprintf(ca, "%u", td->last_ca);
   char *cca = centre(ca, colw);
+  
   char *temp = calloc(20, sizeof(char));
   sprintf(temp, "%f", (*td->temperature));
   char *ctemp = centre(temp, colw);
@@ -134,7 +150,7 @@ display_thread_data(thread_data_t *td)
   for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
     fprintf(stderr, "%s ", cadcval[channel]);
   }
-  fprintf(stderr, "%s %s %s\n", cspeed, cca, ctemp);
+  fprintf(stderr, "%s %s %s %s %s\n", cspeed, cstrainrate, cstress, cca, ctemp);
 
   free(temp);
   free(ca);
@@ -147,6 +163,8 @@ display_thread_data(thread_data_t *td)
 
   free(ctemp);
   free(cca);
+  free(cstress);
+  free(cstrainrate);
   free(cspeed);
   for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
     free(cadcval[channel]);
