@@ -20,6 +20,7 @@
 
 // CONTROL
 #define SPD_HIST 100
+#define ERR_HIST 100
 
 // UI
 #define BOLD  "\033[1m"
@@ -85,6 +86,7 @@ typedef struct control_params_t {
   double ki;
   double kd;
   double set_point;
+  unsigned int is_stress_controlled;
   
   // universal
   unsigned int sleep_ns;
@@ -110,6 +112,7 @@ typedef struct thread_data_t {
   char *control_scheme;
   control_params_t *control_params;
   unsigned int last_ca;
+  float *errhist;
 
   // run_data
   unsigned int length_s;
