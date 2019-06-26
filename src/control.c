@@ -41,13 +41,27 @@ calculate_control_indicators(thread_data_t *td)
       dt_tot += td->ptimes[i][j-1] - td->ptimes[i][j];
     }
   }
+
+  if (count == 0) {
+    warn("speed requested but no optenc events have been recorded.");
+  }
+
+#ifndef DEBUG
   float dt_av = dt_tot / ((float)count);
+#else
+  float dt_av = (count == 0) ? 0.01 : dt_tot / ((float)count);
+#endif
   float speed_hz = ((1.0/6.0) / dt_av); // rotations per second
   td->speed_ind = speed_hz;
-  float strainrate_invs = speed_hz * 3.1415926 * 2.0 * RI / (RO - RI);
-  td->strainrate_ind = strainrate_invs;
-  float torque_Nm = STRESS_M * td->adc[TSTS_CHANNEL] + STRESS_C;
 
+  float strainrate_invs = speed_hz * PI * 2.0 * RI / (RO - RI);
+  td->strainrate_ind = strainrate_invs;
+
+  float torque_Nm = STRESS_M * td->adc[TSTS_CHANNEL] + STRESS_C;
+  float stress_Pa = torque_Nm / (2.0 * PI * RI * RI * td->fill_depth);
+  td->stress_ind = stress_Pa;
+
+  td->viscosity_ind = stress_Pa / strainrate_invs;
 }
 
 

@@ -54,6 +54,9 @@
 #define RI 0.01505
 #define RO 0.01975
 
+// MATH
+#define PI 3.1415926535
+
 // }}}
 // types, structs, and enums {{{
 
