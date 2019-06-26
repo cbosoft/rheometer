@@ -154,7 +154,7 @@ void display_titles();
 // thread.c {{{
 
 thread_data_t *create_thread_data(void);
-void init(int argc, const char** argv, thread_data_t *td);
+void init(unsigned int argc, const char** argv, thread_data_t *td);
 void nsleep(unsigned int delay_ns);
 void free_thread_data(thread_data_t *dat);
 

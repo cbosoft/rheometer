@@ -93,7 +93,7 @@ parse_length_string(const char *length_s_str)
 
 
 void
-check_argc(int i, int argc) 
+check_argc(unsigned int i, unsigned int argc) 
 {
   if (i >= argc) {
     argerr("Option needs a value!");
@@ -104,7 +104,7 @@ check_argc(int i, int argc)
 
 
 void
-parse_args(int argc, const char **argv, thread_data_t *td) 
+parse_args(unsigned int argc, const char **argv, thread_data_t *td) 
 {
   td->tag = "DELME";
   unsigned int cs_set = 0, l_set = 0, d_set = 0;

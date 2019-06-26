@@ -28,7 +28,7 @@ main (int argc, const char ** argv)
 {
   thread_data_t *td = create_thread_data();
 
-  parse_args(argc, argv, td);
+  parse_args((unsigned int)argc, argv, td);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("could not create signal handler");
