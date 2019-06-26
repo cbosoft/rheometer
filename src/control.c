@@ -73,7 +73,35 @@ unsigned int
 pid_control(thread_data_t *td)
 {
   // TODO
-  return 0.0;
+
+  float dca = 0.0;
+  float input = (td->control_params->is_stress_controlled) ? td->stress_ind : td->strainrate_ind;
+  float err = input - td->control_params->set_point;
+  
+  // Proportional control
+  dca += td->control_params->kp * err;
+
+  // Intregral control
+  for (unsigned int i = 0; i < ERR_HIST; i++) {
+    if (td->errhist[i] == 0)
+      break;
+    dca += td->errhist[i] * td->control_params->ki;
+  }
+  
+  // Add error to history
+  float *errhist = calloc(ERR_HIST, sizeof(float)), *tmp;
+  errhist[0] = err;
+  for (unsigned int i = 0; i < ERR_HIST; i++) {
+    errhist[i+1] = td->errhist[i];
+  }
+  tmp = td->errhist;
+  td->errhist = errhist;
+  free(tmp);
+
+  // Derivative control
+  // TODO
+
+  return (unsigned int)(dca + td->last_ca);
 }
 
 
@@ -198,6 +226,25 @@ get_optional_control_scheme_parameter(cJSON *json, const char *paramname, const 
     else {
       (*str_value) = param->valuestring;
     }
+
+  }
+  else if (cJSON_IsBool(param)) {
+
+    if (int_value == NULL) {
+        char err_mesg[1000] = {0};
+        sprintf(err_mesg, "JSON parse error. \"%s\" is not expected to be a boolean (%s).", paramname, description);
+        ferr(err_mesg);
+    }
+    else {
+      if (cJSON_IsTrue(param))
+        (*int_value) = 1;
+      else
+        (*int_value) = 0;
+    }
+
+  }
+  else {
+    ferr("Unknown type encountered while processing control scheme JSON.");
   }
 }
 
@@ -270,7 +317,6 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
       strcat(err_mesg, control_schemes[i]);
     }
     ferr(err_mesg);
-    //ferr("Control scheme json must name a known scheme.\n  i.e. \"constant\" or \"pid\"");
   }
 
   control_params_t *params = malloc(sizeof(control_params_t));
@@ -280,6 +326,7 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
   params->kd = 0.0;
   params->set_point = 0.0;
   params->sleep_ns = 100*1000*1000;
+  params->is_stress_controlled = 0;
 
   if (schemeidx == ctlidx_from_str("constant")) {
     get_control_scheme_parameter(json, "c", "constant", "output value, double", &params->c);
@@ -289,6 +336,9 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
     get_control_scheme_parameter(json, "ki", "pid", "integral control coefficient, double", &params->ki);
     get_control_scheme_parameter(json, "kd", "pid", "derivative control coefficient, double", &params->kd);
     get_control_scheme_parameter(json, "setpoint", "pid", "set point/target, double", &params->set_point);
+
+    // pid specific optional
+    get_optional_control_scheme_parameter(json, "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->sleep_ns, NULL);
   }
 
   // optional params
