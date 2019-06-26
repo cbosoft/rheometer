@@ -22,12 +22,10 @@ rheometer: $(RHEO) $(HDR)
 
 debug: $(WPI) $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o rheometer $(LINK)
+	touch debug
 
-obj/%.o: src/%.c obj $(HDR)
+obj/%.o: src/%.c $(HDR)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)
-
-obj:
-	mkdir obj
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) $(CFLAGS) -shared -o $@ $< -lpthread
