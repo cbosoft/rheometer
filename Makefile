@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -pedantic
+CFLAGS = -Wall -Wextra
 LINK = -lwiringPi -lpthread
 HDR = src/rheo.h
 RHEO = obj/adc.o \
@@ -28,11 +28,11 @@ obj/%.o: src/%.c $(HDR)
 	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
-	$(CC) $(CFLAGS) -shared -o $@ $< -lpthread
+	$(CC) -shared -o $@ $< -lpthread
 	sudo cp -n wpi/libwiringPi.so /usr/lib/.
 	sudo cp -n wpi/wiringPi.h /usr/include/.
 
 clean:
-	rm -rf obj rheometer wpi/*.so
+	rm -rf obj/*.o rheometer wpi/*.so
 
 
