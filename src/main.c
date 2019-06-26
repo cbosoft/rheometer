@@ -62,31 +62,29 @@ main (int argc, const char ** argv)
   // while (!td->tmp_ready) nsleep(100);
   // info("....... thermometer thread ready!"); // TODO: temperature
 
+  motor_setup();
+  info("warming up motor...");
+  motor_warmup(350);
+  info("motor ready!");
+
+  info("starting threads...");
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
     ferr("could not create adc thread");
-  info("started adc thread");
   while (!td->adc_ready) nsleep(100);
-  info("....... adc thread ready!");
+  info("  adc ready!");
 
   pthread_t ctl_thread;
   if (pthread_create(&ctl_thread, NULL, ctl_thread_func, td))
     ferr("could not create adc thread");
-  info("started control thread");
   while (!td->ctl_ready) nsleep(100);
-  info("....... control thread ready!");
+  info("  controller ready!");
 
   pthread_t log_thread;
   if (pthread_create(&log_thread, NULL, log_thread_func, td))
     ferr("could not create log thread");
-  info("started log thread");
   while (!td->log_ready) nsleep(100);
-  info("....... log thread ready!");
-
-  motor_setup();
-  info("set up motor");
-  info("warming up motor...");
-  motor_warmup(256);
+  info("  logger ready!");
 
   info("begin!");
   unsigned int tish = 0;
@@ -99,35 +97,43 @@ main (int argc, const char ** argv)
   td->stopped = 1;
   fprintf(stderr, "\n");
 
+#ifndef DEBUG
+  system("gpio unexport 16");
+  system("gpio unexport 20");
+  system("gpio unexport 21");
+  info("optenc stopped");
+#endif
+
   for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
     fclose(td->opt_log_fps[i]);
   }
 
   motor_shutdown();
+  info("motor off");
 
   if (cancelled)
     warn("received interrupt.");
-  info("waiting for threads to rejoin...");
+  info("waiting for threads to finish...");
 
   if (pthread_join(log_thread, NULL))
     ferr("log thread could not rejoin");
   else
-    info("log thread rejoined");
+    info("  logger done");
 
   if (pthread_join(ctl_thread, NULL))
     ferr("control thread could not rejoin");
   else
-    info("control thread rejoined");
+    info("  controller done");
 
   if (pthread_join(adc_thread, NULL))
     ferr("adc thread could not rejoin");
   else
-    info("adc thread rejoined");
+    info("  adc done");
   
   // if (pthread_join(tmp_thread, NULL))
   //   ferr("thermometer thread could not rejoin");
   // else
-  //   info("thermometer thread rejoined");
+  //   info("  thermometer done");
   
   info("cleaning up...");
   save_run_params_to_json(td);
@@ -136,12 +142,6 @@ main (int argc, const char ** argv)
   info("  logs tar'd");
   free_thread_data(td);
   info("  data free'd");
-#ifndef DEBUG
-  system("gpio unexport 16");
-  system("gpio unexport 20");
-  system("gpio unexport 21");
-  info("  gpios unexported");
-#endif
   info("done!");
   return 0;
 }
