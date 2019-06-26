@@ -33,6 +33,7 @@ create_thread_data()
   rv->temperature = calloc(1, sizeof(float));
 
   rv->last_ca = 0;
+  rv->errhist = calloc(ERR_HIST, sizeof(float));
 
   rv->stopped = 0;
   rv->errored = 0;
