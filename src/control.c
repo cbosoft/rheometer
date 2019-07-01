@@ -318,7 +318,7 @@ void
 read_control_scheme(thread_data_t *td, const char *control_scheme_string)
 {
 
-  if (access(control_scheme_string, F_OK) == -1) {
+  if (access(control_scheme_string, R_OK | F_OK) == -1) {
     argerr("control scheme must be a json file describing the scheme.");
   }
 
