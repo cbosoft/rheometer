@@ -199,7 +199,7 @@ ctlfunc_from_int(int i)
     case CONTROL_BISTABLE:
       return &bistable_control;
     default:
-      ferr("unrecognised control scheme index");
+      ferr("ctlfunc_from_int", "unrecognised control scheme index");
       break;
   }
   return NULL;
@@ -249,10 +249,8 @@ get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemen
 
   if (param == NULL) {
     if (type == PARAM_REQ) {
-      char err_mesg[1000] = {0};
-      sprintf(err_mesg, "%s requires a parameter \"%s\" (%s)", schemename, paramname, description);
       cJSON_Delete(json);
-      ferr(err_mesg);
+      ferr("get_control_scheme_parameter", "%s requires a parameter \"%s\" (%s)", schemename, paramname, description);
     }
     else {
       return;
@@ -263,14 +261,10 @@ get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemen
 
     if (dbl_value == NULL) {
 
-      if (int_value == NULL) {
-        char err_mesg[1000] = {0};
-        sprintf(err_mesg, "JSON parse error. \"%s\" is not expected to be a number (%s).", paramname, description);
-        ferr(err_mesg);
-      }
-      else {
+      if (int_value == NULL)
+        ferr("get_control_scheme_parameter", "JSON parse error. \"%s\" is not expected to be a number (%s).", paramname, description);
+      else
         (*int_value) = param->valueint;
-      }
 
     }
     else {
@@ -280,36 +274,22 @@ get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemen
   } 
   else if (cJSON_IsString(param)) {
 
-    if (str_value == NULL) {
-        char err_mesg[1000] = {0};
-        sprintf(err_mesg, "JSON parse error. \"%s\" is not expected to be a string (%s).", paramname, description);
-        ferr(err_mesg);
-    }
-    else {
+    if (str_value == NULL)
+        ferr("get_control_scheme_parameter", "JSON parse error. \"%s\" is not expected to be a string (%s).", paramname, description);
+    else
       (*str_value) = param->valuestring;
-    }
 
   }
   else if (cJSON_IsBool(param)) {
 
-    if (int_value == NULL) {
-        char err_mesg[1000] = {0};
-        sprintf(err_mesg, "JSON parse error. \"%s\" is not expected to be a boolean (%s).", paramname, description);
-        ferr(err_mesg);
-    }
-    else {
-      if (cJSON_IsTrue(param))
-        (*int_value) = 1;
-      else
-        (*int_value) = 0;
-    }
+    if (int_value == NULL)
+        ferr("get_control_scheme_parameter", "JSON parse error. \"%s\" is not expected to be a boolean (%s).", paramname, description);
+    else
+      (*int_value) = (cJSON_IsTrue(param)) ? 1 : 0;
 
   }
-  else {
-    char *err_mesg = calloc(1000, sizeof(char));
-    sprintf(err_mesg, "Unknown type encountered while processing control scheme JSON param: %s", paramname);
-    ferr(err_mesg);
-  }
+  else
+    ferr("get_control_scheme_parameter", "Unknown type encountered while processing control scheme JSON param: %s", paramname);
 }
 
 
@@ -325,7 +305,7 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
   FILE *fp = fopen(control_scheme_string, "r");
 
   if (fp == NULL)
-    ferr("Something went wrong while opening control scheme.");
+    ferr("read_control_scheme", "could not open control scheme.");
   
   char ch;
   unsigned int count = 0, i = 0;
@@ -333,11 +313,11 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
   while ( (unsigned char)(ch = fgetc(fp)) != (unsigned char)EOF ) {
     count++;
     if (count > 1000)
-      ferr("control scheme is certainly not over 1000 characters long.");
+      ferr("read_control_scheme", "control scheme is certainly not over 1000 characters long.");
   }
 
   if (fseek(fp, 0L, SEEK_SET) != 0)
-    ferr("Something went wrong repositioning file.");
+    ferr("read_control_scheme", "something went wrong repositioning file.");
 
   char *json_str = calloc(count+1, sizeof(char));
   while ( (unsigned char)(ch = fgetc(fp)) != (unsigned char)EOF) {
@@ -352,13 +332,11 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
 
   if (json == NULL) {
     const char *eptr = cJSON_GetErrorPtr();
-    char err_mesg[1000] = {0};
     if (eptr != NULL)
-      sprintf(err_mesg, "JSON parse failed before %s", eptr);
+      ferr("read_control_scheme", "JSON parse failed before %s", eptr);
     else
-      sprintf(err_mesg, "JSON parse failed.");
+      ferr("read_control_scheme", "JSON parse failed.");
     cJSON_Delete(json);
-    ferr(err_mesg);
   }
 
   cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "name");
@@ -368,13 +346,13 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
   }
   else {
     cJSON_Delete(json);
-    ferr("Control scheme json must name a scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
+    ferr("read_control_scheme", "control scheme json must name a scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
   }
   
   int schemeidx = ctlidx_from_str(td->control_scheme);
   if (schemeidx < 0) {
     cJSON_Delete(json);
-    ferr("Control scheme JSON must name a known scheme. See rheometer -h for a list.");
+    ferr("read_control_scheme", "control scheme JSON must name a known scheme. See rheometer -h for a list.");
   }
 
   control_params_t *params = malloc(sizeof(control_params_t));

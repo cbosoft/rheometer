@@ -8,7 +8,7 @@
 #include "rheo.h"
 #include "cJSON.h"
 
-#define CHECKJSON(C) if (C == NULL) { warn("Error creating run params JSON. \n  Write down the fill depth for this run!"); return; }
+#define CHECKJSON(C) if (C == NULL) { warn("CHECKJSON", "Error creating run params JSON. \n  Write down the fill depth for this run!"); return; }
 
 void
 save_run_params_to_json(thread_data_t *td)
@@ -53,7 +53,7 @@ log_thread_func(void *vtd) {
   thread_data_t *td = (thread_data_t *)vtd;
 
   if (td->log_pref == NULL)
-    ferr("data must be initialised before logging is started.");
+    ferr("log_thread_func", "data must be initialised before logging is started.");
   
   struct timeval tv;
   unsigned long *sec, *usec, *psec, *pusec;

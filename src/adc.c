@@ -35,7 +35,7 @@ read_adc_value(adc_handle_t *h, unsigned int channel)
 
   ret = ioctl(h->fd, SPI_IOC_MESSAGE(1), &tr);
   if (ret < 1)
-    ferr("can't send spi message");
+    ferr("read_adc_value", "can't send spi message");
   
   unsigned int total = 0;
   for (unsigned int i = 0; i < L; i++) {
@@ -56,7 +56,7 @@ adc_open(const char *device)
 #ifndef DEBUG
   int fd = open(device, O_RDWR);
   if (fd < 0)
-    ferr("could not open spi device");
+    ferr("adc_open", "could not open spi device");
 
   adc_handle_t *h = malloc(sizeof(adc_handle_t));
 

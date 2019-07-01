@@ -41,9 +41,7 @@ tidy_logs(thread_data_t *td)
 
   for (unsigned int i = 0; i < td->log_count; i++) {
     if (td->log_paths[i] == NULL) {
-      char err_mesg[35] = {0};
-      sprintf(err_mesg, "log path %u is NULL, skipping.", i);
-      warn(err_mesg);
+      warn("tidy_logs", "log path %u is NULL, skipping.", i);
       continue;
     }
     strcat(tar_cmd, " ");
@@ -56,6 +54,6 @@ tidy_logs(thread_data_t *td)
   free(tar_cmd_escaped);
 
   if (rv == -1) {
-    ferr("error when tidying logs");
+    ferr("tidy_logs", "error when tidying logs");
   } // TODO: what about other rvs?
 }

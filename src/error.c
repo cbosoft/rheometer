@@ -28,7 +28,7 @@ ferr (const char* source, const char* fmt, ...)
 
 
 void
-argerr(const char* source, const char *fmt, ...)
+argerr(const char *fmt, ...)
 {
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
@@ -39,7 +39,6 @@ argerr(const char* source, const char *fmt, ...)
   vsnprintf(mesg, mesglen, fmt, ap);
   va_end(ap);
 
-  fprintf(stderr, "  "BGRED"FATAL ERROR!"RESET" in "FGBLUE"%s"RESET": %s\n", source, mesg);
   fprintf(stderr, "  \033[41mUSAGE ERROR!\033[0m %s\n", mesg);
   usage();
   exit(1);
