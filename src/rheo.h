@@ -178,10 +178,10 @@ void *log_thread_func(void *rtd);
 // }}}
 // error.c {{{
 
-void ferr(const char *mesg);
-void argerr(const char *mesg);
-void warn(const char *mesg);
-void info(const char *mesg);
+void ferr(const char *source, const char* fmt, ...);
+void argerr(const char *source, const char* fmt, ...);
+void warn(const char *source, const char* fmt, ...);
+void info(const char* fmt, ...);
 
 // }}}
 // adc.c {{{
