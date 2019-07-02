@@ -21,6 +21,9 @@
 // CONTROL
 #define SPD_HIST 100
 #define ERR_HIST 100
+#define CONTROL_MAXIMUM 1024
+#define CONTROL_MINIMUM 200
+
 
 // UI
 #define BOLD  "\033[1m"
