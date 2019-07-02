@@ -14,7 +14,7 @@ usage(void)
       "\n"
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
-      "  Usage:\n"
+      "  "BOLD"Usage:"RESET"\n"
       "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>]\n"
       "    rheometer -h|--help\n"
       "\n"
@@ -29,7 +29,7 @@ help(void)
 {
   usage();
   fprintf(stderr,
-      "  Options:\n"
+      "  "BOLD"Options:"RESET"\n"
       "    -l | --length    Length of run, can be given in seconds or minutes, dictated\n"
       "                     by a suffixed character. e.g. \"10s\" is 10 seconds, \"10m\"\n"
       "                     is 10 minutes. If ignored, the value is taken as seconds.\n"
@@ -37,17 +37,14 @@ help(void)
       "    -d | --depth     Fill depth of Couette cell. This is the height fluid extends \n"
       "                     up on the "BOLD"inner"RESET" cylinder, in mm.\n"
       "\n"
-      "    -c | --control-scheme    Control scheme JSON file path. The JSON object\n"
-      "                     describes the control scheme to use in the run. Each control\n"
-      "                     scheme has different parameters it requires. E.g. the\n"
-      "                     constant scheme only requires one parameter; \"c\" which is\n"
-      "                     the constant value. PID control requires three different\n"
-      "                     tuning params, and a set point.\n"
+      "    -c | --control-scheme    Control scheme JSON file path. More information in the\n"
+      "                     'Control Schemes' section in the help.\n"
       "\n"
-      "    -t | --tag       A short descriptive name for the test run. Underscores in the\n"
-      "                     tag will be replaced by hyphens. Optional, default is \""TAGDEFAULT"\".\n"
+      "    -t | --tag       A short descriptive name for the test run. Underscores and spaces\n"
+      "                     will be replaced by hyphens. Optional. Default is \""TAGDEFAULT"\".\n"
       "\n"
   );
+  control_help();
 }
 
 
@@ -91,6 +88,22 @@ parse_length_string(const char *length_s_str)
 
 
 
+char *
+parse_tag_string(const char *s) 
+{
+  unsigned int l = strlen(s);
+  char *rv = calloc(l, sizeof(char));
+  for (unsigned int i = 0; i < l; i++) {
+    if (s[i] == ' ' || s[i] == '_')
+      rv[i] = '-';
+    else
+      rv[i] = s[i];
+  }
+  return rv;
+}
+
+
+
 
 void
 check_argc(unsigned int i, unsigned int argc) 
@@ -125,7 +138,7 @@ parse_args(unsigned int argc, const char **argv, thread_data_t *td)
     else if (EITHER(argv[i], "-t", "--tag")) {
       i++;
       check_argc(i, argc);
-      td->tag = argv[i];
+      td->tag = parse_tag_string(argv[i]);
     }
     else if (EITHER(argv[i], "-h", "--help")) {
       help();
@@ -155,7 +168,7 @@ parse_args(unsigned int argc, const char **argv, thread_data_t *td)
       "  Run options:\n"
       "    "FGYELLOW"tag"RESET": \"%s\"\n"
       "    "FGYELLOW"control scheme"RESET": %s\n"
-      "      "FGMAGENTA"c"RESET": %.3f\n"
+      "      "FGMAGENTA"c"RESET": %u\n"
       "      "FGMAGENTA"kp"RESET": %.3f\n"
       "      "FGMAGENTA"ki"RESET": %.3f\n"
       "      "FGMAGENTA"kd"RESET": %.3f\n"

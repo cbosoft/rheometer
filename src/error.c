@@ -2,34 +2,80 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "rheo.h"
 
 void
-ferr (const char* mesg)
+ferr (const char* source, const char* fmt, ...)
 {
-  fprintf(stderr, "  \033[31mFATAL ERROR!\033[0m %s\n", mesg);
+  size_t mesglen = 256;
+  char *mesg = calloc(mesglen, sizeof(char));
+
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(mesg, mesglen, fmt, ap);
+  va_end(ap);
+
+  fprintf(stderr, "  "BGRED"FATAL ERROR!"RESET" in "FGBLUE"%s"RESET": %s\n", source, mesg);
   if (errno)
-    fprintf(stderr, "  \033[31m-->\033[0m(%d)  %s\n", errno, strerror(errno));
+    fprintf(stderr, "  --> (%d)  %s\n", errno, strerror(errno));
   exit(1);
 }
 
+
+
+
 void
-argerr(const char* mesg)
+argerr(const char *fmt, ...)
 {
+  size_t mesglen = 256;
+  char *mesg = calloc(mesglen, sizeof(char));
+
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(mesg, mesglen, fmt, ap);
+  va_end(ap);
+
   fprintf(stderr, "  \033[41mUSAGE ERROR!\033[0m %s\n", mesg);
   usage();
   exit(1);
 }
 
-void
-warn (const char* mesg)
-{
-  fprintf(stderr, "  \033[33mWARNING!\033[0m %s\n", mesg);
-}
+
+
 
 void
-info (const char *mesg)
+warn (const char *source, const char *fmt, ...)
 {
-  fprintf(stderr, "  \033[34m%s\033[0m\n", mesg);
+  size_t mesglen = 256;
+  char *mesg = calloc(mesglen, sizeof(char));
+
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(mesg, mesglen, fmt, ap);
+  va_end(ap);
+
+  fprintf(stderr, "  "FGYELLOW"WARNING!"RESET" in "FGBLUE"%s"RESET": %s\n", source, mesg);
+}
+
+
+
+
+void
+info (const char *fmt, ...)
+{
+  size_t mesglen = 256;
+  char *mesg = calloc(mesglen, sizeof(char));
+
+  va_list ap;
+
+  va_start(ap, fmt);
+  vsnprintf(mesg, mesglen, fmt, ap);
+  va_end(ap);
+
+  fprintf(stderr, "  "FGBLUE"%s"RESET"\n", mesg);
 }

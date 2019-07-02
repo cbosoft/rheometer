@@ -31,7 +31,7 @@ main (int argc, const char ** argv)
   parse_args((unsigned int)argc, argv, td);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
-    ferr("could not create signal handler");
+    ferr("main", "could not create signal handler");
 
   init(td);
 
@@ -39,7 +39,7 @@ main (int argc, const char ** argv)
   info("connected to ADC");
 
   if (wiringPiSetupGpio() == -1)
-    ferr("failed to set up wiringpi lib");
+    ferr("main", "failed to set up wiringpi lib");
   info("setup gpio");
 
   // This is tentatively working now. It seems to need the unexporting at the end, or the interrupts won't work.
@@ -50,9 +50,9 @@ main (int argc, const char ** argv)
   void opt_trip_16(void) { opt_mark(td, 0); }
   void opt_trip_20(void) { opt_mark(td, 1); }
   void opt_trip_21(void) { opt_mark(td, 2); }
-  if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("failed to set up GPIO interrupt");
-  if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("failed to set up GPIO interrupt");
-  if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("failed to set up GPIO interrupt");
+  if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("main", "failed to set up GPIO interrupt");
+  if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("main", "failed to set up GPIO interrupt");
+  if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("main", "failed to set up GPIO interrupt");
   info("set up optical encoder");
 
   // pthread_t tmp_thread;
@@ -70,19 +70,19 @@ main (int argc, const char ** argv)
   info("starting threads...");
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
-    ferr("could not create adc thread");
+    ferr("main", "could not create adc thread");
   while (!td->adc_ready) nsleep(100);
   info("  adc ready!");
 
   pthread_t ctl_thread;
   if (pthread_create(&ctl_thread, NULL, ctl_thread_func, td))
-    ferr("could not create adc thread");
+    ferr("main", "could not create adc thread");
   while (!td->ctl_ready) nsleep(100);
   info("  controller ready!");
 
   pthread_t log_thread;
   if (pthread_create(&log_thread, NULL, log_thread_func, td))
-    ferr("could not create log thread");
+    ferr("main", "could not create log thread");
   while (!td->log_ready) nsleep(100);
   info("  logger ready!");
 
@@ -112,21 +112,21 @@ main (int argc, const char ** argv)
   info("motor off");
 
   if (cancelled)
-    warn("received interrupt.");
+    warn("main", "received interrupt.");
   info("waiting for threads to finish...");
 
   if (pthread_join(log_thread, NULL))
-    ferr("log thread could not rejoin");
+    ferr("main", "log thread could not rejoin");
   else
     info("  logger done");
 
   if (pthread_join(ctl_thread, NULL))
-    ferr("control thread could not rejoin");
+    ferr("main", "control thread could not rejoin");
   else
     info("  controller done");
 
   if (pthread_join(adc_thread, NULL))
-    ferr("adc thread could not rejoin");
+    ferr("main", "adc thread could not rejoin");
   else
     info("  adc done");
   

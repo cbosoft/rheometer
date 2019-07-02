@@ -29,6 +29,9 @@ create_thread_data()
 
   rv->time_s = calloc(1, sizeof(unsigned long));
   rv->time_us = calloc(1, sizeof(unsigned long));
+  rv->start_time_s = 0;
+  rv->start_time_us = 0;
+  rv->time_s_f = 0.0;
   rv->adc = calloc(ADC_COUNT, sizeof(float));
   rv->temperature = calloc(1, sizeof(float));
 
@@ -81,6 +84,11 @@ init(thread_data_t *td)
   td->ptimes = calloc(OPTENC_COUNT, sizeof(float *));
   for (unsigned int i = 0; i < OPTENC_COUNT; i++)
     td->ptimes[i] = calloc(SPD_HIST, sizeof(float));
+  
+  struct timeval tv;
+  gettimeofday(&tv, 0);
+  td->start_time_s = tv.tv_sec;
+  td->start_time_us = tv.tv_usec;
 
   free(date);
 }
@@ -109,6 +117,7 @@ free_thread_data(thread_data_t *td)
 
   free(td->adc);
   free(td->temperature);
+  free(td->tag);
 
   free(td);
 }

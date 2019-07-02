@@ -8,10 +8,6 @@
 
 
 
-static unsigned long start_secs = 0;
-
-
-
 
 unsigned int
 get_column_width(void)
@@ -74,25 +70,25 @@ display_titles(void)
 {
   unsigned int colw = get_column_width();
 
-  char *time = centre("t (s)", colw);
+  char *time = centre("t/s", colw);
   fprintf(stderr, "%s%s ", BOLD, time);
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     char *adcv = calloc(10, sizeof(char));
-    sprintf(adcv, "A%u (b)", channel);
+    sprintf(adcv, "A%u/b", channel);
     char *cadcv = centre(adcv, colw);
     fprintf(stderr, "%s ", cadcv);
     free(cadcv);
     free(adcv);
   }
-  char *speed = centre("s (hz)", colw);
+  char *speed = centre("s/hz", colw);
   fprintf(stderr, "%s ", speed);
-  char *strainrate = centre("GD (1/s)", colw);
+  char *strainrate = centre("SR/hz", colw);
   fprintf(stderr, "%s ", strainrate);
-  char *stress = centre("S (Pa)", colw);
+  char *stress = centre("S/Pa", colw);
   fprintf(stderr, "%s ", stress);
-  char *ca = centre("ca (b)", colw);
+  char *ca = centre("ca/b", colw);
   fprintf(stderr, "%5s ", ca);
-  char *temp = centre("T (C)", colw);
+  char *temp = centre("T/C", colw);
   fprintf(stderr, "%5s%s\r", temp, RESET);
 
   free(time);
@@ -111,10 +107,7 @@ display_thread_data(thread_data_t *td)
 
   unsigned int colw = get_column_width();
   
-  unsigned long secs = (*td->time_s);
-  if (start_secs == 0)
-    start_secs = secs;
-  secs -= start_secs;
+  unsigned long secs = (unsigned int)(td->time_s_f);
 
   char *time = calloc(5, sizeof(char));
   sprintf(time, "%lu", secs);
