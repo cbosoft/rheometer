@@ -19,8 +19,8 @@
 #define PWM_PIN 18
 
 // CONTROL
-#define SPD_HIST 100
-#define ERR_HIST 100
+#define SPD_HIST 10
+#define ERR_HIST 10
 #define CONTROL_MAXIMUM 1024
 #define CONTROL_MINIMUM 200
 
