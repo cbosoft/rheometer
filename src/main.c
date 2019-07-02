@@ -140,8 +140,8 @@ main (int argc, const char ** argv)
   info("  params written");
   tidy_logs(td);
   info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, td->log_pref);
-  free_thread_data(td);
-  info("  data free'd");
+  //free_thread_data(td);
+  //info("  data free'd");
   info("done!");
   return 0;
 }
