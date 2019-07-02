@@ -79,9 +79,8 @@ calculate_control_indicators(thread_data_t *td)
 
 #ifndef DEBUG
 
-  if (count == 0) {
-    warn("speed requested but no optenc events have been recorded.");
-  }
+  if (count == 0)
+    warn("calculate_control_indicators", "speed requested but no optenc events have been recorded.");
 
   float dt_av = dt_tot / ((float)count);
 #else
@@ -116,7 +115,7 @@ pid_control(thread_data_t *td)
   // Proportional control
   dca += td->control_params->kp * err;
 
-  // Intregral control
+  // Integral control
   for (unsigned int i = 0; i < ERR_HIST; i++) {
     if (td->errhist[i] == 0)
       break;
