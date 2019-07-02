@@ -139,10 +139,7 @@ main (int argc, const char ** argv)
   save_run_params_to_json(td);
   info("  params written");
   tidy_logs(td);
-  info("  logs tar'd");
-  char *tarinfo = calloc(100, sizeof(char));
-  sprintf(tarinfo, "  %s\"%s.tar.bz2\"%s", BOLD, td->log_pref, RESET);
-  info(tarinfo);
+  info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, td->log_pref);
   free_thread_data(td);
   info("  data free'd");
   info("done!");
