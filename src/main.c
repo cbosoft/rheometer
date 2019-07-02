@@ -140,6 +140,9 @@ main (int argc, const char ** argv)
   info("  params written");
   tidy_logs(td);
   info("  logs tar'd");
+  char *tarinfo = calloc(100, sizeof(char));
+  sprintf(tarinfo, "  %s\"%s.tar.bz2\"%s", BOLD, td->log_pref, RESET);
+  info(tarinfo);
   free_thread_data(td);
   info("  data free'd");
   info("done!");
