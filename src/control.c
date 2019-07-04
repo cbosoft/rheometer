@@ -295,40 +295,9 @@ get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemen
 
 
 void
-read_control_scheme(thread_data_t *td, const char *control_scheme_string)
+read_control_scheme(thread_data_t *td, const char *control_scheme_json_path)
 {
-
-  if (access(control_scheme_string, R_OK | F_OK) == -1) {
-    argerr("control scheme must be a json file describing the scheme.");
-  }
-
-  FILE *fp = fopen(control_scheme_string, "r");
-
-  if (fp == NULL)
-    ferr("read_control_scheme", "could not open control scheme.");
-  
-  char ch;
-  unsigned int count = 0, i = 0;
-
-  while ( (unsigned char)(ch = fgetc(fp)) != (unsigned char)EOF ) {
-    count++;
-    if (count > 1000)
-      ferr("read_control_scheme", "control scheme is certainly not over 1000 characters long.");
-  }
-
-  if (fseek(fp, 0L, SEEK_SET) != 0)
-    ferr("read_control_scheme", "something went wrong repositioning file.");
-
-  char *json_str = calloc(count+1, sizeof(char));
-  while ( (unsigned char)(ch = fgetc(fp)) != (unsigned char)EOF) {
-    json_str[i] = ch;
-    i++;
-  }
-
-  fclose(fp);
-
-  cJSON *json = cJSON_Parse(json_str);
-  free(json_str);
+  cJSON *json = read_json(control_scheme_json_path);
 
   if (json == NULL) {
     const char *eptr = cJSON_GetErrorPtr();
@@ -341,8 +310,13 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_string)
 
   cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "name");
   if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
+
     td->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
     strcpy(td->control_scheme, control_scheme_name_json->valuestring);
+
+    td->control_scheme = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
+    strcpy(td->control_scheme, control_scheme_json_path);
+
   }
   else {
     cJSON_Delete(json);
