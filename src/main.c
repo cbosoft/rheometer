@@ -64,7 +64,7 @@ main (int argc, const char ** argv)
 
   motor_setup();
   info("warming up motor...");
-  motor_warmup(350);
+  motor_warmup(650);
   info("motor ready!");
 
   info("starting threads...");
@@ -139,9 +139,9 @@ main (int argc, const char ** argv)
   save_run_params_to_json(td);
   info("  params written");
   tidy_logs(td);
-  info("  logs tar'd");
-  free_thread_data(td);
-  info("  data free'd");
+  info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, td->log_pref);
+  //free_thread_data(td);
+  //info("  data free'd");
   info("done!");
   return 0;
 }

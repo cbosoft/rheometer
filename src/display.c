@@ -21,7 +21,7 @@ get_column_width(void)
   unsigned int min_total = (number_cols * (min_cols+1));
 
   if (width_total < min_total) {
-    warn("screen too small");
+    warn("get_column_width", "screen too small");
     return min_cols;
   }
 

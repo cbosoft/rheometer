@@ -115,9 +115,9 @@ free_thread_data(thread_data_t *td)
     free(td->ptimes);
   }
 
-  free(td->adc);
-  free(td->temperature);
-  free(td->tag);
+  if (td->adc != NULL) free(td->adc);
+  if (td->temperature != NULL) free(td->temperature);
+  if (td->tag != NULL) free(td->tag);
 
   free(td);
 }
