@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "cJSON.h"
+
 // macros {{{
 
 // MISC
@@ -121,6 +123,7 @@ typedef struct thread_data_t {
   float viscosity_ind;
   float **ptimes;
   char *control_scheme;
+  char *control_scheme_path;
   control_params_t *control_params;
   unsigned int last_ca;
   float *errhist;
@@ -223,6 +226,11 @@ void motor_shutdown();
 // tar.c {{{
 
 void tidy_logs(thread_data_t *td);
+
+// }}}
+// io.c {{{
+
+cJSON *read_json(const char *path);
 
 // }}}
 // vim: foldmethod=marker ft=c
