@@ -13,22 +13,22 @@
 void
 save_run_params_to_json(thread_data_t *td)
 {
-  cJSON *controlscheme = NULL, *length_s = NULL, *depth_mm = NULL;
-
   cJSON *params = cJSON_CreateObject();
   CHECKJSON(params);
   
-  controlscheme = cJSON_CreateString(td->control_scheme);
-  CHECKJSON(controlscheme);
-  cJSON_AddItemToObject(params, "controlscheme", controlscheme);
+  cJSON *control_scheme_json = read_json(td->control_scheme_path);
+  CHECKJSON(control_scheme_json);
+  cJSON_AddItemToObject(params, "control_scheme", control_scheme_json);
 
-  length_s = cJSON_CreateNumber(td->length_s);
-  CHECKJSON(length_s);
-  cJSON_AddItemToObject(params, "length_s", length_s);
+  cJSON *
 
-  depth_mm = cJSON_CreateNumber(td->fill_depth);
-  CHECKJSON(depth_mm);
-  cJSON_AddItemToObject(params, "depth_mm", depth_mm);
+  cJSON *length_s_json = cJSON_CreateNumber(td->length_s);
+  CHECKJSON(length_s_json);
+  cJSON_AddItemToObject(params, "length_s", length_s_json);
+
+  cJSON *depth_mm_json = cJSON_CreateNumber(td->fill_depth);
+  CHECKJSON(depth_mm_json);
+  cJSON_AddItemToObject(params, "depth_mm", depth_mm_json);
 
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
