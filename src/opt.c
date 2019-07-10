@@ -12,7 +12,7 @@
 #define SETUP_OPT_PIN(PIN, I) \
   pinMode(PIN, INPUT); \
   void OPT_TRIP(PIN)(void) { opt_mark(rd, I); } \
-  if (wiringPiISR(PIN, INT_EDGE_BOTH, &(OPT_TRIP(PIN))) < 0) { \
+  if (wiringPiISR(PIN, INT_EDGE_BOTH, &(OPT_TRIP(PIN))) < 0) \
     ferr("opt_setup", "failed to set up interrupt for pin %d", PIN); \
 
 
