@@ -197,10 +197,8 @@ ctlfunc_from_int(int i)
       return &sine_control;
     case CONTROL_BISTABLE:
       return &bistable_control;
-    default:
-      ferr("ctlfunc_from_int", "unrecognised control scheme index");
-      break;
   }
+  ferr("ctlfunc_from_int", "unrecognised control scheme index");
   return NULL;
 }
 
