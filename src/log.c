@@ -20,8 +20,6 @@ save_run_params_to_json(thread_data_t *td)
   CHECKJSON(control_scheme_json);
   cJSON_AddItemToObject(params, "control_scheme", control_scheme_json);
 
-  cJSON *
-
   cJSON *length_s_json = cJSON_CreateNumber(td->length_s);
   CHECKJSON(length_s_json);
   cJSON_AddItemToObject(params, "length_s", length_s_json);
