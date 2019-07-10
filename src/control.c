@@ -314,8 +314,8 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_json_path)
     td->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
     strcpy(td->control_scheme, control_scheme_name_json->valuestring);
 
-    td->control_scheme = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
-    strcpy(td->control_scheme, control_scheme_json_path);
+    td->control_scheme_path = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
+    strcpy(td->control_scheme_path, control_scheme_json_path);
 
   }
   else {
