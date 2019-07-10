@@ -7,7 +7,7 @@
 // macros {{{
 
 // MISC
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 // ADC
 #define ADC_COUNT 8
