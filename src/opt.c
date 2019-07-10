@@ -11,6 +11,9 @@
 
 static const uint8_t opt_pins[OPTENC_COUNT] = {16, 20, 21};
 
+
+  
+  
 void
 opt_setup(thread_data_t *td)
 {
@@ -20,8 +23,12 @@ opt_setup(thread_data_t *td)
     td->opt_log_fps[i] = fopen(td->log_paths[i+1], "w");
     td->log_count ++;
     pinMode(opt_pins[i], INPUT);
+    //pullUpDnControl(opt_pins[i], PUD_DOWN);
   }
 }
+
+
+
 
 void
 opt_mark(thread_data_t *td, unsigned int i)
