@@ -1,8 +1,14 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 
-#include "rheo.h"
+#include "args.h"
+#include "display.h"
+#include "version.h"
+#include "log.h"
+#include "control.h"
+#include "error.h"
 
 #define EITHER(A,B,C) ( (strcmp(A, B) == 0) || (strcmp(A, C) == 0) )
 
@@ -117,28 +123,28 @@ check_argc(unsigned int i, unsigned int argc)
 
 
 void
-parse_args(unsigned int argc, const char **argv, thread_data_t *td) 
+parse_args(unsigned int argc, const char **argv, struct run_data *rd) 
 {
-  td->tag = "DELME";
+  rd->tag = "DELME";
   unsigned int cs_set = 0, l_set = 0, d_set = 0;
 
   for (unsigned int i = 1; i < argc; i++) {
     if (EITHER(argv[i], "-l", "--length")) {
       i++;
       check_argc(i, argc);
-      td->length_s = parse_length_string(argv[i]);
+      rd->length_s = parse_length_string(argv[i]);
       l_set = 1;
     }
     else if (EITHER(argv[i], "-c", "--control-scheme")) {
       i++;
       check_argc(i, argc);
-      read_control_scheme(td, argv[i]);
+      read_control_scheme(rd, argv[i]);
       cs_set = 1;
     }
     else if (EITHER(argv[i], "-t", "--tag")) {
       i++;
       check_argc(i, argc);
-      td->tag = parse_tag_string(argv[i]);
+      rd->tag = parse_tag_string(argv[i]);
     }
     else if (EITHER(argv[i], "-h", "--help")) {
       help();
@@ -147,7 +153,7 @@ parse_args(unsigned int argc, const char **argv, thread_data_t *td)
     else if (EITHER(argv[i], "-d", "--depth")) {
       i++;
       check_argc(i, argc);
-      td->fill_depth = atof(argv[i]);
+      rd->fill_depth = atof(argv[i]);
       d_set = 1;
     }
     else {
@@ -176,14 +182,14 @@ parse_args(unsigned int argc, const char **argv, thread_data_t *td)
       "      "FGMAGENTA"control interval"RESET": %f ms\n"
       "      "FGMAGENTA"controlled variable"RESET": %s\n"
       "    "FGYELLOW"length"RESET": %u s\n",
-      td->tag, 
-      td->control_scheme, 
-        td->control_params->c, 
-        td->control_params->kp, 
-        td->control_params->ki, 
-        td->control_params->kd, 
-        td->control_params->set_point, 
-        (float)(td->control_params->sleep_ns)*0.001*0.001,
-        td->control_params->is_stress_controlled ? "stress" : "strainrate",
-      td->length_s);
+      rd->tag, 
+      rd->control_scheme, 
+      rd->control_params->c, 
+      rd->control_params->kp, 
+      rd->control_params->ki, 
+      rd->control_params->kd, 
+      rd->control_params->set_point, 
+      (float)(rd->control_params->sleep_ns)*0.001*0.001,
+      rd->control_params->is_stress_controlled ? "stress" : "strainrate",
+      rd->length_s);
 }

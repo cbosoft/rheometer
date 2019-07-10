@@ -4,7 +4,10 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include "rheo.h"
+#include "display.h"
+#include "error.h"
+#include "adc.h"
+#include "run.h"
 
 
 
@@ -102,12 +105,12 @@ display_titles(void)
 
 
 void
-display_thread_data(thread_data_t *td)
+display_thread_data(struct run_data *rd)
 {
 
   unsigned int colw = get_column_width();
   
-  unsigned long secs = (unsigned int)(td->time_s_f);
+  unsigned long secs = (unsigned int)(rd->time_s_f);
 
   char *time = calloc(5, sizeof(char));
   sprintf(time, "%lu", secs);
@@ -117,28 +120,28 @@ display_thread_data(thread_data_t *td)
   char **cadcval = calloc(ADC_COUNT, sizeof(char *));
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     adcval[channel] = calloc(20, sizeof(char));
-    sprintf(adcval[channel], "%lu", td->adc[channel]);
+    sprintf(adcval[channel], "%lu", rd->adc[channel]);
     cadcval[channel] = centre(adcval[channel], colw);
   }
 
   char *speed = calloc(20, sizeof(char));
-  sprintf(speed, "%f", td->speed_ind);
+  sprintf(speed, "%f", rd->speed_ind);
   char *cspeed = centre(speed, colw);
 
   char *strainrate = calloc(20, sizeof(char));
-  sprintf(strainrate, "%f", td->strainrate_ind);
+  sprintf(strainrate, "%f", rd->strainrate_ind);
   char *cstrainrate = centre(strainrate, colw);
 
   char *stress = calloc(20, sizeof(char));
-  sprintf(stress, "%f", td->stress_ind);
+  sprintf(stress, "%f", rd->stress_ind);
   char *cstress = centre(stress, colw);
 
   char *ca = calloc(20, sizeof(char));
-  sprintf(ca, "%u", td->last_ca);
+  sprintf(ca, "%u", rd->last_ca);
   char *cca = centre(ca, colw);
   
   char *temp = calloc(20, sizeof(char));
-  sprintf(temp, "%f", (*td->temperature));
+  sprintf(temp, "%f", (*rd->temperature));
   char *ctemp = centre(temp, colw);
 
   fprintf(stderr, "%s ", ctime);
