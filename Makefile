@@ -13,8 +13,8 @@ RHEO = obj/adc.o \
 			 obj/main.o \
 			 obj/motor.o \
 			 obj/opt.o \
+			 obj/run.o \
 			 obj/tar.o \
-			 obj/thread.o \
 			 obj/util.o
 WPI = wpi/libwiringPi.so
 
