@@ -55,8 +55,11 @@ main (int argc, const char ** argv)
   rd->adc_handle = adc_open("/dev/spidev0.1");
   info("connected to ADC");
 
-  if (wiringPiSetupGpio() == -1)
+  if (wiringPiSetupGpio() == -1) {
+    adc_close(rd->adc_handle);
     ferr("main", "failed to set up wiringpi lib");
+  }
+
   info("setup gpio");
 
   // This is tentatively working now. It seems to need the unexporting at the end, or the interrupts won't work.
