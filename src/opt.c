@@ -5,6 +5,16 @@
 #include <wiringPi.h>
 
 #include "opt.h"
+#include "error.h"
+
+
+#define OPT_TRIP(PIN) opt_trip_ ## PIN
+#define SETUP_OPT_PIN(PIN, I) \
+  pinMode(PIN, INPUT); \
+  void OPT_TRIP(PIN)(void) { opt_mark(rd, I); } \
+  if (wiringPiISR(PIN, INT_EDGE_BOTH, &(OPT_TRIP(PIN))) < 0) { \
+    ferr("opt_setup", "failed to set up interrupt for pin %d", PIN); \
+  }
 
 
 
@@ -17,8 +27,9 @@ static time_t time_last[OPTENC_COUNT] = {0};
 
 void opt_setup(struct run_data *rd)
 {
-  for (unsigned int i = 0; i < OPTENC_COUNT; i++)
-    pinMode(opt_pins[i], INPUT);
+  SETUP_OPT_PIN(16, 0);
+  SETUP_OPT_PIN(20, 1);
+  SETUP_OPT_PIN(21, 2);
 }
 
 

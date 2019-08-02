@@ -62,17 +62,7 @@ main (int argc, const char ** argv)
 
   info("setup gpio");
 
-  // This is tentatively working now. It seems to need the unexporting at the end, or the interrupts won't work.
   opt_setup(rd);
-  pinMode(16, INPUT);
-  pinMode(20, INPUT);
-  pinMode(21, INPUT);
-  void opt_trip_16(void) { opt_mark(rd, 0); }
-  void opt_trip_20(void) { opt_mark(rd, 1); }
-  void opt_trip_21(void) { opt_mark(rd, 2); }
-  if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("main", "failed to set up GPIO interrupt");
-  if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("main", "failed to set up GPIO interrupt");
-  if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("main", "failed to set up GPIO interrupt");
   info("set up optical encoder");
 
   // pthread_t tmp_thread;
