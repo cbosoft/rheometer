@@ -8,6 +8,7 @@ RHEO = obj/adc.o \
 			 obj/display.o \
 			 obj/error.o \
 			 obj/json.o \
+			 obj/loadcell.o \
 			 obj/log.o \
 			 obj/main.o \
 			 obj/motor.o \

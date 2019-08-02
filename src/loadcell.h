@@ -3,12 +3,16 @@
 
 
 
-#define STRESS_M 1.0
-#define STRESS_C 1.0
+#include "run.h"
 
 
 
-double read_loadcell();
+#define CLOCK_PIN	31
+#define DATA_PIN	30
+
+
+
+double read_loadcell(struct run_data *rd);
 
 
 
