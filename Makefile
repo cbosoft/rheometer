@@ -31,8 +31,8 @@ obj/%.o: src/%.c
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) -shared -o $@ $< -lpthread
-	sudo cp -n wpi/libwiringPi.so /usr/lib/.
-	sudo cp -n wpi/wiringPi.h /usr/include/.
+	sudo cp wpi/libwiringPi.so /usr/lib/.
+	sudo cp wpi/wiringPi.h /usr/include/.
 
 clean:
 	rm -rf obj/*.o rheometer wpi/*.so
