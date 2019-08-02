@@ -14,13 +14,13 @@
 #include "adc.h"
 #include "run.h"
 #include "util.h"
+#include "error.h"
 
 
 
 
 unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
 {
-#ifndef DEBUG
   int ret;
   uint8_t tx[] = {
     4 + (channel>>2), (channel&3)<<6, 0
@@ -47,9 +47,6 @@ unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
   }
 
   return total;
-#else
-  return 314;
-#endif
 }
 
 
@@ -57,12 +54,17 @@ unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
 
 struct adc_handle *adc_open(const char *device)
 {
-#ifndef DEBUG
+
+#ifdef DEBUG
+  int fd = open("/dev/null", O_RDWR);
+#else
   int fd = open(device, O_RDWR);
+#endif
+
   if (fd < 0)
     ferr("adc_open", "could not open spi device");
 
-  adc_handle_t *h = malloc(sizeof(adc_handle_t));
+  struct adc_handle *h = malloc(sizeof(struct adc_handle));
 
   h->device = device;
   h->fd = fd;
@@ -73,10 +75,6 @@ struct adc_handle *adc_open(const char *device)
   h->bits = 8;
 
   return h;
-#else
-  struct adc_handle *h = malloc(sizeof(struct adc_handle));
-  return h;
-#endif
 }
 
 
@@ -84,9 +82,7 @@ struct adc_handle *adc_open(const char *device)
 void
 adc_close(struct adc_handle *h)
 {
-#ifndef DEBUG
   close(h->fd);
-#endif
   free(h);
 }
 
