@@ -1,30 +1,31 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
 LINK = -lwiringPi -lpthread -lm
-HDR = src/rheo.h
 RHEO = obj/adc.o \
 			 obj/args.o \
 			 obj/cJSON.o \
 			 obj/control.o \
 			 obj/display.o \
 			 obj/error.o \
+			 obj/json.o \
 			 obj/log.o \
 			 obj/main.o \
 			 obj/motor.o \
 			 obj/opt.o \
 			 obj/tar.o \
-			 obj/thread.o
+			 obj/thread.o \
+			 obj/util.o
 WPI = wpi/libwiringPi.so
 
 
-rheometer: $(RHEO) $(HDR)
+rheometer: $(RHEO)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
-debug: $(WPI) $(RHEO) $(HDR)
+debug: $(WPI) $(RHEO)
 	$(CC) $(CFLAGS) $(RHEO) -o rheometer $(LINK)
 	touch debug
 
-obj/%.o: src/%.c $(HDR)
+obj/%.o: src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@ $(LINK)
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
