@@ -104,8 +104,7 @@ calculate_control_indicators(struct run_data *rd)
   float strainrate_invs = speed_hz * PI * 2.0 * RI / (RO - RI);
   rd->strainrate_ind = strainrate_invs;
 
-  float torque_Nm = STRESS_M * rd->load_cell + STRESS_C;
-  float stress_Pa = torque_Nm / (2.0 * PI * RI * RI * rd->fill_depth);
+  float stress_Pa = rd->loadcell_units / (2.0 * PI * RI * RI * rd->fill_depth);
   rd->stress_ind = stress_Pa;
 
   rd->viscosity_ind = stress_Pa / strainrate_invs;
@@ -117,7 +116,6 @@ calculate_control_indicators(struct run_data *rd)
 unsigned int
 pid_control(struct run_data *rd)
 {
-  // TODO
 
   float dca = 0.0;
   float input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
