@@ -1,10 +1,4 @@
-#define _POSIX_C_SOURCE 199309L
 #include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <time.h>
-#include <glob.h>
-#include <sys/time.h>
 
 #include "run.h"
 #include "util.h"
@@ -39,42 +33,6 @@ struct run_data *init_run_data()
 
   rd->error_string = "all is well";
   return rd;
-}
-
-
-
-
-void setup_run_data(struct run_data *rd)
-{
-  const char *log_dir = "logs";
-  const char *genpref = "rpir";
-
-  char *date = calloc(15, sizeof(char));
-  time_t rawtime;
-  struct tm *timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  strftime(date, 50, "%Y-%m-%d", timeinfo);
-
-  char *pattern = calloc(256, sizeof(char));
-  sprintf(pattern, "%s/%s_%s(*)_%s_%s.csv", log_dir, genpref, date, rd->control_scheme, rd->tag);
-
-  glob_t glob_res;
-  glob((const char *)pattern, GLOB_NOSORT, NULL, &glob_res);
-  free(pattern);
-
-  char *log_pref = calloc(256, sizeof(char));
-  sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->control_scheme, rd->tag);
-  rd->log_pref = log_pref;
-  rd->log_paths = calloc(10, sizeof(char *));
-  rd->log_count = 0;
-
-  struct timeval tv;
-  gettimeofday(&tv, 0);
-  rd->start_time_s = tv.tv_sec;
-  rd->start_time_us = tv.tv_usec;
-
-  free(date);
 }
 
 
