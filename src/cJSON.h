@@ -283,3 +283,5 @@ CJSON_PUBLIC(void) cJSON_free(void *object);
 #endif
 
 #endif
+
+// vim: ft=c

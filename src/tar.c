@@ -3,10 +3,16 @@
 
 #include <wiringPi.h>
 
-#include "rheo.h"
 
-char *
-escape_parens(char *cmd)
+
+
+#include "tar.h"
+#include "error.h"
+
+
+
+
+char *escape_parens(char *cmd)
 {
   unsigned int cmdlen = strlen(cmd);
   char *rv = calloc(cmdlen*2, sizeof(char));
@@ -22,13 +28,15 @@ escape_parens(char *cmd)
   return rv;
 }
 
-void
-tidy_logs(thread_data_t *td) 
+
+
+
+void tidy_logs(struct run_data *rd) 
 {
   unsigned int cmdlen = 0;
   cmdlen += 8; // "tar cjf "
-  for (unsigned int i = 0; i < td->log_count; i++)
-    cmdlen += (td->log_paths[i] == NULL) ? 0 : strlen(td->log_paths[i]) + 1;
+  for (unsigned int i = 0; i < rd->log_count; i++)
+    cmdlen += (rd->log_paths[i] == NULL) ? 0 : strlen(rd->log_paths[i]) + 1;
   cmdlen += 8; // ".tar.bz2"
   cmdlen += 1; // " "
   cmdlen += 1; // "\0"
@@ -36,16 +44,16 @@ tidy_logs(thread_data_t *td)
 
   char  *tar_cmd = calloc(cmdlen, sizeof(char));
   strcat(tar_cmd, "tar cjf ");
-  strcat(tar_cmd, td->log_pref);
+  strcat(tar_cmd, rd->log_pref);
   strcat(tar_cmd, ".tar.bz2");
 
-  for (unsigned int i = 0; i < td->log_count; i++) {
-    if (td->log_paths[i] == NULL) {
+  for (unsigned int i = 0; i < rd->log_count; i++) {
+    if (rd->log_paths[i] == NULL) {
       warn("tidy_logs", "log path %u is NULL, skipping.", i);
       continue;
     }
     strcat(tar_cmd, " ");
-    strcat(tar_cmd, td->log_paths[i]);
+    strcat(tar_cmd, rd->log_paths[i]);
   }
 
   char *tar_cmd_escaped = escape_parens(tar_cmd);
@@ -56,4 +64,5 @@ tidy_logs(thread_data_t *td)
   if (rv == -1) {
     ferr("tidy_logs", "error when tidying logs");
   } // TODO: what about other rvs?
+
 }

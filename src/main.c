@@ -8,10 +8,25 @@
 
 #include <wiringPi.h>
 
-#include "rheo.h"
+#include "run.h"
+#include "args.h"
+#include "error.h"
+#include "motor.h"
+#include "opt.h"
+#include "control.h"
+#include "log.h"
+#include "adc.h"
+#include "util.h"
+#include "tar.h"
+#include "display.h"
+
+
 
 
 static unsigned int cancelled = 0;
+
+
+
 
 void 
 inthandle(int signo)
@@ -23,19 +38,21 @@ inthandle(int signo)
 }
 
 
+
+
 int
 main (int argc, const char ** argv)
 {
-  thread_data_t *td = create_thread_data();
+  struct run_data *rd = init_run_data();
 
-  parse_args((unsigned int)argc, argv, td);
+  parse_args((unsigned int)argc, argv, rd);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("main", "could not create signal handler");
 
-  init(td);
+  setup_run_data(rd);
 
-  td->adc_handle = adc_open("/dev/spidev0.1");
+  rd->adc_handle = adc_open("/dev/spidev0.1");
   info("connected to ADC");
 
   if (wiringPiSetupGpio() == -1)
@@ -43,13 +60,13 @@ main (int argc, const char ** argv)
   info("setup gpio");
 
   // This is tentatively working now. It seems to need the unexporting at the end, or the interrupts won't work.
-  opt_setup(td);
+  opt_setup(rd);
   pinMode(16, INPUT);
   pinMode(20, INPUT);
   pinMode(21, INPUT);
-  void opt_trip_16(void) { opt_mark(td, 0); }
-  void opt_trip_20(void) { opt_mark(td, 1); }
-  void opt_trip_21(void) { opt_mark(td, 2); }
+  void opt_trip_16(void) { opt_mark(rd, 0); }
+  void opt_trip_20(void) { opt_mark(rd, 1); }
+  void opt_trip_21(void) { opt_mark(rd, 2); }
   if (wiringPiISR(16, INT_EDGE_BOTH, &opt_trip_16) < 0) ferr("main", "failed to set up GPIO interrupt");
   if (wiringPiISR(20, INT_EDGE_BOTH, &opt_trip_20) < 0) ferr("main", "failed to set up GPIO interrupt");
   if (wiringPiISR(21, INT_EDGE_BOTH, &opt_trip_21) < 0) ferr("main", "failed to set up GPIO interrupt");
@@ -69,32 +86,32 @@ main (int argc, const char ** argv)
 
   info("starting threads...");
   pthread_t adc_thread;
-  if (pthread_create(&adc_thread, NULL, adc_thread_func, td))
+  if (pthread_create(&adc_thread, NULL, adc_thread_func, rd))
     ferr("main", "could not create adc thread");
-  while (!td->adc_ready) nsleep(100);
+  while (!rd->adc_ready) rh_nsleep(100);
   info("  adc ready!");
 
   pthread_t ctl_thread;
-  if (pthread_create(&ctl_thread, NULL, ctl_thread_func, td))
+  if (pthread_create(&ctl_thread, NULL, ctl_thread_func, rd))
     ferr("main", "could not create adc thread");
-  while (!td->ctl_ready) nsleep(100);
+  while (!rd->ctl_ready) rh_nsleep(100);
   info("  controller ready!");
 
   pthread_t log_thread;
-  if (pthread_create(&log_thread, NULL, log_thread_func, td))
+  if (pthread_create(&log_thread, NULL, log_thread_func, rd))
     ferr("main", "could not create log thread");
-  while (!td->log_ready) nsleep(100);
+  while (!rd->log_ready) rh_nsleep(100);
   info("  logger ready!");
 
   info("begin!");
   unsigned int tish = 0;
-  while ( (!cancelled) && (tish <= td->length_s) ) {
+  while ( (!cancelled) && (tish <= rd->length_s) ) {
     sleep(1);
     tish ++;
-    display_thread_data(td);
+    display_thread_data(rd);
     display_titles();
   }
-  td->stopped = 1;
+  rd->stopped = 1;
   fprintf(stderr, "\n");
 
 #ifndef DEBUG
@@ -103,10 +120,6 @@ main (int argc, const char ** argv)
   system("gpio unexport 21");
   info("optenc stopped");
 #endif
-
-  for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
-    fclose(td->opt_log_fps[i]);
-  }
 
   motor_shutdown();
   info("motor off");
@@ -129,19 +142,19 @@ main (int argc, const char ** argv)
     ferr("main", "adc thread could not rejoin");
   else
     info("  adc done");
-  
+
   // if (pthread_join(tmp_thread, NULL))
   //   ferr("thermometer thread could not rejoin");
   // else
   //   info("  thermometer done");
-  
+
   info("cleaning up...");
-  save_run_params_to_json(td);
+  save_run_params_to_json(rd);
   info("  params written");
-  tidy_logs(td);
-  info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, td->log_pref);
-  //free_thread_data(td);
-  //info("  data free'd");
+  tidy_logs(rd);
+  info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, rd->log_pref);
+  free_run_data(rd);
+  info("  data free'd");
   info("done!");
   return 0;
 }

@@ -8,20 +8,24 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+
 #include <wiringPi.h>
 
-#include "rheo.h"
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#include "adc.h"
+#include "run.h"
+#include "util.h"
 
-unsigned int
-read_adc_value(adc_handle_t *h, unsigned int channel)
+
+
+
+unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
 {
 #ifndef DEBUG
   int ret;
   uint8_t tx[] = {
     4 + (channel>>2), (channel&3)<<6, 0
   };
-  unsigned int L = ARRAY_SIZE(tx);
+  unsigned int L = sizeof(tx)/sizeof(tx[0]);
   uint8_t rx[] = {0, 0, 0};
 
   struct spi_ioc_transfer tr = {
@@ -50,8 +54,8 @@ read_adc_value(adc_handle_t *h, unsigned int channel)
 
 
 
-adc_handle_t *
-adc_open(const char *device)
+
+struct adc_handle *adc_open(const char *device)
 {
 #ifndef DEBUG
   int fd = open(device, O_RDWR);
@@ -70,7 +74,7 @@ adc_open(const char *device)
 
   return h;
 #else
-  adc_handle_t *h = malloc(sizeof(adc_handle_t));
+  struct adc_handle *h = malloc(sizeof(struct adc_handle));
   return h;
 #endif
 }
@@ -78,7 +82,7 @@ adc_open(const char *device)
 
 
 void
-adc_close(adc_handle_t *h)
+adc_close(struct adc_handle *h)
 {
 #ifndef DEBUG
   close(h->fd);
@@ -89,31 +93,30 @@ adc_close(adc_handle_t *h)
 
 
 
-void *
-adc_thread_func(void *vtd) {
-  thread_data_t *td = (thread_data_t *)vtd;
-  
+void *adc_thread_func(void *vptr) {
+
+  struct run_data *rd = (struct run_data *)vptr;
+
   unsigned long *adc, *padc;
 
-  td->adc_ready = 1;
-  while ( (!td->stopped) && (!td->errored) ) {
+  rd->adc_ready = 1;
+  while ( (!rd->stopped) && (!rd->errored) ) {
     
     adc = malloc(ADC_COUNT*sizeof(unsigned long));
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-      adc[channel] = read_adc_value(td->adc_handle, channel);
+      adc[channel] = read_adc_value(rd->adc_handle, channel);
     }
     
-    padc = td->adc;
-    td->adc = adc;
+    padc = rd->adc;
+    rd->adc = adc;
 
     free(padc);
 
-    nsleep(10000);
+    rh_usleep(10);
 
   }
 
   pthread_exit(0);
-
 
   return NULL;
 }

@@ -4,7 +4,12 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "rheo.h"
+#include "error.h"
+#include "display.h"
+#include "args.h"
+
+
+
 
 void
 ferr (const char* source, const char* fmt, ...)

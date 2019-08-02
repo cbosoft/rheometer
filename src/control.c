@@ -7,11 +7,23 @@
 
 #include <wiringPi.h>
 
-#include "rheo.h"
+#include "control.h"
+#include "display.h"
 #include "cJSON.h"
+#include "error.h"
+#include "opt.h"
+#include "motor.h"
+#include "util.h"
+#include "io.h"
+#include "geometry.h"
+#include "loadcell.h"
+
+
+
 
 #define PARAM_REQ 0
 #define PARAM_OPT 1
+#define PI 3.1415926
 
 #define STREQ(A,B) (strcmp(A, B) == 0)
 
@@ -64,16 +76,16 @@ control_help(void)
 
 
 void
-calculate_control_indicators(thread_data_t *td) 
+calculate_control_indicators(struct run_data *rd) 
 {
   float dt_tot = 0.0;
   unsigned int count = 0;
   for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
     for (unsigned int j = 1; j < SPD_HIST; j++, count++) {
-      if (td->ptimes[i][j] == 0)
+      if (rd->ptimes[i][j] == 0)
         break;
       // ptimes... low index is newest
-      dt_tot += td->ptimes[i][j-1] - td->ptimes[i][j];
+      dt_tot += rd->ptimes[i][j-1] - rd->ptimes[i][j];
     }
   }
 
@@ -88,82 +100,82 @@ calculate_control_indicators(thread_data_t *td)
 #endif
 
   float speed_hz = ((1.0/6.0) / dt_av); // rotations per second
-  td->speed_ind = speed_hz;
+  rd->speed_ind = speed_hz;
 
   float strainrate_invs = speed_hz * PI * 2.0 * RI / (RO - RI);
-  td->strainrate_ind = strainrate_invs;
+  rd->strainrate_ind = strainrate_invs;
 
-  float torque_Nm = STRESS_M * td->adc[TSTS_CHANNEL] + STRESS_C;
-  float stress_Pa = torque_Nm / (2.0 * PI * RI * RI * td->fill_depth);
-  td->stress_ind = stress_Pa;
+  float torque_Nm = STRESS_M * rd->load_cell + STRESS_C;
+  float stress_Pa = torque_Nm / (2.0 * PI * RI * RI * rd->fill_depth);
+  rd->stress_ind = stress_Pa;
 
-  td->viscosity_ind = stress_Pa / strainrate_invs;
+  rd->viscosity_ind = stress_Pa / strainrate_invs;
 }
 
 
 
 
 unsigned int
-pid_control(thread_data_t *td)
+pid_control(struct run_data *rd)
 {
   // TODO
 
   float dca = 0.0;
-  float input = (td->control_params->is_stress_controlled) ? td->stress_ind : td->strainrate_ind;
-  float err = td->control_params->set_point - input;
+  float input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
+  float err = rd->control_params->set_point - input;
   
   // Proportional control
-  dca += td->control_params->kp * err;
+  dca += rd->control_params->kp * err;
 
   // Integral control
   for (unsigned int i = 0; i < ERR_HIST; i++) {
-    if (td->errhist[i] == 0)
+    if (rd->errhist[i] == 0)
       break;
-    dca += td->errhist[i] * td->control_params->ki;
+    dca += rd->errhist[i] * rd->control_params->ki;
   }
   
   // Add error to history
   float *errhist = calloc(ERR_HIST, sizeof(float)), *tmp;
   errhist[0] = err;
   for (unsigned int i = 0; i < ERR_HIST; i++) {
-    errhist[i+1] = td->errhist[i];
+    errhist[i+1] = rd->errhist[i];
   }
-  tmp = td->errhist;
-  td->errhist = errhist;
+  tmp = rd->errhist;
+  rd->errhist = errhist;
   free(tmp);
 
   // Derivative control
   // TODO
 
-  return (unsigned int)(dca + td->last_ca);
+  return (unsigned int)(dca + rd->last_ca);
 }
 
 
 
 
 unsigned int
-constant_control(thread_data_t *td)
+constant_control(struct run_data *rd)
 {
-  return (unsigned int)(td->control_params->c);
+  return (unsigned int)(rd->control_params->c);
 }
 
 
 
 unsigned int
-sine_control(thread_data_t *td)
+sine_control(struct run_data *rd)
 {
-  double theta = 2.0 * PI * td->time_s_f / td->control_params->period;
-  double rv = ( (sin(theta) + 1.0) * (double)td->control_params->magnitude ) + td->control_params->magnitude;
+  double theta = 2.0 * PI * rd->time_s_f / rd->control_params->period;
+  double rv = ( (sin(theta) + 1.0) * (double)rd->control_params->magnitude ) + rd->control_params->magnitude;
   return (unsigned int)rv;
 }
 
 
 
 unsigned int
-bistable_control(thread_data_t *td)
+bistable_control(struct run_data *rd)
 {
-  unsigned int periods_passed = (unsigned int)(td->time_s_f / td->control_params->period);
-  return periods_passed % 2 ? td->control_params->upper : td->control_params->lower;
+  unsigned int periods_passed = (unsigned int)(rd->time_s_f / rd->control_params->period);
+  return periods_passed % 2 ? rd->control_params->upper : rd->control_params->lower;
 }
 
 
@@ -207,20 +219,19 @@ ctlfunc_from_int(int i)
 
 
 
-void *
-ctl_thread_func(void *vtd) 
+void *ctl_thread_func(void *vptr)
 {
-  thread_data_t *td = (thread_data_t *)vtd;
+  struct run_data *rd = (struct run_data *)vptr;
   
-  control_func_t ctlfunc = ctlfunc_from_int(ctlidx_from_str(td->control_scheme));
+  control_func_t ctlfunc = ctlfunc_from_int(ctlidx_from_str(rd->control_scheme));
   
-  td->ctl_ready = 1;
+  rd->ctl_ready = 1;
 
-  while ( (!td->stopped) && (!td->errored) ) {
+  while ( (!rd->stopped) && (!rd->errored) ) {
 
-    calculate_control_indicators(td);
+    calculate_control_indicators(rd);
 
-    unsigned int control_action = ctlfunc(td);
+    unsigned int control_action = ctlfunc(rd);
 
     if (control_action > CONTROL_MAXIMUM)
       control_action = CONTROL_MAXIMUM;
@@ -230,9 +241,9 @@ ctl_thread_func(void *vtd)
 
     pwmWrite(PWM_PIN, control_action);
 
-    td->last_ca = control_action;
+    rd->last_ca = control_action;
 
-    nsleep(td->control_params->sleep_ns);
+    rh_nsleep(rd->control_params->sleep_ns);
 
   }
 
@@ -297,7 +308,7 @@ get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemen
 
 
 void
-read_control_scheme(thread_data_t *td, const char *control_scheme_json_path)
+read_control_scheme(struct run_data *rd, const char *control_scheme_json_path)
 {
   cJSON *json = read_json(control_scheme_json_path);
 
@@ -313,11 +324,11 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_json_path)
   cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "name");
   if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
 
-    td->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
-    strcpy(td->control_scheme, control_scheme_name_json->valuestring);
+    rd->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
+    strcpy(rd->control_scheme, control_scheme_name_json->valuestring);
 
-    td->control_scheme = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
-    strcpy(td->control_scheme, control_scheme_json_path);
+    rd->control_scheme = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
+    strcpy(rd->control_scheme, control_scheme_json_path);
 
   }
   else {
@@ -325,13 +336,13 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_json_path)
     ferr("read_control_scheme", "control scheme json must name a scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
   }
   
-  int schemeidx = ctlidx_from_str(td->control_scheme);
+  int schemeidx = ctlidx_from_str(rd->control_scheme);
   if (schemeidx < 0) {
     cJSON_Delete(json);
     ferr("read_control_scheme", "control scheme JSON must name a known scheme. See rheometer -h for a list.");
   }
 
-  control_params_t *params = malloc(sizeof(control_params_t));
+  struct control_params *params = malloc(sizeof(struct control_params));
   params->c = 0.0;
   params->kp = 0.0;
   params->ki = 0.0;
@@ -368,6 +379,6 @@ read_control_scheme(thread_data_t *td, const char *control_scheme_json_path)
 
   cJSON_Delete(json);
 
-  td->control_params = params;
+  rd->control_params = params;
 
 }
