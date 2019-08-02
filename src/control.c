@@ -9,12 +9,11 @@
 
 #include "control.h"
 #include "display.h"
-#include "cJSON.h"
 #include "error.h"
 #include "opt.h"
 #include "motor.h"
 #include "util.h"
-#include "io.h"
+#include "json.h"
 #include "geometry.h"
 #include "loadcell.h"
 
