@@ -2,7 +2,8 @@
 
 
 struct run_data {
-// {{{
+  // {{{
+
   // actual data
   unsigned long *time_s;
   unsigned long *time_us;
@@ -10,7 +11,8 @@ struct run_data {
   unsigned long start_time_us;
   double time_s_f;
   unsigned long *adc;
-  unsigned long load_cell;
+  unsigned long loadcell_bytes;
+  double loadcell_units;
   float *temperature;
   
   // process control stuff
@@ -46,14 +48,14 @@ struct run_data {
   unsigned int stopped;
   unsigned int errored;
   const char *error_string;
-// }}}
+
+  // }}}
 };
 
 
 
 
 struct run_data *init_run_data();
-void setup_run_data(struct run_data *rd);
 void free_run_data(struct run_data *td);
 
 
