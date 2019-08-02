@@ -50,7 +50,7 @@ main (int argc, const char ** argv)
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("main", "could not create signal handler");
 
-  setup_run_data(rd);
+  generate_log_prefix(rd);
 
   rd->adc_handle = adc_open("/dev/spidev0.1");
   info("connected to ADC");
