@@ -22,8 +22,9 @@ WPI = wpi/libwiringPi.so
 rheometer: $(RHEO)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
-debug: $(WPI) $(RHEO)
-	$(CC) $(CFLAGS) $(RHEO) -o rheometer $(LINK)
+wpi: $(WPI)
+
+debug: wpi rheometer
 	touch debug
 
 obj/%.o: src/%.c
