@@ -178,7 +178,6 @@ void *log_thread_func(void *vptr) {
     fprintf(log_fp, "%u,", rd->last_ca);
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%f\n", read_loadcell(rd));
-    //TODO read speed/strainrate
 
     rh_usleep(900);
   }
