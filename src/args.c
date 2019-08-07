@@ -98,7 +98,7 @@ char *
 parse_tag_string(const char *s) 
 {
   unsigned int l = strlen(s);
-  char *rv = calloc(l, sizeof(char));
+  char *rv = calloc(l+1, sizeof(char));
   for (unsigned int i = 0; i < l; i++) {
     if (s[i] == ' ' || s[i] == '_')
       rv[i] = '-';
