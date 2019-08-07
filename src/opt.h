@@ -12,8 +12,8 @@
 
 
 
-void opt_setup();
-double get_speed(struct run_data *rd);
+void opt_setup(struct run_data *rd);
+double get_speed();
 
 
 
