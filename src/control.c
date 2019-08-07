@@ -180,6 +180,7 @@ bistable_control(struct run_data *rd)
 int
 ctlidx_from_str(const char *s)
 {
+  fprintf(stderr, "CONTROL SCHEME: \"%s\"\n", s);
   if STREQ(s, "constant")
     return CONTROL_CONSTANT;
   else if STREQ(s, "pid")
@@ -322,8 +323,8 @@ read_control_scheme(struct run_data *rd, const char *control_scheme_json_path)
     rd->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
     strcpy(rd->control_scheme, control_scheme_name_json->valuestring);
 
-    rd->control_scheme = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
-    strcpy(rd->control_scheme, control_scheme_json_path);
+    rd->control_scheme_path = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
+    strcpy(rd->control_scheme_path, control_scheme_json_path);
 
   }
   else {
