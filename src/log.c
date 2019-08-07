@@ -157,7 +157,7 @@ void set_time(struct run_data *rd)
 
 
 
-void * log_thread_func(void *vptr) {
+void *log_thread_func(void *vptr) {
 
   struct run_data *rd = (struct run_data *)vptr;
 
@@ -175,9 +175,10 @@ void * log_thread_func(void *vptr) {
     fprintf(log_fp, "%lu.%06lu,", (*rd->time_s), (*rd->time_us));
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
       fprintf(log_fp, "%lu,", rd->adc[channel]);
-    fprintf(log_fp, "%u", rd->last_ca);
+    fprintf(log_fp, "%u,", rd->last_ca);
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%f\n", read_loadcell(rd));
+    //TODO read speed/strainrate
 
     rh_usleep(900);
   }
