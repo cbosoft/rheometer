@@ -77,7 +77,9 @@ void loadcell_reset()
 
 unsigned long loadcell_read_bytes()
 {
-	unsigned long count =0;
+	unsigned long count = 0;
+
+  set_gain(CHA_64);
 
   while(digitalRead(DATA_PIN));
 
