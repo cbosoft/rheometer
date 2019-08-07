@@ -1,71 +1,106 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <time.h>
+#include <pthread.h>
+#include <sys/time.h>
 
 #include <wiringPi.h>
 
 #include "opt.h"
+#include "control.h"
 #include "error.h"
 
-void opt_mark(unsigned int i);
-
-#define OPT_TRIP(PIN) opt_trip_ ## PIN
-#define SETUP_OPT_PIN(PIN, I) \
-  pinMode(PIN, INPUT); \
-  if (wiringPiISR(PIN, INT_EDGE_BOTH, &(OPT_TRIP(PIN))) < 0) \
-    ferr("opt_setup", "failed to set up interrupt for pin %d", PIN); \
 
 
-void opt_trip_20(void)
+#define OPT_MARK(IDX) opt_mark_ ## IDX
+#define OPT_SETUP(IDX) \
+  if (wiringPiISR(opt_pins[IDX], INT_EDGE_BOTH, &(OPT_MARK(IDX))) < 0) \
+    ferr("opt_setup", "failed to set up interrupt for pin %d", opt_pins[0]);
+
+
+
+
+// globals required for optenc operation
+static const uint8_t opt_pins[OPTENC_COUNT] = {20, 21};
+struct run_data *ord = NULL;
+
+void opt_mark(struct run_data *rd, unsigned int i);
+void opt_mark_0(void) { opt_mark(ord, 0); }
+void opt_mark_1(void) { opt_mark(ord, 1); }
+
+unsigned int tripc[OPTENC_COUNT] = {0};
+time_t last_convert = {0};
+double last_speed = 0.0;
+
+
+
+
+void opt_setup(struct run_data *rd)
 {
-  opt_mark(0);
+  ord = rd;
+  for (uint8_t i = 0; i < OPTENC_COUNT; i++) {
+
+    rd->log_paths[i+1] = calloc(265, sizeof(char));
+    sprintf(rd->log_paths[i+1], "%s_opt%d-combined.csv", rd->log_pref, opt_pins[i]);
+
+    // Create empty log file for appending to later
+    FILE *fp = fopen(rd->log_paths[i+1], "w");
+    fclose(fp);
+
+    rd->log_count ++;
+    pinMode(opt_pins[i], INPUT);
+
+  }
+  OPT_SETUP(0);
+  OPT_SETUP(1);
 }
 
-void opt_trip_21(void)
+
+
+
+void opt_mark(struct run_data *rd, unsigned int i)
 {
-  opt_mark(1);
-}
+  if (rd->stopped)
+    pthread_exit(0);
 
-const int opt_pins[OPTENC_COUNT] = {20, 21}; // TODO reduce to only the two that are actually used
-volatile unsigned long long tripc[OPTENC_COUNT] = {0};
-time_t time_last[OPTENC_COUNT] = {0};
+  struct timeval tv;
+  gettimeofday(&tv, 0);
+  FILE *fp = fopen(rd->log_paths[i+1], "a");
+  fprintf(fp, "%lu.06%lu\n", tv.tv_sec, tv.tv_usec);
+  fflush(fp);
+  fclose(fp);
 
-
-
-void opt_setup()
-{
-  SETUP_OPT_PIN(20, 0);
-  SETUP_OPT_PIN(21, 1);
-}
-
-
-
-
-void opt_mark(unsigned int i)
-{
   tripc[i] ++;
-  //fprintf(stderr, "!!");
+
 }
 
 
 
 
-double get_speed(struct run_data *rd)
+double get_speed()
 {
   time_t now = time(NULL);
-  double speed = 0.0;
+  double dt = difftime(now, last_convert);
 
-  unsigned long long local_tripc[OPTENC_COUNT];
-  for (int i = 0; i < OPTENC_COUNT; i++) { local_tripc[i] = tripc[i]; tripc[i] = 0; }
-  for (int i = 0; i < OPTENC_COUNT; i++) {
-    double dt = difftime(now, time_last[i]);
-    double dtripc = (double)local_tripc[i];
-    //fprintf(stderr, "TRIPC: %llu\n DT: %f DTRIP: %f\n", local_tripc[i], dt, dtripc);
-    time_last[i] = now;
-    speed += dtripc / dt;
+  if (dt > 1.0) {
+    last_convert = now;
+    int count = 0;
+    for (int i = 0; i < OPTENC_COUNT; i++) {
+
+#ifdef DEBUG
+      count += 3;
+#else
+      count += tripc[i];
+      tripc[i] = 0;
+#endif
+
+    }
+
+    double dtripc = ((double)count) / ((double)OPTENC_COUNT);
+    last_speed = dtripc / (12.0 * dt); // returns speed in hz (rev. per second)
+
   }
-  speed /= (double)OPTENC_COUNT; // units of trips per second
-  speed /= 12.0; // units of rev per second
-  //speed *= 3.1415926 * 2.0; // units of rad/s
-  return speed;
+
+  return last_speed;
 }
