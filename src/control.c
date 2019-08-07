@@ -77,25 +77,11 @@ control_help(void)
 void
 calculate_control_indicators(struct run_data *rd) 
 {
-  float dt_tot = 0.0;
-  unsigned int count = 0;
-  for (unsigned int i = 0; i < OPTENC_COUNT; i++) {
-    for (unsigned int j = 1; j < SPD_HIST; j++, count++) {
-      if (rd->ptimes[i][j] == 0)
-        break;
-      // ptimes... low index is newest
-      dt_tot += rd->ptimes[i][j-1] - rd->ptimes[i][j];
-    }
-  }
 
 #ifndef DEBUG
-
-  if (count == 0)
-    warn("calculate_control_indicators", "speed requested but no optenc events have been recorded.");
-
-  float dt_av = dt_tot / ((float)count);
+  float dt_av = get_speed(rd);
 #else
-  float dt_av = (count == 0) ? 0.01 : dt_tot / ((float)count);
+  float dt_av = 3.14;
 #endif
 
   float speed_hz = ((1.0/6.0) / dt_av); // rotations per second
@@ -239,7 +225,8 @@ void *ctl_thread_func(void *vptr)
 
     rd->last_ca = control_action;
 
-    rh_nsleep(rd->control_params->sleep_ns);
+    //rh_nsleep(rd->control_params->sleep_ns);
+    sleep(1);
 
   }
 
