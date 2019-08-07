@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -13,6 +14,7 @@
 #include "args.h"
 #include "error.h"
 #include "motor.h"
+#include "loadcell.h"
 #include "opt.h"
 #include "control.h"
 #include "log.h"
@@ -51,11 +53,11 @@ main (int argc, const char ** argv)
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("main", "could not create signal handler");
 
-  struct sched_param sched = {0};
-  sched.sched_priority = sched_get_priority_max(SCHED_RR);
-  if (sched_setscheduler(0, SCHED_RR, &sched) == -1) {
-    ferr("main", "Error setting high priority.");
-  }
+  // struct sched_param sched = {0};
+  // sched.sched_priority = sched_get_priority_max(SCHED_RR);
+  // if (sched_setscheduler(0, SCHED_RR, &sched) == -1) {
+  //   ferr("main", "Error setting high priority.");
+  // }
 
   generate_log_prefix(rd);
 
@@ -71,6 +73,9 @@ main (int argc, const char ** argv)
 
   opt_setup(rd);
   info("set up optical encoder");
+
+  loadcell_setup();
+  info("set up loadcell");
 
   // pthread_t tmp_thread;
   // if (pthread_create(&tmp_thread, NULL, tmp_thread_func, td))
@@ -89,18 +94,21 @@ main (int argc, const char ** argv)
   if (pthread_create(&adc_thread, NULL, adc_thread_func, rd))
     ferr("main", "could not create adc thread");
   while (!rd->adc_ready) rh_nsleep(100);
+  pthread_setname_np(adc_thread, "ADC");
   info("  adc ready!");
 
   pthread_t ctl_thread;
   if (pthread_create(&ctl_thread, NULL, ctl_thread_func, rd))
     ferr("main", "could not create adc thread");
   while (!rd->ctl_ready) rh_nsleep(100);
+  pthread_setname_np(ctl_thread, "ctl");
   info("  controller ready!");
 
   pthread_t log_thread;
   if (pthread_create(&log_thread, NULL, log_thread_func, rd))
     ferr("main", "could not create log thread");
   while (!rd->log_ready) rh_nsleep(100);
+  pthread_setname_np(log_thread, "log");
   info("  logger ready!");
 
   info("begin!");
