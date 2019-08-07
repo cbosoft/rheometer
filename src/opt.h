@@ -8,12 +8,11 @@
 
 
 
-#define OPTENC_COUNT 3
+#define OPTENC_COUNT 2
 
 
 
-void opt_setup(struct run_data *rd);
-void opt_mark(struct run_data *rd, unsigned int i);
+void opt_setup();
 double get_speed(struct run_data *rd);
 
 
