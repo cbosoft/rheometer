@@ -39,7 +39,7 @@ get_column_width(void)
 char *
 centre(char *s, unsigned int w)
 {
-  char *rv = calloc(w+1, sizeof(char));
+  char *rv = calloc(w+3, sizeof(char));
   char padchar = ' ';
   
   unsigned int l = strlen(s);
