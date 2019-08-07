@@ -53,12 +53,6 @@ main (int argc, const char ** argv)
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("main", "could not create signal handler");
 
-  // struct sched_param sched = {0};
-  // sched.sched_priority = sched_get_priority_max(SCHED_RR);
-  // if (sched_setscheduler(0, SCHED_RR, &sched) == -1) {
-  //   ferr("main", "Error setting high priority.");
-  // }
-
   generate_log_prefix(rd);
 
   rd->adc_handle = adc_open("/dev/spidev0.1");
