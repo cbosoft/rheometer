@@ -78,11 +78,7 @@ void
 calculate_control_indicators(struct run_data *rd) 
 {
 
-#ifndef DEBUG
-  float dt_av = get_speed(rd);
-#else
-  float dt_av = 3.14;
-#endif
+  float dt_av = get_speed();
 
   float speed_hz = ((1.0/6.0) / dt_av); // rotations per second
   rd->speed_ind = speed_hz;
