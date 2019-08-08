@@ -49,7 +49,7 @@ void tidy_logs(struct run_data *rd)
 
   for (unsigned int i = 0; i < rd->log_count; i++) {
     if (rd->log_paths[i] == NULL) {
-      warn("tidy_logs", "log path %u is NULL, skipping.", i);
+      warn("tidy_logs", "log path \"%s\" is NULL, skipping.", rd->log_names[i]);
       continue;
     }
     strcat(tar_cmd, " ");
