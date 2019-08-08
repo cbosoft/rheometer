@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <time.h>
 #include <pthread.h>
 #include <sys/time.h>
@@ -41,10 +42,11 @@ int opt_log_idxs[OPTENC_COUNT] = {0};
 void opt_setup(struct run_data *rd)
 {
   ord = rd;
+  char logname[10] = {0};
   for (uint8_t i = 0; i < OPTENC_COUNT; i++) {
 
-    rd->log_paths[i+1] = calloc(265, sizeof(char));
-    opt_log_idxs[i] = add_log(rd, "%s_opt%d-combined.csv", rd->log_pref, opt_pins[i]);
+    snprintf(logname, 10, "opt-%d", i);
+    opt_log_idxs[i] = add_log(rd, logname, "%s_opt%d-combined.csv", rd->log_pref, opt_pins[i]);
 
     // Create empty log file for appending to later
     FILE *fp = fopen(rd->log_paths[opt_log_idxs[i]], "w");
@@ -55,6 +57,8 @@ void opt_setup(struct run_data *rd)
   }
   OPT_SETUP(0);
   OPT_SETUP(1);
+  last_convert = time(NULL);
+  sleep(1);
 }
 
 
