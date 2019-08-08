@@ -24,7 +24,7 @@ void thermometer_setup()
   glob("/sys/bus/w1/devices/28-*", GLOB_NOSORT, NULL, &g);
   
   devices = malloc(g.gl_pathc * sizeof(char*));
-  for (int i = 0; i < g.gl_pathc; i++) {
+  for (int i = 0; i < (int)g.gl_pathc; i++) {
     devices[i] = calloc(strlen(g.gl_pathv[i]) + 1, sizeof(char));
     strcpy(devices[i], g.gl_pathv[i]);
   }
