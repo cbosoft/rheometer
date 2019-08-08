@@ -49,8 +49,6 @@ void generate_log_prefix(struct run_data *rd)
   char *log_pref = calloc(256, sizeof(char));
   sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->control_scheme, rd->tag);
   rd->log_pref = log_pref;
-  rd->log_paths = calloc(10, sizeof(char *));
-  rd->log_count = 0;
 
   free(date);
 
@@ -101,16 +99,19 @@ void save_run_params_to_json(struct run_data *rd)
 
 
 
-void add_log(struct run_data *rd, const char* fmt, ...)
+int add_log(struct run_data *rd, const char* name, const char* fmt, ...)
 {
   if (rd->log_paths == NULL) {
     rd->log_paths = malloc(sizeof(char*));
+    rd->log_names = malloc(sizeof(char*));
   }
   else {
     rd->log_paths = realloc(rd->log_paths, (rd->log_count + 1)*sizeof(char*));
+    rd->log_names = realloc(rd->log_names, (rd->log_count + 1)*sizeof(char*));
   }
 
   rd->log_paths[rd->log_count] = calloc(PATH_MAX, sizeof(char));
+  rd->log_names[rd->log_count] = calloc(strlen(name)+1, sizeof(char));
 
   va_list ap;
 
@@ -118,7 +119,11 @@ void add_log(struct run_data *rd, const char* fmt, ...)
   vsnprintf(rd->log_paths[rd->log_count], PATH_MAX, fmt, ap);
   va_end(ap);
 
+  strcpy(rd->log_names[rd->log_count], name);
+
   rd->log_count ++;
+
+  return rd->log_count - 1;
 }
 
 
@@ -164,10 +169,9 @@ void *log_thread_func(void *vptr) {
   if (rd->log_pref == NULL)
     ferr("log_thread_func", "data must be initialised before logging is started.");
 
-  add_log(rd, "%s.csv", rd->log_pref);
+  int log_idx = add_log(rd, "%s.csv", rd->log_pref);
 
-  FILE *log_fp = fopen(rd->log_paths[0], "w");
-  rd->log_count ++;
+  FILE *log_fp = fopen(rd->log_paths[log_idx], "w");
 
   rd->log_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
