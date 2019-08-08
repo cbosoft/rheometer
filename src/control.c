@@ -78,12 +78,9 @@ void
 calculate_control_indicators(struct run_data *rd) 
 {
 
-  float dt_av = get_speed();
+  rd->speed_ind = get_speed(); // speed in rotations per second (hz)
 
-  float speed_hz = ((1.0/6.0) / dt_av); // rotations per second
-  rd->speed_ind = speed_hz;
-
-  float strainrate_invs = speed_hz * PI * 2.0 * RI / (RO - RI);
+  float strainrate_invs = rd->speed_ind * PI * 2.0 * RI / (RO - RI);
   rd->strainrate_ind = strainrate_invs;
 
   float stress_Pa = rd->loadcell_units / (2.0 * PI * RI * RI * rd->fill_depth);
