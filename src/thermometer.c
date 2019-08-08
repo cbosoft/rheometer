@@ -29,6 +29,9 @@ void thermometer_setup()
 
   glob_t g;
   glob("/sys/bus/w1/devices/28-**/w1_slave", GLOB_NOSORT, NULL, &g);
+
+  if (!g.gl_pathc)
+    return;
   
   devices = malloc(g.gl_pathc * sizeof(char*));
   for (int i = 0; i < (int)g.gl_pathc; i++) {
@@ -121,14 +124,22 @@ void* thermometer_thread_func(void *vptr)
 
   thermometer_setup();
 
-  // don't need to pointer buffer, as main thread will block until done
-  (*rd->temperature) = read_thermometer();
-  
+  rd->temperature = malloc(sizeof(double));
+
+  if (!device_count) {
+    (*rd->temperature) = 0.0;
+    rd->tmp_ready = 1;
+    return NULL;
+  }
+  else {
+    (*rd->temperature) = read_thermometer();
+  }
+
   rd->tmp_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
 
     // pointers are fast to copy. Doubles, not so much.
-    double *reading = malloc(sizeof(float));
+    double *reading = malloc(sizeof(double));
     (*reading) = read_thermometer();
     double *previous = rd->temperature;
     rd->temperature = reading;
