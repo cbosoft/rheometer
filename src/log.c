@@ -167,7 +167,7 @@ void *log_thread_func(void *vptr) {
   if (rd->log_pref == NULL)
     ferr("log_thread_func", "data must be initialised before logging is started.");
 
-  int log_idx = add_log(rd, "%s.csv", rd->log_pref);
+  int log_idx = add_log(rd, "log", "%s.csv", rd->log_pref);
 
   FILE *log_fp = fopen(rd->log_paths[log_idx], "w");
 
@@ -178,7 +178,6 @@ void *log_thread_func(void *vptr) {
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
       fprintf(log_fp, "%lu,", rd->adc[channel]);
     fprintf(log_fp, "%u,", rd->last_ca);
-    (*rd->temperature) = read_thermometer();
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%f\n", read_loadcell(rd));
 
