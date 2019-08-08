@@ -1,4 +1,12 @@
+#pragma once
+
+
+
+
 void thermometer_setup();
-double read_thermometer();
+void *thermometer_thread_func(void *vptr);
+
+
+
 
 // vim: ft=c

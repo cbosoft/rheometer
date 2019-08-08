@@ -5,30 +5,39 @@
 
 #include "thermometer.h"
 #include "error.h"
+#include "run.h"
 
+
+
+// before this is used, you must enable loading of the required modules by the
+// kernel at boot-time.
+//
+// Append 
+//
+// w1-gpio
+// w1-therm
+//
+// to /etc/modules.
 
 
 
 char **devices = NULL;
 int device_count = 0;
 
-
-
-
 void thermometer_setup()
 {
-  system("modprobe w1-gpio");
-  system("modprobe w1-therm");
-  
+
   glob_t g;
-  glob("/sys/bus/w1/devices/28-*", GLOB_NOSORT, NULL, &g);
+  glob("/sys/bus/w1/devices/28-**/w1_slave", GLOB_NOSORT, NULL, &g);
   
   devices = malloc(g.gl_pathc * sizeof(char*));
   for (int i = 0; i < (int)g.gl_pathc; i++) {
     devices[i] = calloc(strlen(g.gl_pathv[i]) + 1, sizeof(char));
     strcpy(devices[i], g.gl_pathv[i]);
+    fprintf(stderr, "    found \"%s\"\n", devices[i]);
   }
   device_count = g.gl_pathc;
+
 
 }
 
@@ -73,10 +82,6 @@ double read_device(char *device_path)
     i++;
   }
   
-  // unless its incredibly cold (unlikely), the temperature should be five digits
-  if (i != 5)
-    warn("read_device", "temperature may not be correct: %s", temp);
-
   fclose(fp);
 
   return atof(temp)*0.001;
@@ -105,4 +110,30 @@ double read_thermometer()
 
   return average;
 
+}
+
+
+
+
+
+void* thermometer_thread_func(void *vptr)
+{
+  struct run_data *rd = (struct run_data *)vptr;
+
+  thermometer_setup();
+
+  // don't need to pointer buffer, as main thread will block until done
+  (*rd->temperature) = read_thermometer();
+  
+  rd->tmp_ready = 1;
+  while (1) {
+
+    // pointers are fast to copy. Doubles, not so much.
+    double *reading = malloc(sizeof(float));
+    (*reading) = read_thermometer();
+    double *previous = rd->temperature;
+    rd->temperature = reading;
+    free(previous);
+
+  }
 }

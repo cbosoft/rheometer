@@ -69,9 +69,6 @@ main (int argc, const char ** argv)
   opt_setup(rd);
   info("set up optical encoder");
 
-  thermometer_setup(rd);
-  info("set up optical encoder");
-
   loadcell_setup();
   info("set up loadcell");
 
@@ -79,6 +76,13 @@ main (int argc, const char ** argv)
   info("warming up motor...");
   motor_warmup(650);
   info("motor ready!");
+
+  pthread_t tmp_thread;
+  if (pthread_create(&tmp_thread, NULL, thermometer_thread_func, rd))
+    ferr("main", "could not create thermometer thread");
+  while (!rd->tmp_ready) rh_nsleep(100);
+  pthread_setname_np(tmp_thread, "temp");
+  info("  thermometer ready!");
 
   info("starting threads...");
   pthread_t adc_thread;
@@ -90,7 +94,7 @@ main (int argc, const char ** argv)
 
   pthread_t ctl_thread;
   if (pthread_create(&ctl_thread, NULL, ctl_thread_func, rd))
-    ferr("main", "could not create adc thread");
+    ferr("main", "could not create control thread");
   while (!rd->ctl_ready) rh_nsleep(100);
   pthread_setname_np(ctl_thread, "ctl");
   info("  controller ready!");

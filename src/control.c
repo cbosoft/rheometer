@@ -78,7 +78,7 @@ void
 calculate_control_indicators(struct run_data *rd) 
 {
 
-  rd->speed_ind = get_speed(); // speed in rotations per second (hz)
+  rd->speed_ind = get_speed(rd); // speed in rotations per second (hz)
 
   float strainrate_invs = rd->speed_ind * PI * 2.0 * RI / (RO - RI);
   rd->strainrate_ind = strainrate_invs;
