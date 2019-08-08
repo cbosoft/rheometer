@@ -33,6 +33,7 @@ struct run_data {
   char *tag;
   char *log_pref;
   char **log_paths;
+  char **log_names;
   unsigned int log_count;
 
   // program control stuff

@@ -22,6 +22,10 @@ struct run_data *init_run_data()
   rd->last_ca = 0;
   rd->errhist = calloc(ERR_HIST, sizeof(float));
 
+  rd->log_paths = NULL;
+  rd->log_names = NULL;
+  rd->log_count = 0;
+
   rd->stopped = 0;
   rd->errored = 0;
   rd->adc_ready = 0;
