@@ -34,7 +34,6 @@ void thermometer_setup()
   for (int i = 0; i < (int)g.gl_pathc; i++) {
     devices[i] = calloc(strlen(g.gl_pathv[i]) + 1, sizeof(char));
     strcpy(devices[i], g.gl_pathv[i]);
-    fprintf(stderr, "    found \"%s\"\n", devices[i]);
   }
   device_count = g.gl_pathc;
 
@@ -126,7 +125,7 @@ void* thermometer_thread_func(void *vptr)
   (*rd->temperature) = read_thermometer();
   
   rd->tmp_ready = 1;
-  while (1) {
+  while ( (!rd->stopped) && (!rd->errored) ) {
 
     // pointers are fast to copy. Doubles, not so much.
     double *reading = malloc(sizeof(float));
@@ -136,4 +135,6 @@ void* thermometer_thread_func(void *vptr)
     free(previous);
 
   }
+
+  return NULL;
 }
