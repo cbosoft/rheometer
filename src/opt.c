@@ -83,12 +83,12 @@ void opt_mark(struct run_data *rd, unsigned int i)
 
 
 
-double get_speed()
+double get_speed(struct run_data *rd)
 {
   time_t now = time(NULL);
   double dt = difftime(now, last_convert);
 
-  if (dt > 1.0) {
+  if (dt > rd->speed_ind_timeout) {
     last_convert = now;
     int count = 0;
     for (int i = 0; i < OPTENC_COUNT; i++) {

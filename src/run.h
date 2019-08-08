@@ -13,14 +13,15 @@ struct run_data {
   unsigned long *adc;
   unsigned long loadcell_bytes;
   double loadcell_units;
-  float *temperature;
+  double *temperature;
   
   // process control stuff
-  float speed_ind;
-  float strainrate_ind;
-  float stress_ind;
-  float viscosity_ind;
-  float **ptimes;
+  double speed_ind;
+  double speed_ind_timeout;
+  double strainrate_ind;
+  double stress_ind;
+  double viscosity_ind;
+  double **ptimes;
   char *control_scheme;
   char *control_scheme_path;
   struct control_params *control_params;
