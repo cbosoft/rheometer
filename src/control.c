@@ -159,7 +159,6 @@ bistable_control(struct run_data *rd)
 int
 ctlidx_from_str(const char *s)
 {
-  fprintf(stderr, "CONTROL SCHEME: \"%s\"\n", s);
   if STREQ(s, "constant")
     return CONTROL_CONSTANT;
   else if STREQ(s, "pid")
