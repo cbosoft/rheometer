@@ -77,6 +77,9 @@ main (int argc, const char ** argv)
   motor_warmup(650);
   info("motor ready!");
 
+
+  info("starting threads...");
+
   pthread_t tmp_thread;
   if (pthread_create(&tmp_thread, NULL, thermometer_thread_func, rd))
     ferr("main", "could not create thermometer thread");
@@ -84,7 +87,6 @@ main (int argc, const char ** argv)
   pthread_setname_np(tmp_thread, "temp");
   info("  thermometer ready!");
 
-  info("starting threads...");
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, rd))
     ferr("main", "could not create adc thread");
@@ -129,6 +131,7 @@ main (int argc, const char ** argv)
 
   if (cancelled)
     warn("main", "received interrupt.");
+
   info("waiting for threads to finish...");
 
   if (pthread_join(log_thread, NULL))
@@ -145,6 +148,11 @@ main (int argc, const char ** argv)
     ferr("main", "adc thread could not rejoin");
   else
     info("  adc done");
+
+  if (pthread_join(tmp_thread, NULL))
+    ferr("main", "temperature thread could not rejoin");
+  else
+    info("  tmp done");
 
   info("cleaning up...");
   save_run_params_to_json(rd);
