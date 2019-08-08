@@ -87,6 +87,8 @@ double read_device(char *device_path)
 
 double read_thermometer()
 {
+  if (!device_count)
+    return -314.0;
 
   double total = 0.0;
 
