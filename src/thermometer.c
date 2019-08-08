@@ -57,10 +57,10 @@ double read_device(char *device_path)
 
 
   int i = 0;
-  char ch = 0;
+  int ch = 0;
 
   // skip past the address, crc, and the second address, to where we have 't'
-  while ((ch = fgetc(fp)) != 't' && ++i < 1000);
+  while ((ch = fgetc(fp)) != (int)'t' && ++i < 1000);
 
   // skip the equals sign
   fgetc(fp);
@@ -69,7 +69,7 @@ double read_device(char *device_path)
   char temp[100] = {0};
   i = 0;
   while ((ch = fgetc(fp)) != EOF) {
-    temp[i] = ch;
+    temp[i] = (char)ch;
     i++;
   }
   
