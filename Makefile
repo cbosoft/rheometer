@@ -15,6 +15,7 @@ RHEO = obj/adc.o \
 			 obj/opt.o \
 			 obj/run.o \
 			 obj/tar.o \
+			 obj/thermometer.o \
 			 obj/util.o
 WPI = wpi/libwiringPi.so
 
