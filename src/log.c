@@ -82,14 +82,11 @@ void save_run_params_to_json(struct run_data *rd)
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
   sprintf(params_path, "%s_runparams.json", rd->log_pref);
-  
+  add_log(rd, "%s", params_path);
+
   FILE *fp = fopen(params_path, "w");
   fprintf(fp, "%s\n", params_json_str);
   fclose(fp);
-  
-  rd->log_paths[rd->log_count] = calloc(256, sizeof(char));
-  strcpy(rd->log_paths[rd->log_count], params_path);
-  rd->log_count ++;
 
   free(params_path);
   free(params_json_str);
