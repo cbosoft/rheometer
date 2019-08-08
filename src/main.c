@@ -22,6 +22,7 @@
 #include "util.h"
 #include "tar.h"
 #include "display.h"
+#include "thermometer.h"
 
 
 
@@ -66,6 +67,9 @@ main (int argc, const char ** argv)
   info("setup gpio");
 
   opt_setup(rd);
+  info("set up optical encoder");
+
+  thermometer_setup(rd);
   info("set up optical encoder");
 
   loadcell_setup();

@@ -16,6 +16,7 @@
 #include "error.h"
 #include "adc.h"
 #include "loadcell.h"
+#include "thermometer.h"
 
 
 #ifndef PATH_MAX
@@ -177,6 +178,7 @@ void *log_thread_func(void *vptr) {
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
       fprintf(log_fp, "%lu,", rd->adc[channel]);
     fprintf(log_fp, "%u,", rd->last_ca);
+    (*rd->temperature) = read_thermometer();
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%f\n", read_loadcell(rd));
 
