@@ -71,13 +71,6 @@ main (int argc, const char ** argv)
   loadcell_setup();
   info("set up loadcell");
 
-  // pthread_t tmp_thread;
-  // if (pthread_create(&tmp_thread, NULL, tmp_thread_func, td))
-  //   ferr("could not create thermometer thread");
-  // info("started thermometer thread");
-  // while (!td->tmp_ready) nsleep(100);
-  // info("....... thermometer thread ready!"); // TODO: temperature
-
   motor_setup();
   info("warming up motor...");
   motor_warmup(650);
@@ -144,11 +137,6 @@ main (int argc, const char ** argv)
     ferr("main", "adc thread could not rejoin");
   else
     info("  adc done");
-
-  // if (pthread_join(tmp_thread, NULL))
-  //   ferr("thermometer thread could not rejoin");
-  // else
-  //   info("  thermometer done");
 
   info("cleaning up...");
   save_run_params_to_json(rd);
