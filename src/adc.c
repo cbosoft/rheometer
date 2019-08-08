@@ -21,6 +21,9 @@
 
 unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
 {
+#ifdef DEBUG
+  return 314;
+#else
   int ret;
   uint8_t tx[] = {
     4 + (channel>>2), (channel&3)<<6, 0
@@ -47,6 +50,7 @@ unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
   }
 
   return total;
+#endif
 }
 
 
