@@ -10,6 +10,7 @@
 #include "opt.h"
 #include "control.h"
 #include "error.h"
+#include "log.h"
 
 
 
@@ -32,6 +33,7 @@ void opt_mark_1(void) { opt_mark(ord, 1); }
 unsigned int tripc[OPTENC_COUNT] = {0};
 time_t last_convert = {0};
 double last_speed = 0.0;
+int opt_log_idxs[OPTENC_COUNT] = {0};
 
 
 
@@ -42,13 +44,12 @@ void opt_setup(struct run_data *rd)
   for (uint8_t i = 0; i < OPTENC_COUNT; i++) {
 
     rd->log_paths[i+1] = calloc(265, sizeof(char));
-    sprintf(rd->log_paths[i+1], "%s_opt%d-combined.csv", rd->log_pref, opt_pins[i]);
+    opt_log_idxs[i] = add_log(rd, "%s_opt%d-combined.csv", rd->log_pref, opt_pins[i]);
 
     // Create empty log file for appending to later
-    FILE *fp = fopen(rd->log_paths[i+1], "w");
+    FILE *fp = fopen(rd->log_paths[opt_log_idxs[i]], "w");
     fclose(fp);
 
-    rd->log_count ++;
     pinMode(opt_pins[i], INPUT);
 
   }
@@ -66,7 +67,7 @@ void opt_mark(struct run_data *rd, unsigned int i)
 
   struct timeval tv;
   gettimeofday(&tv, 0);
-  FILE *fp = fopen(rd->log_paths[i+1], "a");
+  FILE *fp = fopen(rd->log_paths[opt_log_idxs[i]], "a");
   fprintf(fp, "%lu.06%lu\n", tv.tv_sec, tv.tv_usec);
   fflush(fp);
   fclose(fp);
