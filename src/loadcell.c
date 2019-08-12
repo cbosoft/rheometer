@@ -25,12 +25,22 @@ const double LOADCELL_C = 0.0;
 
 
 
-void clock_pulse(int ns)
+void clock_pulse(double us)
 {
+  /*
+    Initially, I wanted everything to run with the lowest timings possible, 
+    however nanosecond resolution is not easy. Instead, going for the middle
+    ground.
+
+    Minimum timings: 0.2 us
+    Maximum timings: 50 us
+
+    Middle ground: 20 us
+   */
   digitalWrite(CLOCK_PIN, HIGH);
-	rh_nsleep(ns);
+	sleep_us(us);
   digitalWrite(CLOCK_PIN, LOW);
-	rh_nsleep(ns);
+	sleep_us(us);
 }
 
 
@@ -42,7 +52,7 @@ void set_gain(int r)
 	while(digitalRead(DATA_PIN));
 
 	for (int i = 0; i < 24 + r; i++)
-    clock_pulse(200);
+    clock_pulse(20);
 
 }
 
@@ -66,10 +76,7 @@ void loadcell_setup()
 
 void loadcell_reset()
 {
-	digitalWrite(CLOCK_PIN, HIGH);
-	rh_usleep(60);
-	digitalWrite(CLOCK_PIN, LOW);
-	rh_usleep(60);
+  clock_pulse(100.0);
 }
 
 
@@ -83,16 +90,16 @@ unsigned long loadcell_read_bytes()
 
   while(digitalRead(DATA_PIN));
 
-  rh_nsleep(100);
+  sleep_us(10);
 
   for(int i = 0; i < 24; i++) {
     count = count << 1;
-    clock_pulse(200);
+    clock_pulse(20.0);
     if (digitalRead(DATA_PIN)) count++;
   }
 
   for (int i = 0; i < GAIN + 1; i++)
-    clock_pulse(200);
+    clock_pulse(20.0);
 
   if (count & 0x800000) {
     count |= (long) ~0xffffff;

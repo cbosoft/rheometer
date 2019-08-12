@@ -181,7 +181,7 @@ void *log_thread_func(void *vptr) {
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%f\n", read_loadcell(rd));
 
-    rh_usleep(900);
+    sleep_us(900);
   }
 
   fclose(log_fp);

@@ -112,7 +112,7 @@ void *adc_thread_func(void *vptr) {
 
     free(padc);
 
-    rh_usleep(10);
+    sleep_us(10);
 
   }
 

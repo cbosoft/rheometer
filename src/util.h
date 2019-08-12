@@ -2,10 +2,15 @@
 
 
 
+#include <sys/time.h>
 
-void rh_nsleep(long delay_ns);
-void rh_usleep(long delay_us);
-void rh_msleep(long delay_us);
+
+
+
+double time_elapsed(struct timeval end, struct timeval start);
+void sleep_us(double delay_us);
+void sleep_ms(double delay_us);
+void blocking_sleep(double delay_s);
 
 
 

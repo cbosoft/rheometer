@@ -1,31 +1,47 @@
 #define _POSIX_C_SOURCE 199309L
 #include <time.h>
+#include <sys/time.h>
+#include <stdio.h>
 
 #include "util.h"
 
 
 
 
-void rh_nsleep(long delay_ns)
+double time_elapsed(struct timeval end, struct timeval start)
 {
-  struct timespec delay, res;
-  delay.tv_sec = 0;
-  delay.tv_nsec = delay_ns;
-  nanosleep(&delay, &res);
+  double seconds = end.tv_sec - start.tv_sec;
+  double usec = end.tv_usec - start.tv_usec;
+
+  return seconds + (usec*0.001*0.001);
 }
 
 
 
 
-void rh_usleep(long delay_us)
+void sleep_us(double delay_us)
 {
-  rh_nsleep(delay_us * 1000);
+  blocking_sleep( delay_us * 1e-6 );
 }
 
 
 
 
-void rh_msleep(long delay_ms)
+void sleep_ms(double delay_ms)
 {
-  rh_nsleep(delay_ms * 1000 * 1000);
+  blocking_sleep( delay_ms * 1e-3 );
+}
+
+
+
+
+void blocking_sleep(double delay_s)
+{
+  struct timeval start, now;
+  gettimeofday(&start, NULL);
+  while (1) {
+    gettimeofday(&now, NULL);
+    if (time_elapsed(now, start) > delay_s)
+      break;
+  }
 }

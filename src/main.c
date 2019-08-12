@@ -83,28 +83,28 @@ main (int argc, const char ** argv)
   pthread_t tmp_thread;
   if (pthread_create(&tmp_thread, NULL, thermometer_thread_func, rd))
     ferr("main", "could not create thermometer thread");
-  while (!rd->tmp_ready) rh_nsleep(100);
+  while (!rd->tmp_ready);
   pthread_setname_np(tmp_thread, "temp");
   info("  thermometer ready!");
 
   pthread_t adc_thread;
   if (pthread_create(&adc_thread, NULL, adc_thread_func, rd))
     ferr("main", "could not create adc thread");
-  while (!rd->adc_ready) rh_nsleep(100);
+  while (!rd->adc_ready);
   pthread_setname_np(adc_thread, "ADC");
   info("  adc ready!");
 
   pthread_t ctl_thread;
   if (pthread_create(&ctl_thread, NULL, ctl_thread_func, rd))
     ferr("main", "could not create control thread");
-  while (!rd->ctl_ready) rh_nsleep(100);
+  while (!rd->ctl_ready);
   pthread_setname_np(ctl_thread, "ctl");
   info("  controller ready!");
 
   pthread_t log_thread;
   if (pthread_create(&log_thread, NULL, log_thread_func, rd))
     ferr("main", "could not create log thread");
-  while (!rd->log_ready) rh_nsleep(100);
+  while (!rd->log_ready);
   pthread_setname_np(log_thread, "log");
   info("  logger ready!");
 

@@ -21,10 +21,10 @@ void motor_warmup(unsigned int target)
 {
   // run high for 1.5s, then go to target for 3
   pwmWrite(PWM_PIN, 800);
-  rh_msleep(1500);
+  sleep_ms(1.5e3);
   pwmWrite(PWM_PIN, target);
 #ifndef DEBUG
-  sleep(3);
+  sleep_ms(3e3);
 #endif
 }
 
