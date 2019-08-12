@@ -125,7 +125,7 @@ check_argc(unsigned int i, unsigned int argc)
 void
 parse_args(unsigned int argc, const char **argv, struct run_data *rd) 
 {
-  rd->tag = "DELME";
+  rd->tag = TAGDEFAULT;
   unsigned int cs_set = 0, l_set = 0, d_set = 0;
 
   for (unsigned int i = 1; i < argc; i++) {
@@ -189,7 +189,7 @@ parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       rd->control_params->ki, 
       rd->control_params->kd, 
       rd->control_params->set_point, 
-      (float)(rd->control_params->sleep_ns)*0.001*0.001,
+      (double)(rd->control_params->sleep_ns)*0.001*0.001,
       rd->control_params->is_stress_controlled ? "stress" : "strainrate",
       rd->length_s);
 }
