@@ -35,6 +35,7 @@ struct run_data *init_run_data()
   rd->opt_ready = 0;
   rd->log_ready = 0;
   rd->tmp_ready = 0;
+  rd->lc_ready = 0;
 
   rd->adc_busy = 0;
   rd->adc_dt = 0.0;
@@ -57,10 +58,9 @@ void free_run_data(struct run_data *td)
 
   if (td->log_pref != NULL) free(td->log_pref);
   if (td->errhist != NULL) free(td->errhist);
-  
+ 
   if (td->adc != NULL) free(td->adc);
   if (td->temperature != NULL) free(td->temperature);
-  if (td->tag != NULL) free(td->tag);
   if (td->loadcell_bytes != NULL) free(td->loadcell_bytes);
   if (td->loadcell_units != NULL) free(td->loadcell_units);
 
