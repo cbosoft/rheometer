@@ -19,6 +19,7 @@ void read_loadcell(struct run_data *rd);
 void loadcell_setup();
 void loadcell_reset();
 unsigned long loadcell_read_bytes();
+void *loadcell_thread_func(void *vptr);
 
 
 

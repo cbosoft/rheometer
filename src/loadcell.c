@@ -3,6 +3,7 @@
 #include <sched.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include <wiringPi.h>
 
@@ -111,23 +112,38 @@ unsigned long loadcell_read_bytes()
 
 
 
-double read_loadcell(struct run_data *rd)
+void read_loadcell(struct run_data *rd)
 {
-  unsigned long *loadcell, *ploadcell;
+  unsigned long *loadcell_bytes, *ploadcell_bytes;
   double *loadcell_units, *ploadcell_units;
 
-  loadcell = malloc(sizeof(unsigned long));
+  loadcell_bytes = malloc(sizeof(unsigned long));
   loadcell_units = malloc(sizeof(double));
 
-  (*loadcell) = loadcell_read_bytes();
-  (*loadcell_units) = (((double)(*loadcell)) * LOADCELL_M) + LOADCELL_C;
+  (*loadcell_bytes) = loadcell_read_bytes();
 
-  ploadcell = rd->loadcell_bytes;
+  (*loadcell_units) = (((double)(*loadcell_bytes)) * LOADCELL_M) + LOADCELL_C;
+
+  ploadcell_bytes = rd->loadcell_bytes;
   ploadcell_units = rd->loadcell_units;
-  rd->loadcell_bytes = loadcell;
-  rd->loadcell_units = loadcell_units;
-  free(ploadcell);
-  free(ploadcell_units);
 
-  return (*rd->loadcell_units);
+  rd->loadcell_bytes = loadcell_bytes;
+  rd->loadcell_units = loadcell_units;
+
+  free(ploadcell_bytes);
+  free(ploadcell_units);
+}
+
+
+void *loadcell_thread_func(void *vptr)
+{
+  struct run_data *rd = (struct run_data *) vptr;
+
+  rd->lc_ready = 1;
+  while ( (!rd->stopped) && (!rd->errored) ) {
+    read_loadcell(rd);
+  }
+
+  pthread_exit(0);
+  return NULL;
 }
