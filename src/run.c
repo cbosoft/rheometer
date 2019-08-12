@@ -35,6 +35,7 @@ struct run_data *init_run_data()
   rd->tmp_ready = 0;
 
   rd->adc_busy = 0;
+  rd->adc_dt = 0.0;
 
   rd->error_string = "all is well";
   return rd;

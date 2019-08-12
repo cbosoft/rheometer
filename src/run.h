@@ -46,6 +46,7 @@ struct run_data {
   unsigned int ctl_ready;
 
   unsigned int adc_busy;
+  double adc_dt;
   
   unsigned int stopped;
   unsigned int errored;

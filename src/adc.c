@@ -8,11 +8,13 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+#include <sys/time.h>
 
 #include <wiringPi.h>
 
 #include "adc.h"
 #include "run.h"
+#include "util.h"
 #include "util.h"
 #include "error.h"
 #include "loadcell.h"
@@ -100,6 +102,9 @@ void *adc_thread_func(void *vptr) {
 
   unsigned long *adc, *padc;
 
+  struct timeval start, now;
+  gettimeofday(&start, NULL);
+
   rd->adc_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
     
@@ -113,9 +118,10 @@ void *adc_thread_func(void *vptr) {
 
     free(padc);
 
-    read_loadcell(rd);
+    gettimeofday(&now, NULL);
 
-    sleep_us(10);
+    rd->adc_dt = time_elapsed(now, start);
+    start = now;
 
   }
 
