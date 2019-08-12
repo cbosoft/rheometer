@@ -29,13 +29,12 @@ void clock_pulse(double us)
 {
   /*
     Initially, I wanted everything to run with the lowest timings possible, 
-    however nanosecond resolution is not easy. Instead, going for the middle
-    ground.
+    however nanosecond resolution is not easy. Minimum acheivable timing is 
+    1us.
 
-    Minimum timings: 0.2 us
+    Minimum timings: 0.2 us (1us acheivable)
     Maximum timings: 50 us
 
-    Middle ground: 20 us
    */
   digitalWrite(CLOCK_PIN, HIGH);
 	sleep_us(us);
@@ -52,7 +51,7 @@ void set_gain(int r)
 	while(digitalRead(DATA_PIN));
 
 	for (int i = 0; i < 24 + r; i++)
-    clock_pulse(20);
+    clock_pulse(PULSE_US);
 
 }
 
@@ -76,7 +75,7 @@ void loadcell_setup()
 
 void loadcell_reset()
 {
-  clock_pulse(100.0);
+  clock_pulse(RESET_US);
 }
 
 
@@ -87,19 +86,19 @@ unsigned long loadcell_read_bytes()
 	unsigned long count = 0;
 
   set_gain(CHA_64);
-
+  
   while(digitalRead(DATA_PIN));
 
-  sleep_us(10);
+  sleep_us(1);
 
   for(int i = 0; i < 24; i++) {
     count = count << 1;
-    clock_pulse(20.0);
+    clock_pulse(PULSE_US);
     if (digitalRead(DATA_PIN)) count++;
   }
 
   for (int i = 0; i < GAIN + 1; i++)
-    clock_pulse(20.0);
+    clock_pulse(PULSE_US);
 
   if (count & 0x800000) {
     count |= (long) ~0xffffff;
