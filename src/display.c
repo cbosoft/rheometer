@@ -75,6 +75,8 @@ display_titles(void)
 
   char *time = centre("t/s", colw);
   fprintf(stderr, "%s%s ", BOLD, time);
+  free(time);
+  
   for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
     char *adcv = calloc(10, sizeof(char));
     sprintf(adcv, "A%u/b", channel);
@@ -83,22 +85,29 @@ display_titles(void)
     free(cadcv);
     free(adcv);
   }
+  
+  char *adcdt = centre("dt/s", colw);
+  fprintf(stderr, "%s ", adcdt);
+  free(adcdt);
+
   char *speed = centre("s/hz", colw);
   fprintf(stderr, "%s ", speed);
+  free(speed);
+
   char *strainrate = centre("SR/hz", colw);
   fprintf(stderr, "%s ", strainrate);
+  free(strainrate);
+
   char *stress = centre("S/Pa", colw);
   fprintf(stderr, "%s ", stress);
+  free(stress);
+
   char *ca = centre("ca/b", colw);
   fprintf(stderr, "%5s ", ca);
+  free(ca);
+
   char *temp = centre("T/C", colw);
   fprintf(stderr, "%5s%s\r", temp, RESET);
-
-  free(time);
-  free(speed);
-  free(strainrate);
-  free(stress);
-  free(ca);
   free(temp);
 }
 
@@ -124,6 +133,10 @@ display_thread_data(struct run_data *rd)
     cadcval[channel] = centre(adcval[channel], colw);
   }
 
+  char *adcdt = calloc(20, sizeof(char));
+  sprintf(adcdt, "%f", rd->adc_dt);
+  char *cadcdt = centre(adcdt, colw);
+
   char *speed = calloc(20, sizeof(char));
   sprintf(speed, "%f", rd->speed_ind);
   char *cspeed = centre(speed, colw);
@@ -133,7 +146,7 @@ display_thread_data(struct run_data *rd)
   char *cstrainrate = centre(strainrate, colw);
 
   char *stress = calloc(20, sizeof(char));
-  sprintf(stress, "%f", rd->stress_ind);
+  sprintf(stress, "%f", (*rd->loadcell_units));
   char *cstress = centre(stress, colw);
 
   char *ca = calloc(20, sizeof(char));
@@ -148,7 +161,7 @@ display_thread_data(struct run_data *rd)
   for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
     fprintf(stderr, "%s ", cadcval[channel]);
   }
-  fprintf(stderr, "%s %s %s %s %s\n", cspeed, cstrainrate, cstress, cca, ctemp);
+  fprintf(stderr, "%s %s %s %s %s %s\n", cadcdt, cspeed, cstrainrate, cstress, cca, ctemp);
 
   free(temp);
   free(ca);
