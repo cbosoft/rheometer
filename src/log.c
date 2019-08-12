@@ -179,7 +179,7 @@ void *log_thread_func(void *vptr) {
       fprintf(log_fp, "%lu,", rd->adc[channel]);
     fprintf(log_fp, "%u,", rd->last_ca);
     fprintf(log_fp, "%f,", (*rd->temperature));
-    fprintf(log_fp, "%f\n", read_loadcell(rd));
+    fprintf(log_fp, "%f\n", (*rd->loadcell_units));
 
     sleep_us(900);
   }

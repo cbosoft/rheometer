@@ -15,6 +15,7 @@
 #include "run.h"
 #include "util.h"
 #include "error.h"
+#include "loadcell.h"
 
 
 
@@ -111,6 +112,8 @@ void *adc_thread_func(void *vptr) {
     rd->adc = adc;
 
     free(padc);
+
+    read_loadcell(rd);
 
     sleep_us(10);
 

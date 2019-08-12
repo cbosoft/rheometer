@@ -11,8 +11,8 @@ struct run_data {
   unsigned long start_time_us;
   double time_s_f;
   unsigned long *adc;
-  unsigned long loadcell_bytes;
-  double loadcell_units;
+  unsigned long *loadcell_bytes;
+  double *loadcell_units;
   double *temperature;
   
   // process control stuff
