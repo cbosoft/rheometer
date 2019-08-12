@@ -18,6 +18,8 @@ struct run_data *init_run_data()
   rd->time_s_f = 0.0;
   rd->adc = calloc(ADC_COUNT, sizeof(float));
   rd->temperature = calloc(1, sizeof(float));
+  rd->loadcell_bytes = calloc(1, sizeof(unsigned long));
+  rd->loadcell_units = calloc(1, sizeof(double));
 
   rd->speed_ind_timeout = 0.5;
   rd->last_ca = 0;
@@ -59,6 +61,8 @@ void free_run_data(struct run_data *td)
   if (td->adc != NULL) free(td->adc);
   if (td->temperature != NULL) free(td->temperature);
   if (td->tag != NULL) free(td->tag);
+  if (td->loadcell_bytes != NULL) free(td->loadcell_bytes);
+  if (td->loadcell_units != NULL) free(td->loadcell_units);
 
   free(td);
 }

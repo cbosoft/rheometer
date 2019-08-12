@@ -80,10 +80,10 @@ calculate_control_indicators(struct run_data *rd)
 
   rd->speed_ind = get_speed(rd); // speed in rotations per second (hz)
 
-  float strainrate_invs = rd->speed_ind * PI * 2.0 * RI / (RO - RI);
+  double strainrate_invs = rd->speed_ind * PI * 2.0 * RI / (RO - RI);
   rd->strainrate_ind = strainrate_invs;
 
-  float stress_Pa = rd->loadcell_units / (2.0 * PI * RI * RI * rd->fill_depth);
+  double stress_Pa = (*rd->loadcell_units) / (2.0 * PI * RI * RI * rd->fill_depth);
   rd->stress_ind = stress_Pa;
 
   rd->viscosity_ind = stress_Pa / strainrate_invs;
@@ -96,9 +96,9 @@ unsigned int
 pid_control(struct run_data *rd)
 {
 
-  float dca = 0.0;
-  float input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
-  float err = rd->control_params->set_point - input;
+  double dca = 0.0;
+  double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
+  double err = rd->control_params->set_point - input;
   
   // Proportional control
   dca += rd->control_params->kp * err;
@@ -111,7 +111,7 @@ pid_control(struct run_data *rd)
   }
   
   // Add error to history
-  float *errhist = calloc(ERR_HIST, sizeof(float)), *tmp;
+  double *errhist = calloc(ERR_HIST, sizeof(double)), *tmp;
   errhist[0] = err;
   for (unsigned int i = 0; i < ERR_HIST; i++) {
     errhist[i+1] = rd->errhist[i];
