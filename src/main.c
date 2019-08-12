@@ -24,6 +24,21 @@
 #include "display.h"
 #include "thermometer.h"
 
+  pthread_t tmp_thread;
+
+#define SETUP_THREAD(THREADVAR,THREADFUNC,NAME,WATCHVAR) \
+  if (pthread_create(& THREADVAR, NULL, THREADFUNC, rd)) \
+    ferr("main", "could not create "NAME" thread"); \
+  while (! WATCHVAR); \
+  pthread_setname_np(THREADVAR, NAME); \
+  info("  "NAME" ready!");
+
+#define THREAD_JOIN(THREADVAR,NAME) \
+  if (pthread_join(THREADVAR, NULL)) \
+    ferr("main", "error in "NAME"thread."); \
+  else \
+    info("  "NAME" done"); \
+
 
 
 
@@ -79,35 +94,13 @@ main (int argc, const char ** argv)
 
 
   info("starting threads...");
-
-  pthread_t tmp_thread;
-  if (pthread_create(&tmp_thread, NULL, thermometer_thread_func, rd))
-    ferr("main", "could not create thermometer thread");
-  while (!rd->tmp_ready);
-  pthread_setname_np(tmp_thread, "temp");
-  info("  thermometer ready!");
-
-  pthread_t adc_thread;
-  if (pthread_create(&adc_thread, NULL, adc_thread_func, rd))
-    ferr("main", "could not create adc thread");
-  while (!rd->adc_ready);
-  pthread_setname_np(adc_thread, "ADC");
-  info("  adc ready!");
-
-  pthread_t ctl_thread;
-  if (pthread_create(&ctl_thread, NULL, ctl_thread_func, rd))
-    ferr("main", "could not create control thread");
-  while (!rd->ctl_ready);
-  pthread_setname_np(ctl_thread, "ctl");
-  info("  controller ready!");
-
-  pthread_t log_thread;
-  if (pthread_create(&log_thread, NULL, log_thread_func, rd))
-    ferr("main", "could not create log thread");
-  while (!rd->log_ready);
-  pthread_setname_np(log_thread, "log");
-  info("  logger ready!");
-
+  pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread;
+  SETUP_THREAD(tmp_thread, thermometer_thread_func, "thermometer", rd->tmp_ready);
+  SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
+  SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);
+  SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
+  SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
+  
   info("begin!");
   unsigned int tish = 0;
   while ( (!cancelled) && (tish <= rd->length_s) ) {
@@ -134,31 +127,19 @@ main (int argc, const char ** argv)
 
   info("waiting for threads to finish...");
 
-  if (pthread_join(log_thread, NULL))
-    ferr("main", "log thread could not rejoin");
-  else
-    info("  logger done");
-
-  if (pthread_join(ctl_thread, NULL))
-    ferr("main", "control thread could not rejoin");
-  else
-    info("  controller done");
-
-  if (pthread_join(adc_thread, NULL))
-    ferr("main", "adc thread could not rejoin");
-  else
-    info("  adc done");
-
-  if (pthread_join(tmp_thread, NULL))
-    ferr("main", "temperature thread could not rejoin");
-  else
-    info("  tmp done");
+  THREAD_JOIN(log_thread, "log");
+  THREAD_JOIN(ctl_thread, "control");
+  THREAD_JOIN(lc_thread, "loadcell");
+  THREAD_JOIN(adc_thread, "adc");
+  THREAD_JOIN(tmp_thread, "thermometer");
 
   info("cleaning up...");
   save_run_params_to_json(rd);
   info("  params written");
   tidy_logs(rd);
   info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, rd->log_pref);
+
+  // invalid pointer error... trying to free that which has not been alloc'd?
   free_run_data(rd);
   info("  data free'd");
   info("done!");
