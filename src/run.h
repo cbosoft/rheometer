@@ -26,11 +26,11 @@ struct run_data {
   char *control_scheme_path;
   struct control_params *control_params;
   unsigned int last_ca;
-  float *errhist;
+  double *errhist;
 
   // run_data
   unsigned int length_s;
-  float fill_depth;
+  double fill_depth;
   char *tag;
   char *log_pref;
   char **log_paths;
@@ -44,6 +44,7 @@ struct run_data {
   unsigned int tmp_ready;
   unsigned int opt_ready;
   unsigned int ctl_ready;
+  unsigned int lc_ready;
 
   unsigned int adc_busy;
   double adc_dt;

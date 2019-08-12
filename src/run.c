@@ -16,14 +16,14 @@ struct run_data *init_run_data()
   rd->start_time_s = 0;
   rd->start_time_us = 0;
   rd->time_s_f = 0.0;
-  rd->adc = calloc(ADC_COUNT, sizeof(float));
-  rd->temperature = calloc(1, sizeof(float));
+  rd->adc = calloc(ADC_COUNT, sizeof(double));
+  rd->temperature = calloc(1, sizeof(double));
   rd->loadcell_bytes = calloc(1, sizeof(unsigned long));
   rd->loadcell_units = calloc(1, sizeof(double));
 
   rd->speed_ind_timeout = 0.5;
   rd->last_ca = 0;
-  rd->errhist = calloc(ERR_HIST, sizeof(float));
+  rd->errhist = calloc(ERR_HIST, sizeof(double));
 
   rd->log_paths = NULL;
   rd->log_names = NULL;
