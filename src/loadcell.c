@@ -105,6 +105,7 @@ unsigned long loadcell_read_bytes()
   for (int i = 0; i < GAIN + 1; i++)
     clock_pulse(PULSE_US);
 
+  // count is in 2s complement
   if (count & 0x800000) {
     count |= (long) ~0xffffff;
   }
