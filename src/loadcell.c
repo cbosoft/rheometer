@@ -20,7 +20,7 @@ enum HX711_GAIN {
   CHA_64
 };
 
-const int GAIN = CHA_64;
+int GAIN = CHA_128; // default
 const double LOADCELL_M = 1.0;
 const double LOADCELL_C = 0.0;
 
@@ -46,13 +46,15 @@ void clock_pulse(double us)
 
 
 
-void set_gain(int r)
+void set_gain(int gain)
 {
 
 	while(digitalRead(DATA_PIN));
 
-	for (int i = 0; i < 24 + r; i++)
+	for (int i = 0; i < 24 + gain + 1; i++)
     clock_pulse(PULSE_US);
+
+  GAIN = gain;
 
 }
 
@@ -65,9 +67,9 @@ void loadcell_setup()
   pinMode(DATA_PIN, INPUT);
   pinMode(CLOCK_PIN, OUTPUT);
 
-  digitalWrite(CLOCK_PIN, 0);
+  digitalWrite(CLOCK_PIN, LOW);
 
-  set_gain(CHA_64);
+  //set_gain(CHA_64);
 
 }
 
@@ -86,18 +88,20 @@ unsigned long loadcell_read_bytes()
 {
 	unsigned long count = 0;
 
-  set_gain(CHA_64);
+  // set_gain(CHA_64);
   
   while(digitalRead(DATA_PIN));
 
   sleep_us(1);
 
+  // 24 pulses
   for(int i = 0; i < 24; i++) {
     count = count << 1;
     clock_pulse(PULSE_US);
     if (digitalRead(DATA_PIN)) count++;
   }
 
+  // at least one more pulse
   for (int i = 0; i < GAIN + 1; i++)
     clock_pulse(PULSE_US);
 
