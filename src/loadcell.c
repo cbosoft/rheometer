@@ -21,8 +21,8 @@ enum HX711_GAIN {
 };
 
 int GAIN = CHA_128; // default
-const double LOADCELL_M = 1.0;
-const double LOADCELL_C = 0.0;
+#define LOADCELL_CAL_M -2.15940989e-04
+#define LOADCELL_CAL_C 9.27446776e+05
 
 
 
@@ -69,8 +69,6 @@ void loadcell_setup()
 
   digitalWrite(CLOCK_PIN, LOW);
 
-  //set_gain(CHA_64);
-
 }
 
 
@@ -87,8 +85,6 @@ void loadcell_reset()
 unsigned long loadcell_read_bytes()
 {
 	unsigned long count = 0;
-
-  // set_gain(CHA_64);
   
   while(digitalRead(DATA_PIN));
 
@@ -127,7 +123,7 @@ void read_loadcell(struct run_data *rd)
 
   (*loadcell_bytes) = loadcell_read_bytes();
 
-  (*loadcell_units) = (((double)(*loadcell_bytes)) * LOADCELL_M) + LOADCELL_C;
+  (*loadcell_units) = (((double)(*loadcell_bytes)) * LOADCELL_CAL_M) + LOADCELL_CAL_C;
 
   ploadcell_bytes = rd->loadcell_bytes;
   ploadcell_units = rd->loadcell_units;
