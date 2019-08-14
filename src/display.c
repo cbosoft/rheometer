@@ -90,7 +90,7 @@ display_titles(void)
   fprintf(stderr, "%s ", adcdt);
   free(adcdt);
 
-  char *speed = centre("s/hz", colw);
+  char *speed = centre("s/RPS", colw);
   fprintf(stderr, "%s ", speed);
   free(speed);
 
