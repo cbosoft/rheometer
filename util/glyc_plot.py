@@ -32,11 +32,11 @@ def highlight_mix(v, c):
     plotf([xmin, c], [v, v], f'C{number_highlights}')
     plotf([c, c], [ymin, v], f'C{number_highlights}')
     plt.text(
-            c, v*0.7, f'$C_m = {c:.3f}$',
+            c, v*0.7, f'$C_m = {c:.3f}$', color='white',
             ha='center', va='top', rotation=270,
             bbox={'facecolor':f'C{number_highlights}', 'pad':3})
     plt.text(
-            c-0.05, v, f'$\\mu = {v:.3f}$',
+            c-0.05, v, f'$\\mu = {v:.3f}$', color='white',
             ha='center', va='center',
             bbox={'facecolor':f'C{number_highlights}', 'pad':3})
 
