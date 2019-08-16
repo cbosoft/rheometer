@@ -99,6 +99,7 @@ main (int argc, const char ** argv)
   SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
   SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
+  sleep(3);
   SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
   
   info("begin!");
