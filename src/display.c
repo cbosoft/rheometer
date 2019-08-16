@@ -20,7 +20,16 @@ get_column_width(void)
 
   unsigned int width_total = (unsigned int)ws.ws_col;
   unsigned int min_cols = 7;
-  unsigned int number_cols = 14;
+  unsigned int number_cols = 0;
+  number_cols += 1; // time
+  //number_cols += 8; // adc
+  number_cols += 1; // adc_dt
+  number_cols += 1; // speed
+  number_cols += 1; // strainrate
+  number_cols += 1; // stress (bytes)
+  number_cols += 1; // stress (units)
+  number_cols += 1; // control action
+  number_cols += 1; // temperature
   unsigned int min_total = (number_cols * (min_cols+1));
 
   if (width_total < min_total) {
@@ -77,14 +86,14 @@ display_titles(void)
   fprintf(stderr, "%s%s ", BOLD, time);
   free(time);
   
-  for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-    char *adcv = calloc(10, sizeof(char));
-    sprintf(adcv, "A%u/b", channel);
-    char *cadcv = centre(adcv, colw);
-    fprintf(stderr, "%s ", cadcv);
-    free(cadcv);
-    free(adcv);
-  }
+  // for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
+  //   char *adcv = calloc(10, sizeof(char));
+  //   sprintf(adcv, "A%u/b", channel);
+  //   char *cadcv = centre(adcv, colw);
+  //   fprintf(stderr, "%s ", cadcv);
+  //   free(cadcv);
+  //   free(adcv);
+  // }
   
   char *adcdt = centre("dt/s", colw);
   fprintf(stderr, "%s ", adcdt);
@@ -97,6 +106,10 @@ display_titles(void)
   char *strainrate = centre("SR/hz", colw);
   fprintf(stderr, "%s ", strainrate);
   free(strainrate);
+
+  char *stress_bytes = centre("LC/24b", colw);
+  fprintf(stderr, "%s ", stress_bytes);
+  free(stress_bytes);
 
   char *stress = centre("S/Pa", colw);
   fprintf(stderr, "%s ", stress);
@@ -125,13 +138,13 @@ display_thread_data(struct run_data *rd)
   sprintf(time, "%lu", secs);
   char *ctime = centre(time, colw);
   
-  char **adcval = calloc(ADC_COUNT, sizeof(char *));
-  char **cadcval = calloc(ADC_COUNT, sizeof(char *));
-  for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-    adcval[channel] = calloc(20, sizeof(char));
-    sprintf(adcval[channel], "%lu", rd->adc[channel]);
-    cadcval[channel] = centre(adcval[channel], colw);
-  }
+  //char **adcval = calloc(ADC_COUNT, sizeof(char *));
+  //char **cadcval = calloc(ADC_COUNT, sizeof(char *));
+  //for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
+  //  adcval[channel] = calloc(20, sizeof(char));
+  //  sprintf(adcval[channel], "%lu", rd->adc[channel]);
+  //  cadcval[channel] = centre(adcval[channel], colw);
+  //}
 
   char *adcdt = calloc(20, sizeof(char));
   sprintf(adcdt, "%f", rd->adc_dt);
@@ -144,6 +157,10 @@ display_thread_data(struct run_data *rd)
   char *strainrate = calloc(20, sizeof(char));
   sprintf(strainrate, "%f", rd->strainrate_ind);
   char *cstrainrate = centre(strainrate, colw);
+
+  char *stress_bytes = calloc(20, sizeof(char));
+  sprintf(stress_bytes, "%lu", (*rd->loadcell_bytes));
+  char *cstress_bytes = centre(stress_bytes, colw);
 
   char *stress = calloc(20, sizeof(char));
   sprintf(stress, "%f", (*rd->loadcell_units));
@@ -158,18 +175,18 @@ display_thread_data(struct run_data *rd)
   char *ctemp = centre(temp, colw);
 
   fprintf(stderr, "%s ", ctime);
-  for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
-    fprintf(stderr, "%s ", cadcval[channel]);
-  }
-  fprintf(stderr, "%s %s %s %s %s %s\n", cadcdt, cspeed, cstrainrate, cstress, cca, ctemp);
+  //for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
+  //  fprintf(stderr, "%s ", cadcval[channel]);
+  //}
+  fprintf(stderr, "%s %s %s %s %s %s %s\n", cadcdt, cspeed, cstrainrate, cstress_bytes, cstress, cca, ctemp);
 
   free(temp);
   free(ca);
   free(speed);
-  for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
-    free(adcval[channel]);
-  }
-  free(adcval);
+  //for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
+  //  free(adcval[channel]);
+  //}
+  //free(adcval);
   free(time);
 
   free(ctemp);
@@ -177,10 +194,10 @@ display_thread_data(struct run_data *rd)
   free(cstress);
   free(cstrainrate);
   free(cspeed);
-  for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
-    free(cadcval[channel]);
-  }
-  free(cadcval);
+  //for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
+  //  free(cadcval[channel]);
+  //}
+  //free(cadcval);
   free(ctime);
 }
 
