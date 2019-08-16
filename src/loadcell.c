@@ -21,8 +21,6 @@ enum HX711_GAIN {
 };
 
 int GAIN = CHA_128; // default
-#define LOADCELL_CAL_M -2.15940989e-04
-#define LOADCELL_CAL_C 9.27446776e+05
 
 
 
