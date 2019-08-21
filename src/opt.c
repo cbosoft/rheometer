@@ -72,7 +72,7 @@ void opt_mark(struct run_data *rd, unsigned int i)
   struct timeval tv;
   gettimeofday(&tv, 0);
   FILE *fp = fopen(rd->log_paths[opt_log_idxs[i]], "a");
-  fprintf(fp, "%lu.06%lu\n", tv.tv_sec, tv.tv_usec);
+  fprintf(fp, "%lu.%06lu\n", tv.tv_sec, tv.tv_usec);
   fflush(fp);
   fclose(fp);
 
