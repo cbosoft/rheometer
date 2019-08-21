@@ -21,6 +21,7 @@ enum HX711_GAIN {
 };
 
 int GAIN = CHA_128; // default
+const long halfway = (long)(1 << 31);
 
 
 
@@ -82,7 +83,9 @@ void loadcell_reset()
 
 unsigned long loadcell_read_bytes()
 {
-	unsigned long count = 0;
+	long count = 0;
+
+  loadcell_reset();
   
   while(digitalRead(DATA_PIN));
 
@@ -104,7 +107,7 @@ unsigned long loadcell_read_bytes()
     count |= (long) ~0xffffff;
   }
 
-  return count;
+  return (unsigned long)(count + halfway);
 
 }
 
