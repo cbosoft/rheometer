@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python3.7
 '''
 Usage:
     rheorun -t <tag> -d <depth> -l <lengths> -c <control_spec_params> -p <control_spec_pattern>
@@ -18,11 +18,14 @@ control_params = list()
 control_pattern = str()
 
 args = sys.argv[1:]
+keys = args[:-1:2]
+values = args[1::2]
 
 try:
     assert len(args) % 2 == 0
+    assert len(keys) == 5
 
-    for key, value in zip(args[:-1:2], args[1::2]):
+    for key, value in zip(keys, values):
 
         if key == '-t':
             tag = value
@@ -37,8 +40,10 @@ try:
         else:
             print(f"Unknown arg {key}")
             raise Exception()
-# pylint: disable=bare-except
-except:
+except AssertionError:
+    print("Syntax error", __doc__)
+    exit(1)
+except Exception:
     print(__doc__)
     exit(1)
 
@@ -57,7 +62,8 @@ total_time /= 60.0
 print(f"There will be {len(combined_params)} runs taking a total of {total_time} minutes.")
 sleep(3)
 
-for i, (length, control_spec) in enumerate(combined_params):
+for i, (length, control_param) in enumerate(combined_params):
+    control_spec = control_pattern.format(control_param)
     command = f'sudo ./rheometer -t {tag} -d {depth} -l {length} -c {control_spec}'
     title = f"({i+1}/{len(combined_params)}) - {command}"
     sys.stdout.write('\33]0;' + title + '\a')
