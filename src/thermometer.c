@@ -28,7 +28,9 @@ void thermometer_setup()
 {
 
   glob_t g;
-  glob("/sys/bus/w1/devices/28-**/w1_slave", GLOB_NOSORT, NULL, &g);
+  if (glob("/sys/bus/w1/devices/28-**/w1_slave", GLOB_NOSORT, NULL, &g)) {
+    return;
+  }
 
   if (!g.gl_pathc)
     return;
