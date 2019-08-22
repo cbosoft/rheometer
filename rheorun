@@ -1,0 +1,66 @@
+#!/usr/bin/python
+'''
+Usage:
+    rheorun -t <tag> -d <depth> -l <lengths> -c <control_spec_params> -p <control_spec_pattern>
+'''
+
+import itertools
+from time import sleep
+import os
+
+import sys
+
+
+tag = str()
+lengths = list()
+depth = str()
+control_params = list()
+control_pattern = str()
+
+args = sys.argv[1:]
+
+try:
+    assert len(args) % 2 == 0
+
+    for key, value in zip(args[:-1:2], args[1::2]):
+
+        if key == '-t':
+            tag = value
+        elif key == '-l':
+            lengths = value.split(',')
+        elif key == '-d':
+            depth = value
+        elif key == '-c':
+            control_params = value.split(',')
+        elif key == '-p':
+            control_pattern = value
+        else:
+            print(f"Unknown arg {key}")
+            raise Exception()
+# pylint: disable=bare-except
+except:
+    print(__doc__)
+    exit(1)
+
+combined_params = list(itertools.product(lengths, control_params))
+total_time = 0
+for length, spec in combined_params:
+    if 'm' in length:
+        total_time += int(length[:-1]) * 60
+    if 's' in length:
+        total_time += int(length[:-1])
+    else:
+        total_time += int(length)
+    total_time += 15 # ramp up, ramp down, per run
+total_time /= 60.0
+
+print(f"There will be {len(combined_params)} runs taking a total of {total_time} minutes.")
+sleep(3)
+
+for i, (length, control_spec) in enumerate(combined_params):
+    command = f'sudo ./rheometer -t {tag} -d {depth} -l {length} -c {control_spec}'
+    title = f"({i+1}/{len(combined_params)}) - {command}"
+    sys.stdout.write('\33]0;' + title + '\a')
+    sys.stdout.flush()
+    print(title)
+    os.system(command)
