@@ -21,7 +21,7 @@ usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>]\n"
+      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start]\n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -48,6 +48,11 @@ help(void)
       "\n"
       "    -t | --tag       A short descriptive name for the test run. Underscores and spaces\n"
       "                     will be replaced by hyphens. Optional. Default is \""TAGDEFAULT"\".\n"
+      "\n"
+      "    --calm-start     Enable this flag to remove the high power motor start up. This is\n"
+      "                     useful for tuning position of the outer cylinder for very thick or\n"
+      "                     non-Newtonian fluids. However, the motor is more likely to stall on \n"
+      "                     start, so be wary about doing tests with this data.\n"
       "\n"
   );
   control_help();
@@ -155,6 +160,9 @@ parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       check_argc(i, argc);
       rd->fill_depth = atof(argv[i]);
       d_set = 1;
+    }
+    else if (strcmp(argv[i], "--calm-start") == 0) {
+      rd->calm_start = 1;
     }
     else {
       argerr("given unknown arg");

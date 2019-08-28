@@ -24,6 +24,7 @@ struct run_data *init_run_data()
   rd->speed_ind_timeout = 0.5;
   rd->last_ca = 0;
   rd->errhist = calloc(ERR_HIST, sizeof(double));
+  rd->calm_start = 0;
 
   rd->log_paths = NULL;
   rd->log_names = NULL;

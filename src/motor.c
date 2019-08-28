@@ -17,11 +17,13 @@ void motor_setup()
 
 
 
-void motor_warmup(unsigned int target)
+void motor_warmup(struct run_data *rd, unsigned int target)
 {
   // run high for 1.5s, then go to target for 3
-  pwmWrite(PWM_PIN, 800);
-  sleep_ms(1.5e3);
+  if (!rd->calm_start) { 
+    pwmWrite(PWM_PIN, 800);
+    sleep_ms(1.5e3);
+  }
   pwmWrite(PWM_PIN, target);
 #ifndef DEBUG
   sleep_ms(3e3);

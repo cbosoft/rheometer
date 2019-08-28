@@ -89,7 +89,7 @@ main (int argc, const char ** argv)
 
   motor_setup();
   info("warming up motor...");
-  motor_warmup(650);
+  motor_warmup(rd, rd->control_params->c ? rd->control_params->c : 512 );
   info("motor ready!");
 
 

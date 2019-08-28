@@ -45,6 +45,7 @@ struct run_data {
   unsigned int opt_ready;
   unsigned int ctl_ready;
   unsigned int lc_ready;
+  int calm_start;
 
   unsigned int adc_busy;
   double adc_dt;
