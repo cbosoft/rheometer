@@ -85,8 +85,6 @@ unsigned long loadcell_read_bytes()
 {
 	long count = 0;
 
-  loadcell_reset();
-  
   while(digitalRead(DATA_PIN));
 
   sleep_us(1);
