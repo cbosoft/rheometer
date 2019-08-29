@@ -81,14 +81,6 @@ void save_run_params_to_json(struct run_data *rd)
   CHECKJSON(depth_mm_json);
   cJSON_AddItemToObject(params, "depth_mm", depth_mm_json);
 
-  cJSON *loadcell_cal_m_json = cJSON_CreateNumber(LOADCELL_CAL_M);
-  CHECKJSON(loadcell_cal_m_json);
-  cJSON_AddItemToObject(params, "loadcell_cal_m", loadcell_cal_m_json);
-
-  cJSON *loadcell_cal_c_json = cJSON_CreateNumber(LOADCELL_CAL_C);
-  CHECKJSON(loadcell_cal_c_json);
-  cJSON_AddItemToObject(params, "loadcell_cal_c", loadcell_cal_c_json);
-
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
   sprintf(params_path, "%s_runparams.json", rd->log_pref);

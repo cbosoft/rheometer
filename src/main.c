@@ -50,6 +50,7 @@ static unsigned int cancelled = 0;
 void 
 inthandle(int signo)
 {
+  fprintf(stderr, "\n\nInterrupted...\n\n");
   if (signo == SIGINT) {
     fprintf(stderr, "\r");
     cancelled = 1;
