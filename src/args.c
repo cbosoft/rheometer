@@ -182,22 +182,24 @@ parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       "  Run options:\n"
       "    "FGYELLOW"tag"RESET": \"%s\"\n"
       "    "FGYELLOW"control scheme"RESET": %s\n"
-      "      "FGMAGENTA"c"RESET": %u\n"
+      "    "FGYELLOW"setter scheme"RESET": %s\n"
+      "      "FGMAGENTA"c"RESET": %f\n"
       "      "FGMAGENTA"kp"RESET": %.3f\n"
       "      "FGMAGENTA"ki"RESET": %.3f\n"
       "      "FGMAGENTA"kd"RESET": %.3f\n"
-      "      "FGMAGENTA"set_point"RESET": %.3f\n"
+      "      "FGMAGENTA"setpoint"RESET": %.3f\n"
       "      "FGMAGENTA"control interval"RESET": %f ms\n"
       "      "FGMAGENTA"controlled variable"RESET": %s\n"
       "    "FGYELLOW"length"RESET": %u s\n",
       rd->tag, 
       rd->control_scheme, 
+      rd->setter_scheme, 
       rd->control_params->c, 
       rd->control_params->kp, 
       rd->control_params->ki, 
       rd->control_params->kd, 
-      rd->control_params->set_point, 
-      (double)(rd->control_params->sleep_ns)*0.001*0.001,
+      rd->control_params->setpoint, 
+      (double)(rd->control_params->sleep_ms),
       rd->control_params->is_stress_controlled ? "stress" : "strainrate",
       rd->length_s);
 }

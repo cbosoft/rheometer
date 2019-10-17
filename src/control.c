@@ -29,19 +29,23 @@
 
 
 typedef enum control_scheme {
-  CONTROL_CONSTANT, 
   CONTROL_PID,
-  CONTROL_SINE,
-  CONTROL_BISTABLE
+  CONTROL_NONE
 } control_scheme_enum;
 
 
+typedef enum setter_scheme {
+  SETTER_CONSTANT, 
+  SETTER_SINE,
+  SETTER_BISTABLE
+} setter_scheme_enum;
 
 
-void
-control_help(void)
+
+
+void control_help(void)
 {
-  fprintf(stderr, 
+  fprintf(stderr, /*
       "  "BOLD"Control Schemes"RESET"\n"
       "    Control schemes are defined in JSON files (stored in the data/ directory).\n"
       "    These JSON files dictate what function should be used, and what parameters \n"
@@ -68,14 +72,13 @@ control_help(void)
       "\n"
       "  "BOLD"Bistable"RESET", 'bistable'\n"
       "    Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.\n"
-      "\n"
+      "\n"*/ "this help section is out of date\n"
   );
 }
 
 
 
-void
-calculate_control_indicators(struct run_data *rd) 
+void calculate_control_indicators(struct run_data *rd) 
 {
 
   rd->speed_ind = get_speed(rd); // speed in rotations per second (hz)
@@ -92,13 +95,12 @@ calculate_control_indicators(struct run_data *rd)
 
 
 
-unsigned int
-pid_control(struct run_data *rd)
+unsigned int pid_control(struct run_data *rd)
 {
 
   double dca = 0.0;
   double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
-  double err = rd->control_params->set_point - input;
+  double err = rd->control_params->setpoint - input;
   
   // Proportional control
   dca += rd->control_params->kp * err;
@@ -129,64 +131,85 @@ pid_control(struct run_data *rd)
 
 
 
-unsigned int
-constant_control(struct run_data *rd)
+unsigned int no_control(struct run_data *rd)
 {
-  return (unsigned int)(rd->control_params->c);
+  return (unsigned int)rd->control_params->setpoint;
 }
 
 
 
-unsigned int
-sine_control(struct run_data *rd)
+
+
+// setpoint updaters "setters"
+
+double constant_setter(struct run_data *rd)
+{
+  return rd->control_params->c;
+}
+
+
+
+double sine_setter(struct run_data *rd)
 {
   double theta = 2.0 * PI * rd->time_s_f / rd->control_params->period;
   double rv = ( (sin(theta) + 1.0) * (double)rd->control_params->magnitude ) + rd->control_params->magnitude;
-  return (unsigned int)rv;
+  return rv;
 }
 
 
 
-unsigned int
-bistable_control(struct run_data *rd)
+double bistable_setter(struct run_data *rd)
 {
-  unsigned int periods_passed = (unsigned int)(rd->time_s_f / rd->control_params->period);
+  int periods_passed = (int)(rd->time_s_f / rd->control_params->period);
   return periods_passed % 2 ? rd->control_params->upper : rd->control_params->lower;
 }
 
 
 
-int
-ctlidx_from_str(const char *s)
+int ctlidx_from_str(const char *s)
+{
+  if STREQ(s, "pid")
+    return CONTROL_PID;
+  else if STREQ(s, "none")
+    return CONTROL_NONE;
+  return -1;
+}
+
+
+int setidx_from_str(const char *s)
 {
   if STREQ(s, "constant")
-    return CONTROL_CONSTANT;
-  else if STREQ(s, "pid")
-    return CONTROL_PID;
-  else if STREQ(s, "sine")
-    return CONTROL_SINE;
+    return SETTER_CONSTANT;
   else if STREQ(s, "bistable")
-    return CONTROL_BISTABLE;
+    return SETTER_BISTABLE;
+  else if STREQ(s, "sine")
+    return SETTER_SINE;
   return -1;
 }
 
 
 
 
-control_func_t
-ctlfunc_from_int(int i)
+control_func_t ctlfunc_from_str(char *s)
 {
-  switch (i) {
-    case CONTROL_CONSTANT:
-      return &constant_control;
-    case CONTROL_PID:
-      return &pid_control;
-    case CONTROL_SINE:
-      return &sine_control;
-    case CONTROL_BISTABLE:
-      return &bistable_control;
-  }
+  if STREQ(s, "pid")
+    return &pid_control;
+  else if STREQ(s, "none")
+    return &no_control;
   ferr("ctlfunc_from_int", "unrecognised control scheme index");
+  return NULL;
+}
+
+
+setter_func_t setfunc_from_str(char *s)
+{
+  if STREQ(s, "constant")
+    return &constant_setter;
+  else if STREQ(s, "bistable")
+    return &bistable_setter;
+  else if STREQ(s, "sine")
+    return &sine_setter;
+  ferr("setfunc_from_str", "unrecognised setter scheme index");
   return NULL;
 }
 
@@ -197,13 +220,16 @@ void *ctl_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
   
-  control_func_t ctlfunc = ctlfunc_from_int(ctlidx_from_str(rd->control_scheme));
+  control_func_t ctlfunc = ctlfunc_from_str(rd->control_scheme);
+  setter_func_t setfunc = setfunc_from_str(rd->setter_scheme);
   
   rd->ctl_ready = 1;
 
   while ( (!rd->stopped) && (!rd->errored) ) {
 
     calculate_control_indicators(rd);
+
+    rd->control_params->setpoint = setfunc(rd);
 
     unsigned int control_action = ctlfunc(rd);
 
@@ -217,8 +243,7 @@ void *ctl_thread_func(void *vptr)
 
     rd->last_ca = control_action;
 
-    //rh_nsleep(rd->control_params->sleep_ns);
-    sleep(1);
+    sleep_ms(rd->control_params->sleep_ms);
 
   }
 
@@ -230,8 +255,7 @@ void *ctl_thread_func(void *vptr)
 
 
 
-void
-get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemename, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
+void get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemename, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
 {
   cJSON *param = cJSON_GetObjectItem(json, paramname);
 
@@ -282,8 +306,8 @@ get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemen
 
 
 
-void
-read_control_scheme(struct run_data *rd, const char *control_scheme_json_path)
+
+void read_control_scheme(struct run_data *rd, const char *control_scheme_json_path)
 {
   cJSON *json = read_json(control_scheme_json_path);
 
@@ -308,13 +332,31 @@ read_control_scheme(struct run_data *rd, const char *control_scheme_json_path)
   }
   else {
     cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme json must name a scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
+    ferr("read_control_scheme", "control scheme json must name a control scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
+  }
+
+  cJSON *setter_scheme_name_json = cJSON_GetObjectItem(json, "setter");
+  if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
+
+    rd->setter_scheme = calloc(strlen(setter_scheme_name_json->valuestring)+1, sizeof(char));
+    strcpy(rd->setter_scheme, setter_scheme_name_json->valuestring);
+
+  }
+  else {
+    cJSON_Delete(json);
+    ferr("read_control_scheme", "control scheme json must name a setter scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
   }
   
-  int schemeidx = ctlidx_from_str(rd->control_scheme);
-  if (schemeidx < 0) {
+  int control_idx = ctlidx_from_str(rd->control_scheme);
+  if (control_idx < 0) {
     cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme JSON must name a known scheme. See rheometer -h for a list.");
+    ferr("read_control_scheme", "control scheme JSON must name a known control scheme. See rheometer -h for a list.");
+  }
+
+  int setter_idx = setidx_from_str(rd->setter_scheme);
+  if (setter_idx < 0) {
+    cJSON_Delete(json);
+    ferr("read_control_scheme", "control scheme JSON must name a known setter scheme. See rheometer -h for a list.");
   }
 
   struct control_params *params = malloc(sizeof(struct control_params));
@@ -322,35 +364,46 @@ read_control_scheme(struct run_data *rd, const char *control_scheme_json_path)
   params->kp = 0.0;
   params->ki = 0.0;
   params->kd = 0.0;
-  params->set_point = 0.0;
-  params->sleep_ns = 100*1000*1000;
+  params->setpoint = 0.0;
+  params->sleep_ms = 100;
   params->is_stress_controlled = 0;
   
-  switch (schemeidx) {
-    case CONTROL_CONSTANT:
-      get_control_scheme_parameter(json, PARAM_REQ, "constant", "c", "output value, double", NULL, &params->c, NULL);
-      break;
+  switch (control_idx) {
     case CONTROL_PID:
       get_control_scheme_parameter(json, PARAM_REQ, "pid", "kp", "proportional control coefficient, double", &params->kp, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "pid", "ki", "integral control coefficient, double", &params->ki, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "pid", "kd", "derivative control coefficient, double", &params->kd, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "pid", "setpoint", "set point/target, double", &params->set_point, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "pid", "setpoint", "set point/target, double", &params->setpoint, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_OPT, "pid", "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->is_stress_controlled, NULL);
       break;
-    case CONTROL_SINE:
+    case CONTROL_NONE:
+      break;
+    default:
+      // will not get here; is checked in ctlidx_from_str(char *)
+      break;
+  }
+
+  switch(setter_idx) {
+    case SETTER_CONSTANT:
+      get_control_scheme_parameter(json, PARAM_REQ, "constant", "c", "output value, double", &params->c, NULL, NULL);
+      break;
+    case SETTER_SINE:
       get_control_scheme_parameter(json, PARAM_REQ, "sine", "magnitude", "amplitude of the sine wave (mean to peak), double", &params->magnitude, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "sine", "mean", "mean value of the sine wave, double", &params->mean, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "sine", "period", "period of the sine wave in seconds, double", &params->period, NULL, NULL);
       break;
-    case CONTROL_BISTABLE:
-      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "lower", "lower stable value, integer 0-1024", NULL, &params->lower, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "upper", "upper stable value, integer 0-1024", NULL, &params->upper, NULL);
+    case SETTER_BISTABLE:
+      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "lower", "lower stable value, double", &params->lower, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "upper", "upper stable value, double", &params->upper, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "bistable", "period", "switching period in seconds, double", &params->period, NULL, NULL);
+      break;
+    default:
+      // will not get here; is checked in ctlidx_from_str(char *)
       break;
   }
 
-  // optional params
-  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ns", "interval between control calculations, nanoseconds", NULL, &params->sleep_ns, NULL);
+  // universal (optional) params
+  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ns", "interval between control calculations, nanoseconds", NULL, &params->sleep_ms, NULL);
 
   cJSON_Delete(json);
 
