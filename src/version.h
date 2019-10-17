@@ -1,2 +1,2 @@
 #pragma once
-#define VERSION "20190829"
+#define VERSION "20191018"
