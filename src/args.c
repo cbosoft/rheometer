@@ -16,7 +16,7 @@
 void
 usage(void)
 {
-  fprintf(stderr, 
+  fprintf(stdout, 
       "\n"
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
@@ -34,7 +34,7 @@ void
 help(void)
 {
   usage();
-  fprintf(stderr,
+  fprintf(stdout,
       "  "BOLD"Options:"RESET"\n"
       "    -l | --length    Length of run, can be given in seconds or minutes, dictated\n"
       "                     by a suffixed character. e.g. \"10s\" is 10 seconds, \"10m\"\n"

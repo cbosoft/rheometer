@@ -45,7 +45,7 @@ typedef enum setter_scheme {
 
 void control_help(void)
 {
-  fprintf(stderr, /*
+  fprintf(stdout,
       "  "BOLD"Control Schemes"RESET"\n"
       "    Control schemes are defined in JSON files (stored in the data/ directory).\n"
       "    These JSON files dictate what function should be used, and what parameters \n"
