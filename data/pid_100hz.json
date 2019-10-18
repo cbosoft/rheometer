@@ -1,0 +1,8 @@
+{
+  "control": "pid",
+  "setter": "constant",
+  "kp": 3.0,
+  "ki": 3.0,
+  "kd": 0.0,
+  "setpoint": 100.0
+}
