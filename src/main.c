@@ -86,11 +86,6 @@ int main (int argc, const char ** argv)
   loadcell_setup();
   info("set up loadcell");
 
-  motor_setup();
-  info("warming up motor...");
-  motor_warmup(rd, rd->control_params->c ? rd->control_params->c : 512 );
-  info("motor ready!");
-
 
   info("starting sensor threads...");
   pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread;
@@ -102,6 +97,11 @@ int main (int argc, const char ** argv)
   info("starting logging thread...");
   SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
   sleep(1);
+
+  motor_setup();
+  info("warming up motor...");
+  motor_warmup(rd, 512 );
+  info("motor ready!");
 
   info("starting control thread...");
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
