@@ -47,8 +47,7 @@ static unsigned int cancelled = 0;
 
 
 
-void 
-inthandle(int signo)
+void inthandle(int signo)
 {
   fprintf(stderr, "\n\nInterrupted...\n\n");
   if (signo == SIGINT) {
@@ -60,8 +59,7 @@ inthandle(int signo)
 
 
 
-int
-main (int argc, const char ** argv)
+int main (int argc, const char ** argv)
 {
   struct run_data *rd = init_run_data();
 
@@ -94,14 +92,20 @@ main (int argc, const char ** argv)
   info("motor ready!");
 
 
-  info("starting threads...");
+  info("starting sensor threads...");
   pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread;
   SETUP_THREAD(tmp_thread, thermometer_thread_func, "thermometer", rd->tmp_ready);
   SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
   SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);
+  sleep(1);
+
+  info("starting logging thread...");
+  SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
+  sleep(1);
+
+  info("starting control thread...");
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
   sleep(3);
-  SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
   
   info("begin!");
   unsigned int tish = 0;

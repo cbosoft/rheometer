@@ -23,10 +23,13 @@ struct run_data {
   double viscosity_ind;
   double **ptimes;
   char *control_scheme;
+  char *setter_scheme;
   char *control_scheme_path;
+  char *setter_scheme_path;
   struct control_params *control_params;
   unsigned int last_ca;
-  double *errhist;
+  double err1;
+  double err2;
 
   // run_data
   unsigned int length_s;

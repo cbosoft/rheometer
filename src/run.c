@@ -23,7 +23,8 @@ struct run_data *init_run_data()
 
   rd->speed_ind_timeout = 0.5;
   rd->last_ca = 0;
-  rd->errhist = calloc(ERR_HIST, sizeof(double));
+  rd->err1 = 0.0;
+  rd->err2 = 0.0;
   rd->calm_start = 0;
 
   rd->log_paths = NULL;
@@ -58,7 +59,6 @@ void free_run_data(struct run_data *td)
   if (td->time_us != NULL) free(td->time_us);
 
   if (td->log_pref != NULL) free(td->log_pref);
-  if (td->errhist != NULL) free(td->errhist);
  
   if (td->adc != NULL) free(td->adc);
   if (td->temperature != NULL) free(td->temperature);
