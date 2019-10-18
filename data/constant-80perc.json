@@ -1,6 +1,6 @@
 {
-  "name": "none",
+  "control": "none",
   "setter": "constant",
   "mult": 1.0,
-  "c" : 819
+  "setpoint" : 819
 }
