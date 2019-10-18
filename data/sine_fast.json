@@ -1,6 +1,6 @@
 {
   "name": "sine",
-  "magnitude": 100,
-  "mean": 400,
+  "magnitude": 512,
+  "mean": 512,
   "period" : 10
 }
