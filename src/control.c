@@ -53,26 +53,39 @@ void control_help(void)
       "    below. Scheme names, and all parameter names, are expected to be written in\n"
       "    lowercase in the JSON file.\n"
       "\n"
-      "  "BOLD"Constant voltage"RESET", 'constant'\n"
-      "    A constant is output, the only required parameter is \"c\", the constant (integer)\n"
-      "    control action to output.\n"
+      "  - "BOLD"PID control"RESET", 'pid'\n"
+      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n"
+      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n"
+      "      The three tuning parameters (kp, ki, kd) are required, along with a single \n"
+      "      setpoint parameter. It is usual to not use all three parts of the algorithm, a\n"
+      "      section can be turned off by setting the relevant coefficient to zero.\n"
       "\n"
-      "  "BOLD"PID control"RESET", 'pid'\n"
-      "    Uses the standard PID algoirithm to reject disturbance and maintain a set point:\n"
-      "      caₙ = ca₍ₙ₋₁₎ + (Kp × err) + (Σⁿ Ki × errₙ) + (Kd × derr/dt)\n"
-      "    The three tuning parameters (kp, ki, kd) are required, along with a single \n"
-      "    setpoint parameter. It is usual to not use all three parts of the algorithm, a\n"
-      "    section can be turned off by setting the relevant coefficient to zero.\n"
+      "  - "BOLD"No control"RESET", 'none'\n"
+      "      None actual controlling of the variable is performed; just a simple conversion from \n"
+      "      the stress/strainrate setpoint to DC. A single required parameter is \"mult\", the \n"
+      "      multiplier which does the conversion. This method is not intended to provide robust \n"
+      "      control, but is intended to take the controller out of the equation.\n"
       "\n"
-      "  "BOLD"Sine"RESET", 'sine'\n"
-      "    Sine function operating on the time the experiment has run for. Evaluated as:\n"
-      "      ca = ( sin( 2 × Pi × (t / period) ) × magnitude) + magnitude + mean\n"
-      "    This will produce a sine wave which varies around \"mean\" by an amount \"magnitude\"\n"
-      "    with period \"period\".\n"
+      "  "BOLD"Setpoint (setter) Schemes"RESET"\n"
+      "    Setpoint for the controller is set by one of these functions. It takes in sensor \n"
+      "    readings and time, then deciding the new setpoint. Normally this is a constant, \n"
+      "    being varied by the user between different constants between runs. It is possible that\n"
+      "    dynamic testing may be applied which would require the use of one of the other functions.\n"
+      "    This is a property within the control scheme json file. See the ./dat folder for examples.\n"
       "\n"
-      "  "BOLD"Bistable"RESET", 'bistable'\n"
-      "    Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.\n"
-      "\n"*/ "this help section is out of date\n"
+      "  - "BOLD"Constant value setter"RESET", 'constant'\n"
+      "      A constant setpoint, the only required parameter is \"c\", the constant (double)\n"
+      "      value of stress/strainrate to provide the controller.\n"
+      "\n"
+      "  - "BOLD"Sinusoid setter"RESET", 'sine'\n"
+      "      Sine function operating on the time the experiment has run for. Evaluated as:\n"
+      "        ca = ( sin( 2 × Pi × (t / period) ) × magnitude) + magnitude + mean\n"
+      "      This will produce a sine wave which varies around \"mean\" by an amount \"magnitude\"\n"
+      "      with period \"period\".\n"
+      "\n"
+      "  - "BOLD"Bistable"RESET", 'bistable'\n"
+      "      Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.\n"
+      "\n"
   );
 }
 
@@ -93,10 +106,21 @@ void calculate_control_indicators(struct run_data *rd)
 }
 
 
-
+/*
+  Control algorithms: functions that convert a setpoint (in stress, or
+  strainrate) to a DC.
+ */
 
 unsigned int pid_control(struct run_data *rd)
 {
+  /*
+    PID - proportional -- integral -- derivative control
+
+    Usual velocity algorthm:
+
+    dCA = KP*dErr + KI*Err*dt + KD * (Err - 2Err1 + Err2)/dt
+
+   */
 
   double dca = 0.0;
   double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
@@ -134,6 +158,10 @@ unsigned int pid_control(struct run_data *rd)
 unsigned int no_control(struct run_data *rd)
 {
   return (unsigned int)rd->control_params->setpoint;
+  /*
+    "no_control" - multiplies the setpoint by a number to get a DC, no adaptive
+    control or anything.
+   */
 }
 
 
