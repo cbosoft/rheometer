@@ -183,7 +183,6 @@ parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       "    "FGYELLOW"tag"RESET": \"%s\"\n"
       "    "FGYELLOW"control scheme"RESET": %s\n"
       "    "FGYELLOW"setter scheme"RESET": %s\n"
-      "      "FGMAGENTA"c"RESET": %f\n"
       "      "FGMAGENTA"kp"RESET": %.3f\n"
       "      "FGMAGENTA"ki"RESET": %.3f\n"
       "      "FGMAGENTA"kd"RESET": %.3f\n"
@@ -194,7 +193,6 @@ parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       rd->tag, 
       rd->control_scheme, 
       rd->setter_scheme, 
-      rd->control_params->c, 
       rd->control_params->kp, 
       rd->control_params->ki, 
       rd->control_params->kd, 

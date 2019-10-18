@@ -25,7 +25,6 @@ struct control_params {
   double kp;
   double ki;
   double kd;
-  double setpoint;
   unsigned int is_stress_controlled;
 
   // none
@@ -33,7 +32,7 @@ struct control_params {
 
   /* Setter information */
   // constant
-  double c;
+  double setpoint;
 
   // sin
   double period;

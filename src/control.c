@@ -54,11 +54,11 @@ void control_help(void)
       "    lowercase in the JSON file.\n"
       "\n"
       "  - "BOLD"PID control"RESET", 'pid'\n"
-      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n"
-      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n"
-      "      The three tuning parameters (kp, ki, kd) are required, along with a single \n"
-      "      setpoint parameter. It is usual to not use all three parts of the algorithm, a\n"
-      "      section can be turned off by setting the relevant coefficient to zero.\n"
+      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n\n"
+      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n\n"
+      "      Three tuning parameters (kp, ki, kd) are required, delta time is measured setpoint \n"
+      "      parameter. It is usual to not use all three parts of the algorithm, a section can be \n"
+      "      turned off by setting the relevant coefficient to zero.\n"
       "\n"
       "  - "BOLD"No control"RESET", 'none'\n"
       "      None actual controlling of the variable is performed; just a simple conversion from \n"
@@ -74,7 +74,7 @@ void control_help(void)
       "    This is a property within the control scheme json file. See the ./dat folder for examples.\n"
       "\n"
       "  - "BOLD"Constant value setter"RESET", 'constant'\n"
-      "      A constant setpoint, the only required parameter is \"c\", the constant (double)\n"
+      "      A constant setpoint, the only required parameter is \"setpoint\", the constant (double)\n"
       "      value of stress/strainrate to provide the controller.\n"
       "\n"
       "  - "BOLD"Sinusoid setter"RESET", 'sine'\n"
@@ -165,7 +165,7 @@ unsigned int no_control(struct run_data *rd) {
 
 double constant_setter(struct run_data *rd)
 {
-  return rd->control_params->c;
+  return rd->control_params->setpoint;
 }
 
 
@@ -381,7 +381,6 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   }
 
   struct control_params *params = malloc(sizeof(struct control_params));
-  params->c = 0.0;
   params->kp = 0.0;
   params->ki = 0.0;
   params->kd = 0.0;
@@ -395,7 +394,6 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
       get_control_scheme_parameter(json, PARAM_REQ, "pid", "kp", "proportional control coefficient, double", &params->kp, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "pid", "ki", "integral control coefficient, double", &params->ki, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_REQ, "pid", "kd", "derivative control coefficient, double", &params->kd, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "pid", "setpoint", "set point/target, double", &params->setpoint, NULL, NULL);
       get_control_scheme_parameter(json, PARAM_OPT, "pid", "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->is_stress_controlled, NULL);
       break;
     case CONTROL_NONE:
@@ -408,7 +406,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
   switch(setter_idx) {
     case SETTER_CONSTANT:
-      get_control_scheme_parameter(json, PARAM_REQ, "constant", "c", "output value, double", &params->c, NULL, NULL);
+      get_control_scheme_parameter(json, PARAM_REQ, "constant", "setpoint", "set point/target, double", &params->setpoint, NULL, NULL);
       break;
     case SETTER_SINE:
       get_control_scheme_parameter(json, PARAM_REQ, "sine", "magnitude", "amplitude of the sine wave (mean to peak), double", &params->magnitude, NULL, NULL);
