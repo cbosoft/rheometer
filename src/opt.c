@@ -32,7 +32,7 @@ void opt_mark_0(void) { opt_mark(ord, 0); }
 void opt_mark_1(void) { opt_mark(ord, 1); }
 
 unsigned int tripc[OPTENC_COUNT] = {0};
-time_t last_convert = {0};
+struct timeval last_convert = {0, 0};
 double last_speed = 0.0;
 int opt_log_idxs[OPTENC_COUNT] = {0};
 
@@ -57,7 +57,7 @@ void opt_setup(struct run_data *rd)
   }
   OPT_SETUP(0);
   OPT_SETUP(1);
-  last_convert = time(NULL);
+  gettimeofday(&last_convert, NULL);
   sleep(1);
 }
 
@@ -85,8 +85,11 @@ void opt_mark(struct run_data *rd, unsigned int i)
 
 double get_speed(struct run_data *rd)
 {
-  time_t now = time(NULL);
-  double dt = difftime(now, last_convert);
+  struct timeval now = {0, 0};
+  gettimeofday(&now, NULL);
+  double dseconds = ((double)now.tv_sec) - ((double)last_convert.tv_sec);
+  double duseconds = ((double)now.tv_usec) - ((double)last_convert.tv_usec);
+  double dt = dseconds + (duseconds*0.001*0.001);
 
   if (dt > rd->speed_ind_timeout) {
     last_convert = now;
