@@ -341,7 +341,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
     cJSON_Delete(json);
   }
 
-  cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "name");
+  cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "control");
   if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
 
     rd->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
@@ -353,7 +353,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   }
   else {
     cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme json must name a control scheme.\n  e.g. { ... \"name\": \"pid\" ... }");
+    ferr("read_control_scheme", "control scheme json must name a control scheme.\n  e.g. { ... \"control\": \"pid\" ... }");
   }
 
   cJSON *setter_scheme_name_json = cJSON_GetObjectItem(json, "setter");
