@@ -141,7 +141,7 @@ unsigned int
 sine_control(struct run_data *rd)
 {
   double theta = 2.0 * PI * rd->time_s_f / rd->control_params->period;
-  double rv = ( (sin(theta) + 1.0) * (double)rd->control_params->magnitude ) + rd->control_params->magnitude;
+  double rv = (sin(theta) * (double)rd->control_params->magnitude) + rd->control_params->mean;
   return (unsigned int)rv;
 }
 
