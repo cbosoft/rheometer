@@ -426,7 +426,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   }
 
   // universal (optional) params
-  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ns", "interval between control calculations, nanoseconds", NULL, &params->sleep_ms, NULL);
+  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ms", "interval between control calculations, milliseconds", NULL, &params->sleep_ms, NULL);
 
   cJSON_Delete(json);
 
