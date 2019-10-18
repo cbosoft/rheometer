@@ -147,13 +147,14 @@ unsigned int pid_control(struct run_data *rd)
 
 
 
-unsigned int no_control(struct run_data *rd)
-{
-  return (unsigned int)rd->control_params->setpoint;
+unsigned int no_control(struct run_data *rd) {
+
   /*
     "no_control" - multiplies the setpoint by a number to get a DC, no adaptive
     control or anything.
    */
+
+  return (unsigned int)(rd->control_params->mult * rd->control_params->setpoint);
 }
 
 
@@ -387,6 +388,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   params->setpoint = 0.0;
   params->sleep_ms = 100;
   params->is_stress_controlled = 0;
+  params->mult = 1.0;
   
   switch (control_idx) {
     case CONTROL_PID:
@@ -397,6 +399,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
       get_control_scheme_parameter(json, PARAM_OPT, "pid", "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->is_stress_controlled, NULL);
       break;
     case CONTROL_NONE:
+      get_control_scheme_parameter(json, PARAM_REQ, "none", "mult", "multiplier: used to convert the constant setpoint to a DC. Accuracy of this is not assumed, this is a very very rough conversion.", &params->mult, NULL, NULL);
       break;
     default:
       // will not get here; is checked in ctlidx_from_str(char *)

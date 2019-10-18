@@ -28,6 +28,9 @@ struct control_params {
   double setpoint;
   unsigned int is_stress_controlled;
 
+  // none
+  double mult;
+
   /* Setter information */
   // constant
   double c;
