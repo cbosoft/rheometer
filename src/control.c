@@ -125,29 +125,21 @@ unsigned int pid_control(struct run_data *rd)
   double dca = 0.0;
   double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
   double err = rd->control_params->setpoint - input;
+  double delta_t = rd->control_params->sleep_ms * 0.001;
+
   
   // Proportional control
-  dca += rd->control_params->kp * err;
-
-  // Integral control
-  for (unsigned int i = 0; i < ERR_HIST; i++) {
-    if (rd->errhist[i] == 0)
-      break;
-    dca += rd->errhist[i] * rd->control_params->ki;
-  }
+  dca += rd->control_params->kp * (err - rd->err1);
   
-  // Add error to history
-  double *errhist = calloc(ERR_HIST, sizeof(double)), *tmp;
-  errhist[0] = err;
-  for (unsigned int i = 0; i < ERR_HIST; i++) {
-    errhist[i+1] = rd->errhist[i];
-  }
-  tmp = rd->errhist;
-  rd->errhist = errhist;
-  free(tmp);
+  // Integral control
+  dca += rd->control_params->ki * err * delta_t;
 
   // Derivative control
-  // TODO
+  dca += rd->control_params->kd * (err - rd->err1 - rd->err1 + rd->err2) / delta_t;
+
+  // Update error history
+  rd->err2 = rd->err1;
+  rd->err1 = err;
 
   return (unsigned int)(dca + rd->last_ca);
 }
