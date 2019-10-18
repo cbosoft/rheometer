@@ -21,7 +21,7 @@ struct run_data *init_run_data()
   rd->loadcell_bytes = calloc(1, sizeof(unsigned long));
   rd->loadcell_units = calloc(1, sizeof(double));
 
-  rd->speed_ind_timeout = 0.5;
+  rd->speed_ind_timeout = 0.1;
   rd->last_ca = 0;
   rd->err1 = 0.0;
   rd->err2 = 0.0;
