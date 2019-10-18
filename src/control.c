@@ -257,7 +257,7 @@ void *ctl_thread_func(void *vptr)
     if (control_action > CONTROL_MAXIMUM)
       control_action = CONTROL_MAXIMUM;
 
-    if (control_action < CONTROL_MINIMUM)
+    if ((int)control_action < CONTROL_MINIMUM)
       control_action = CONTROL_MINIMUM;
 
     pwmWrite(PWM_PIN, control_action);

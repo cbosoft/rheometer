@@ -11,7 +11,7 @@
 #define SPD_HIST 10
 #define ERR_HIST 10
 #define CONTROL_MAXIMUM 1024
-#define CONTROL_MINIMUM 200
+#define CONTROL_MINIMUM 0
 
 typedef unsigned int (*control_func_t)(struct run_data *);
 typedef double (*setter_func_t)(struct run_data *);
