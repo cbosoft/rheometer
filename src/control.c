@@ -357,7 +357,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   }
 
   cJSON *setter_scheme_name_json = cJSON_GetObjectItem(json, "setter");
-  if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
+  if (cJSON_IsString(setter_scheme_name_json) && (setter_scheme_name_json->valuestring != NULL)) {
 
     rd->setter_scheme = calloc(strlen(setter_scheme_name_json->valuestring)+1, sizeof(char));
     strcpy(rd->setter_scheme, setter_scheme_name_json->valuestring);
