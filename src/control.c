@@ -353,7 +353,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   }
   else {
     cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme json must name a control scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
+    ferr("read_control_scheme", "control scheme json must name a control scheme.\n  e.g. { ... \"name\": \"pid\" ... }");
   }
 
   cJSON *setter_scheme_name_json = cJSON_GetObjectItem(json, "setter");
@@ -365,7 +365,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   }
   else {
     cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme json must name a setter scheme.\n  e.g. { ... \"name\": \"constant\" ... }");
+    ferr("read_control_scheme", "control scheme json must name a setter scheme.\n  e.g. { ... \"setter\": \"constant\" ... }");
   }
   
   int control_idx = ctlidx_from_str(rd->control_scheme);
