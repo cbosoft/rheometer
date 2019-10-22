@@ -17,6 +17,7 @@
 #include "loadcell.h"
 #include "opt.h"
 #include "control.h"
+#include "webcam.h"
 #include "log.h"
 #include "adc.h"
 #include "util.h"
@@ -88,7 +89,7 @@ int main (int argc, const char ** argv)
 
 
   info("starting sensor threads...");
-  pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread;
+  pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread, vid_thread;
   SETUP_THREAD(tmp_thread, thermometer_thread_func, "thermometer", rd->tmp_ready);
   SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
   SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);
@@ -96,6 +97,9 @@ int main (int argc, const char ** argv)
 
   info("starting logging thread...");
   SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
+  if (rd->video_device != NULL) {
+    SETUP_THREAD(vid_thread, cam_thread_func, "video", rd->cam_ready);
+  }
   sleep(1);
 
   motor_setup();
@@ -134,6 +138,9 @@ int main (int argc, const char ** argv)
   info("waiting for threads to finish...");
 
   THREAD_JOIN(log_thread, "log");
+  if (rd->video_device != NULL) {
+    THREAD_JOIN(vid_thread, "video");
+  }
   THREAD_JOIN(ctl_thread, "control");
   THREAD_JOIN(lc_thread, "loadcell");
   THREAD_JOIN(adc_thread, "adc");
