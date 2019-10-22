@@ -54,6 +54,11 @@ help(void)
       "                     non-Newtonian fluids. However, the motor is more likely to stall on \n"
       "                     start, so be wary about doing tests with this data.\n"
       "\n"
+      "    -v | --video-device    This argument informs the location of the video device to capture\n"
+      "                     from during logging. By setting this option, video logging is enabled.\n"
+      "                     A video of the name \"${prefix}_video.mp4\" will be created and stored\n"
+      "                     alongside the other log files.\n"
+      "\n"
   );
   control_help();
 }
@@ -61,8 +66,7 @@ help(void)
 
 
 
-unsigned int
-parse_length_string(const char *length_s_str)
+unsigned int parse_length_string(const char *length_s_str)
 {
   unsigned int len = strlen(length_s_str);
 
@@ -99,8 +103,7 @@ parse_length_string(const char *length_s_str)
 
 
 
-char *
-parse_tag_string(const char *s) 
+char * parse_tag_string(const char *s) 
 {
   unsigned int l = strlen(s);
   char *rv = calloc(l+1, sizeof(char));
@@ -116,8 +119,7 @@ parse_tag_string(const char *s)
 
 
 
-void
-check_argc(unsigned int i, unsigned int argc) 
+void check_argc(unsigned int i, unsigned int argc) 
 {
   if (i >= argc) {
     argerr("Option needs a value!");
@@ -127,8 +129,7 @@ check_argc(unsigned int i, unsigned int argc)
 
 
 
-void
-parse_args(unsigned int argc, const char **argv, struct run_data *rd) 
+void parse_args(unsigned int argc, const char **argv, struct run_data *rd) 
 {
   rd->tag = TAGDEFAULT;
   unsigned int cs_set = 0, l_set = 0, d_set = 0;
@@ -159,6 +160,13 @@ parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       i++;
       check_argc(i, argc);
       rd->fill_depth = atof(argv[i]);
+      d_set = 1;
+    }
+    else if (EITHER(argv[i], "-v", "--video-device")) {
+      i++;
+      check_argc(i, argc);
+      rd->video_device = calloc(strlen(argv[i])+1, sizeof(char *));
+      strcpy(rd->video_device, argv[i]);
       d_set = 1;
     }
     else if (strcmp(argv[i], "--calm-start") == 0) {
