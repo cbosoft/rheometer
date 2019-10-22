@@ -57,6 +57,7 @@ struct run_data {
   unsigned int stopped;
   unsigned int errored;
   const char *error_string;
+  char *video_device;
 
   // }}}
 };
