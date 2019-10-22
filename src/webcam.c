@@ -2,22 +2,32 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
-
+#include <sys/wait.h>
 
 #include "run.h"
-char *record_args[9] = {"-f", "v4l2", "-framereate", "15", "-video_size", "640x480", "-i", "/dev/video0", "out.mkv"};
-const int FRAMERATE_ARG = 3;
-const int INPUT_ARG = 7;
-const int OUTPUT_ARG = 8;
+#include "error.h"
+#include "log.h"
+
+
+char *record_args[15] = {
+  "ffmpeg", "-y", 
+  "-f", "v4l2",
+  "-i", "/dev/video0", 
+  "-framerate", "15", 
+  "-video_size", "640x480", 
+  "-f", "mp4", "out.mp4", NULL};
+const int INPUT_ARG = 5;
+const int FRAMERATE_ARG = 7;
+const int OUTPUT_ARG = 12;
 
 
 void *cam_thread_func(void *vtd)
 {
   struct run_data *rd = (struct run_data*)vtd;
 
-  char video_path[200] = {0};
-  snprintf(video_path, 199, "%s_video.mkv", rd->log_pref);
-  record_args[OUTPUT_ARG] = video_path;
+  int video_idx = add_log(rd, "video", "%s_video.mp4", rd->log_pref);
+  record_args[INPUT_ARG] = rd->video_device;
+  record_args[OUTPUT_ARG] = rd->log_paths[video_idx];
 
   int sp_stdin[2], sp_stdout[2], sp_stderr[2];
 
@@ -43,18 +53,27 @@ void *cam_thread_func(void *vtd)
     execvp("ffmpeg", record_args);
   }
 
+  fprintf(stderr, "forked. child PID=%d\n", child_pid);
+
   rd->cam_ready = 1;
 
+  int i = 0;
   while ( (!rd->stopped) && (!rd->errored) ) {
 
-    // TODO: ping to ensure video is still running
-    // check PID?
+    if (waitpid(child_pid, NULL, WNOHANG)) {
+      warn("cam_thread_func", "ffmpeg process died unexpectedly");
+      pthread_exit(0);
+    }
+
+    sleep(1);
+    i++;
 
   }
 
-  // send 'q\n' to stdin of child to kill cam
-  // wait for it to process
-  // check PID?
+  if (!waitpid(child_pid, NULL, WNOHANG)) {
+    write(sp_stdin[1], "q", 1);
+    waitpid(child_pid, NULL, 0);
+  }
 
   pthread_exit(0);
 
