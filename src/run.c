@@ -38,6 +38,7 @@ struct run_data *init_run_data()
   rd->log_ready = 0;
   rd->tmp_ready = 0;
   rd->lc_ready = 0;
+  rd->cam_ready = 0;
 
   rd->adc_busy = 0;
   rd->adc_dt = 0.0;
