@@ -5,10 +5,13 @@
 
 #include "args.h"
 #include "display.h"
-#include "version.h"
 #include "log.h"
 #include "control.h"
 #include "error.h"
+
+#ifndef VERSION
+#define VERSION "UNSET"
+#endif
 
 #define EITHER(A,B,C) ( (strcmp(A, B) == 0) || (strcmp(A, C) == 0) )
 
@@ -185,7 +188,7 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
 
   // finished setting args, display
   fprintf(stderr, 
-      "  "BOLD"rheometer"RESET" v"VERSION"\n"
+      "  "BOLD"rheometer"RESET" v%s\n"
       "\n"
       "  Run options:\n"
       "    "FGYELLOW"tag"RESET": \"%s\"\n"
@@ -198,6 +201,7 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       "      "FGMAGENTA"control interval"RESET": %f ms\n"
       "      "FGMAGENTA"controlled variable"RESET": %s\n"
       "    "FGYELLOW"length"RESET": %u s\n",
+      VERSION,
       rd->tag, 
       rd->control_scheme, 
       rd->setter_scheme, 
