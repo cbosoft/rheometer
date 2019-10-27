@@ -30,6 +30,7 @@ struct run_data *init_run_data()
   rd->log_paths = NULL;
   rd->log_names = NULL;
   rd->log_count = 0;
+  rd->uid = NULL;
 
   rd->stopped = 0;
   rd->errored = 0;
@@ -61,6 +62,7 @@ void free_run_data(struct run_data *td)
   if (td->time_us != NULL) free(td->time_us);
 
   if (td->log_pref != NULL) free(td->log_pref);
+  if (td->uid != NULL) free(td->uid);
  
   if (td->adc != NULL) free(td->adc);
   if (td->temperature != NULL) free(td->temperature);

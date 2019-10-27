@@ -39,6 +39,7 @@ struct run_data {
   char **log_paths;
   char **log_names;
   unsigned int log_count;
+  char *uid;
 
   // program control stuff
   struct adc_handle *adc_handle;

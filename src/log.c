@@ -18,6 +18,7 @@
 #include "loadcell.h"
 #include "thermometer.h"
 #include "loadcell.h"
+#include "uid.h"
 
 
 #ifndef PATH_MAX
@@ -51,6 +52,8 @@ void generate_log_prefix(struct run_data *rd)
   char *log_pref = calloc(256, sizeof(char));
   sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->control_scheme, rd->tag);
   rd->log_pref = log_pref;
+
+  rd->uid = get_uid();
 
   free(date);
 

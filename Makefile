@@ -12,11 +12,12 @@ RHEO = obj/adc.o \
 			 obj/log.o \
 			 obj/main.o \
 			 obj/motor.o \
+			 obj/nouns.o \
 			 obj/opt.o \
 			 obj/run.o \
 			 obj/tar.o \
 			 obj/thermometer.o \
-			 obj/util.o
+			 obj/uid.o \
 WPI = wpi/libwiringPi.so
 
 
