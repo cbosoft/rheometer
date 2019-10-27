@@ -18,6 +18,8 @@ RHEO = obj/adc.o \
 			 obj/tar.o \
 			 obj/thermometer.o \
 			 obj/uid.o \
+			 obj/util.o \
+			 obj/webcam.o
 WPI = wpi/libwiringPi.so
 
 
