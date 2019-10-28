@@ -9,16 +9,18 @@
 #include "log.h"
 
 
-char *record_args[15] = {
-  "ffmpeg", "-y", 
-  "-f", "v4l2",
-  "-i", "/dev/video0", 
-  "-framerate", "15", 
-  "-video_size", "640x480", 
-  "-f", "mp4", "out.mp4", NULL};
-const int INPUT_ARG = 5;
-const int FRAMERATE_ARG = 7;
-const int OUTPUT_ARG = 12;
+char *record_args[20] = {
+  "ffmpeg", "-y", //1
+  "-f", "v4l2", //3
+  "-framerate", "10", //5
+  "-input_format", "mjpeg",//7
+  "-video_size", "320x240", //9
+  "-i", "/dev/video0", //11
+  "-f", "mp4", //13
+  "out.mp4", NULL};
+const int FRAMERATE_ARG = 5;
+const int INPUT_ARG = 11;
+const int OUTPUT_ARG = 14;
 
 
 void *cam_thread_func(void *vtd)
