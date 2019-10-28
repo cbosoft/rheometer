@@ -56,10 +56,12 @@ void *cam_thread_func(void *vtd)
     execvp("ffmpeg", record_args);
   }
 
-  info("ffmpeg forked: PID=%d", child_pid);
   fcntl(sp_stderr[1], F_SETFL, O_NONBLOCK);
 
+  info("ffmpeg forked: PID=%d", child_pid);
+  time_t now = time(NULL);
   rd->cam_ready = 1;
+  rd->cam_start = now;
 
   int i = 0;
   while ( (!rd->stopped) && (!rd->errored) ) {
@@ -82,10 +84,13 @@ void *cam_thread_func(void *vtd)
 
   }
 
+  now = time(NULL);
+
   if (!waitpid(child_pid, NULL, WNOHANG)) {
     write(sp_stdin[1], "q", 1);
     waitpid(child_pid, NULL, 0);
   }
+  rd->cam_end = now;
 
   pthread_exit(0);
 
