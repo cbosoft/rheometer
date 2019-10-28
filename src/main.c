@@ -70,7 +70,7 @@ int main (int argc, const char ** argv)
     ferr("main", "could not create signal handler");
 
   generate_log_prefix(rd);
-  info("unique ID: %s%s%s\n", BOLD, rd->uid, RESET);
+  info("unique ID: %s%s%s", BOLD, rd->uid, RESET);
 
   rd->adc_handle = adc_open("/dev/spidev0.1");
   info("connected to ADC");
@@ -152,7 +152,7 @@ int main (int argc, const char ** argv)
   info("  params written");
   tidy_logs(rd);
   info("  logs tar'd to "FGBLUE"\"%s.tar.bz2\""RESET, rd->log_pref);
-  info("  unique ID: %s%s%s\n", BOLD, rd->uid, RESET);
+  info("  unique ID: %s%s%s", BOLD, rd->uid, RESET);
 
   // invalid pointer error... trying to free that which has not been alloc'd?
   free_run_data(rd);
