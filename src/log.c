@@ -85,6 +85,24 @@ void save_run_params_to_json(struct run_data *rd)
   CHECKJSON(depth_mm_json);
   cJSON_AddItemToObject(params, "depth_mm", depth_mm_json);
 
+  cJSON *software_version = cJSON_CreateString(VERSION);
+  CHECKJSON(software_version);
+  cJSON_AddItemToObject(params, "software_version", software_version);
+
+  if (rd->video_device != NULL) {
+    cJSON *video_device = cJSON_CreateString(rd->video_device);
+    CHECKJSON(video_device);
+    cJSON_AddItemToObject(params, "video_device", software_version);
+
+    cJSON *video_start_json = cJSON_CreateNumber(rd->cam_start);
+    CHECKJSON(video_start_json);
+    cJSON_AddItemToObject(params, "video_start", software_version);
+
+    cJSON *video_end_json = cJSON_CreateNumber(rd->cam_end);
+    CHECKJSON(video_end_json);
+    cJSON_AddItemToObject(params, "video_end", software_version);
+  }
+
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
   sprintf(params_path, "%s_runparams.json", rd->log_pref);
@@ -216,7 +234,7 @@ void *log_thread_func(void *vptr) {
     fprintf(log_fp, "%u,", rd->last_ca);
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%lu\n", (*rd->loadcell_bytes));
-
+    
     sleep_us(900);
   }
 
