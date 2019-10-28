@@ -90,19 +90,23 @@ void save_run_params_to_json(struct run_data *rd)
   cJSON_AddItemToObject(params, "software_version", software_version);
 
   if (rd->video_device != NULL) {
+    info("video_dev");
     cJSON *video_device = cJSON_CreateString(rd->video_device);
     CHECKJSON(video_device);
-    cJSON_AddItemToObject(params, "video_device", software_version);
+    cJSON_AddItemToObject(params, "video_device", video_device);
 
+    info("video_start");
     cJSON *video_start_json = cJSON_CreateNumber(rd->cam_start);
     CHECKJSON(video_start_json);
-    cJSON_AddItemToObject(params, "video_start", software_version);
+    cJSON_AddItemToObject(params, "video_start", video_start_json);
 
+    info("video_end");
     cJSON *video_end_json = cJSON_CreateNumber(rd->cam_end);
     CHECKJSON(video_end_json);
-    cJSON_AddItemToObject(params, "video_end", software_version);
+    cJSON_AddItemToObject(params, "video_end", video_end_json);
   }
 
+  info("saving");
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
   sprintf(params_path, "%s_runparams.json", rd->log_pref);
