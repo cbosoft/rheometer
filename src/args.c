@@ -22,7 +22,7 @@ usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start]\n"
+      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start] [-v <video-dev>]\n"
       "    rheometer -h|--help\n"
       "\n"
   );
