@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include "run.h"
 #include "error.h"
@@ -56,6 +57,7 @@ void *cam_thread_func(void *vtd)
   }
 
   info("ffmpeg forked: PID=%d", child_pid);
+  fcntl(sp_stderr[1], F_SETFL, O_NONBLOCK);
 
   rd->cam_ready = 1;
 
@@ -64,10 +66,13 @@ void *cam_thread_func(void *vtd)
 
     if (waitpid(child_pid, NULL, WNOHANG)) {
       // TODO: remove video from list of logs
-      // TODO: properly read from stderr until stderr has nothing left
-      char *se = malloc(10000*sizeof(char));
-      read(sp_stderr[0], se, 9999);
-      warn("cam_thread_func", "ffmpeg process died unexpectedly: %s", se);
+      warn("cam_thread_func", "ffmpeg process died unexpectedly:");
+      char *se = malloc((100 + 1)*sizeof(char));
+      int c = read(sp_stderr[0], se, 100);
+      while (c) {
+        warn("cam_thread_func", "%s", se);
+        c = read(sp_stderr[0], se, 100);
+      }
       free(se);
       pthread_exit(0);
     }
