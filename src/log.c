@@ -131,6 +131,37 @@ int add_log(struct run_data *rd, const char* name, const char* fmt, ...)
 
 
 
+
+int remove_log(struct run_data *rd, unsigned int index)
+{
+  if (index >= rd->log_count) {
+    warn("remove_log", "Log index outside of list (%d out of %d)", index, rd->log_count);
+  }
+
+  char **log_paths = rd->log_paths, **log_names = rd->log_names;
+
+  rd->log_paths = calloc(rd->log_count-1, sizeof(char*));
+  rd->log_names = calloc(rd->log_count-1, sizeof(char*));
+
+  for (unsigned int i = 0, j = 0; i < rd->log_count; i++) {
+    
+    if (i == index)
+      continue;
+
+    rd->log_paths[j] = log_paths[i];
+    rd->log_names[j] = log_names[i];
+
+    j++;
+
+  }
+
+  rd->log_count --;
+
+  return 0;
+}
+
+
+
 void set_time(struct run_data *rd)
 {
   struct timeval tv;

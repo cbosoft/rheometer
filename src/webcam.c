@@ -67,7 +67,6 @@ void *cam_thread_func(void *vtd)
   while ( (!rd->stopped) && (!rd->errored) ) {
 
     if (waitpid(child_pid, NULL, WNOHANG)) {
-      // TODO: remove video from list of logs
       warn("cam_thread_func", "ffmpeg process died unexpectedly:");
       char *se = malloc((100 + 1)*sizeof(char));
       int c = read(sp_stderr[0], se, 100);
@@ -76,6 +75,7 @@ void *cam_thread_func(void *vtd)
         c = read(sp_stderr[0], se, 100);
       }
       free(se);
+      remove_log(rd, video_idx);
       pthread_exit(0);
     }
 
