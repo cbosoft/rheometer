@@ -55,7 +55,7 @@ void *cam_thread_func(void *vtd)
     execvp("ffmpeg", record_args);
   }
 
-  fprintf(stderr, "forked. child PID=%d\n", child_pid);
+  info("ffmpeg forked: PID=%d", child_pid);
 
   rd->cam_ready = 1;
 
