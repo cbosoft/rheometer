@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <glob.h>
 
 #include "thermometer.h"
@@ -146,6 +147,7 @@ void* thermometer_thread_func(void *vptr)
     double *previous = rd->temperature;
     rd->temperature = reading;
     free(previous);
+    sleep(3);
 
   }
 
