@@ -4,8 +4,10 @@
 #include <stdio.h>
 
 #include "util.h"
+#include "error.h"
 
 
+#define BILLION 1000*1000*1000
 
 
 double time_elapsed(struct timeval end, struct timeval start)
@@ -17,25 +19,9 @@ double time_elapsed(struct timeval end, struct timeval start)
 }
 
 
+#ifdef BLOCKING_SLEEP
 
-
-void sleep_us(double delay_us)
-{
-  blocking_sleep( delay_us * 1e-6 );
-}
-
-
-
-
-void sleep_ms(double delay_ms)
-{
-  blocking_sleep( delay_ms * 1e-3 );
-}
-
-
-
-
-void blocking_sleep(double delay_s)
+static void _sleep(double delay_s)
 {
   struct timeval start, now;
   gettimeofday(&start, NULL);
@@ -44,4 +30,31 @@ void blocking_sleep(double delay_s)
     if (time_elapsed(now, start) > delay_s)
       break;
   }
+}
+
+#else
+
+static void _sleep(double delay_s)
+{
+  struct timespec delay;
+  delay.tv_sec = (int)(delay_s);
+  delay.tv_nsec = (((int)delay_s)*BILLION) % BILLION;
+  int rv = nanosleep(&delay, NULL);
+
+  if (rv)
+    warn("nonblocking_sleep", "nanosleep interrupted.");
+}
+
+#endif
+
+
+void sleep_us(double delay_us)
+{
+  _sleep( delay_us * 1e-6 );
+}
+
+
+void sleep_ms(double delay_ms)
+{
+  _sleep( delay_ms * 1e-3 );
 }
