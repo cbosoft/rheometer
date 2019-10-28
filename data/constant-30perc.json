@@ -2,5 +2,6 @@
   "control": "none",
   "setter": "constant",
   "mult": 1.0,
-  "setpoint" : 307
+  "setpoint" : 307,
+  "sleep_ms" : 10000
 }
