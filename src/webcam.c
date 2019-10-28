@@ -8,6 +8,7 @@
 #include "run.h"
 #include "error.h"
 #include "log.h"
+#include "util.h"
 
 
 char *record_args[20] = {
@@ -79,7 +80,7 @@ void *cam_thread_func(void *vtd)
       pthread_exit(0);
     }
 
-    sleep(1);
+    sleep_ms(100);
     i++;
 
   }
