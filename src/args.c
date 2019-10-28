@@ -3,15 +3,13 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "version.h"
 #include "args.h"
 #include "display.h"
 #include "log.h"
 #include "control.h"
 #include "error.h"
 
-#ifndef VERSION
-#define VERSION "UNSET"
-#endif
 
 #define EITHER(A,B,C) ( (strcmp(A, B) == 0) || (strcmp(A, C) == 0) )
 

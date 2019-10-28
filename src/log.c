@@ -19,6 +19,7 @@
 #include "thermometer.h"
 #include "loadcell.h"
 #include "uid.h"
+#include "version.h"
 
 
 #ifndef PATH_MAX
