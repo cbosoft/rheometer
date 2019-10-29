@@ -38,7 +38,7 @@ static void _sleep(double delay_s)
 {
   struct timespec delay;
   delay.tv_sec = (int)(delay_s);
-  delay.tv_nsec = (((int)delay_s)*BILLION) % BILLION;
+  delay.tv_nsec = ((long)(delay_s*((double)(BILLION)))) % (BILLION);
   int rv = nanosleep(&delay, NULL);
 
   if (rv)
