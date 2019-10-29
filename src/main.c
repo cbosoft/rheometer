@@ -50,10 +50,20 @@ static unsigned int cancelled = 0;
 
 void inthandle(int signo)
 {
-  fprintf(stderr, "\n\nInterrupted...\n\n");
   if (signo == SIGINT) {
     fprintf(stderr, "\r");
-    cancelled = 1;
+    cancelled ++;
+  }
+
+  if (cancelled > 10) {
+    fprintf(stderr, "\n\n CONTINUE PRESSING CTRL+C TO HALT EXECUTION FORCEFULLY.\n THIS WILL RUIN THE RUN.\n DON'T TAKE THIS WARNING LIGHTLY.\n\n");
+    //warn("interrupt_handler", "continue pressing CTRL+c to halt execution forcefully.")
+  }
+  else if (cancelled > 20) {
+    exit(1);
+  }
+  else {
+    fprintf(stderr, "\n\nInterrupted...\n\n");
   }
 }
 
