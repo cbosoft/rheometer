@@ -41,17 +41,17 @@ void generate_log_prefix(struct run_data *rd)
   struct tm *timeinfo;
   time(&rawtime);
   timeinfo = localtime(&rawtime);
-  strftime(date, 50, "%Y-%m-%d", timeinfo);
+  strftime(date, 14, "%Y-%m-%d", timeinfo);
 
   char *pattern = calloc(256, sizeof(char));
-  sprintf(pattern, "%s/%s_%s(*)_%s_%s.csv", log_dir, genpref, date, rd->control_scheme, rd->tag);
+  sprintf(pattern, "%s/%s_%s_*_%s.csv", log_dir, genpref, date, rd->tag);
 
   glob_t glob_res;
   glob((const char *)pattern, GLOB_NOSORT, NULL, &glob_res);
   free(pattern);
 
   char *log_pref = calloc(256, sizeof(char));
-  sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->control_scheme, rd->tag);
+  sprintf(log_pref, "%s/%s_%s_%03u_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->tag);
   rd->log_pref = log_pref;
 
   rd->uid = get_uid();
