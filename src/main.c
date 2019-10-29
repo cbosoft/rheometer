@@ -116,7 +116,7 @@ int main (int argc, const char ** argv)
   motor_setup();
   info("warming up motor...");
   motor_warmup(rd, 512 );
-  info("motor ready!");
+  info("  motor ready!");
 
   info("starting control thread...");
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
