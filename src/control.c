@@ -453,28 +453,49 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
 
 
-void analyze(int length, struct run_data *rd, struct controller_analysis_result *res)
+void analyze(int length, struct run_data *rd)
 {
   double *error = calloc(length, sizeof(double));
   double total = 0.0;
+  int plotting = 1;
+  FILE *fp = fopen("control_analysis_data.csv", "w");
+
+  if (fp == NULL) plotting = 0;
 
   fprintf(stderr, "Gathering data...\n");
   for (int i = 0; i < length; i++) {
     error[i] = rd->err1;
     total += error[i];
     fprintf(stderr, "  %d/%d    \r", i+1, length);
+    if (plotting) {
+      fprintf(fp, "%f\n", error[i]);
+    }
     sleep(1);
   }
   fprintf(stderr, "\n");
+  fclose(fp);
 
-  res->average_error = total/((double)length);
+  double average_error = total/((double)length);
 
   double sumsqdiff = 0.0;
   for (int i = 0; i < length; i++)
-    sumsqdiff += pow(error[i] - res->average_error, 2.0);
+    sumsqdiff += pow(error[i] - average_error, 2.0);
 
-  res->stddev_error = pow( sumsqdiff/((double)(length - 1)) ,0.5);
+  double stddev_error = pow( sumsqdiff/((double)(length - 1)) ,0.5);
+
+  system("gnuplot /home/pi/gits/rheometer/plot_control_analysis.gplot");
+  fprintf(stderr, 
+      BOLD"Analysis results"RESET": Eav: %f, std: %f\n", 
+      average_error, 
+      stddev_error);
 }
+
+
+
+
+
+
+
 
 
 
@@ -498,7 +519,7 @@ void do_tuning(struct run_data *rd) {
   double value = 0.0;
   char input[100], cmd[100], variable[50];
 
-  while (1) {
+  while ( (!rd->stopped) && (!rd->errored) ) {
     
     fprintf(stderr, "Waiting...\n");
     for (int i = 0; i < l; i++) {
@@ -506,6 +527,8 @@ void do_tuning(struct run_data *rd) {
       sleep(1);
     }
     fprintf(stderr, "\n");
+
+    // TODO create new log holding the changes in tuning
 
     while (1) {
       // read user input
@@ -556,17 +579,12 @@ void do_tuning(struct run_data *rd) {
         else if (strcmp(variable, "kd") == 0) {
           rd->control_params->kd = value;
         }
+        // TODO log tuning parameter change
 
       }
       else if (strcmp(cmd, "analyze") == 0) {
         
-        struct controller_analysis_result result;
-        analyze(analyze_length, rd, &result);
-
-        fprintf(stderr, 
-            BOLD"Analysis results"RESET": Eav: %f, std: %f\n", 
-            result.average_error, 
-            result.stddev_error);
+        analyze(analyze_length, rd);
 
       }
       else if (strcmp(cmd, "show") == 0) {
