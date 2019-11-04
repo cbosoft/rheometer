@@ -453,7 +453,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
 
 
-void analyze(int length, struct run_data *rd)
+void analyse(int length, struct run_data *rd)
 {
   double *error = calloc(length, sizeof(double));
   double total = 0.0;
@@ -506,7 +506,7 @@ void do_tuning(struct run_data *rd) {
    * Rheometer runs for a period of time, before allowing the user to select a
    * new set of tuning parameters.  */
 
-  int l = 10, analyze_length = 0;
+  int l = 10, analyse_length = 0;
   fprintf(stderr, 
       "  "BOLD"Welcome to the TD tuner."RESET"\n"
       "\n"
@@ -549,11 +549,11 @@ void do_tuning(struct run_data *rd) {
         }
 
       }
-      else if (strncmp(input, "analyze", 7) == 0) {
-        int nmatch = sscanf(input, "%s %d", cmd, &analyze_length);
+      else if (strncmp(input, "analyse", 7) == 0) {
+        int nmatch = sscanf(input, "%s %d", cmd, &analyse_length);
 
         if (nmatch < 2) {
-          analyze_length = 30;
+          analyse_length = 30;
         }
       }
       else {
@@ -563,10 +563,12 @@ void do_tuning(struct run_data *rd) {
       if (strcmp(cmd, "help") == 0) {
         fprintf(stderr, 
             "  "BOLD"Commands:"RESET"\n"
-            "    set <var> <val>    set var to value, valid vars: kp, ki, kd\n"
-            "    show               show the current params\n"
-            "    done               finish tuning\n"
-            "    analyse [<len>]    analyze a <len=30> second section of data.\n");
+            "    show                 show the current params\n"
+            "    set <var> <val>      set var to value, valid vars: kp, ki, kd\n"
+            "    analyse [<len>]      analyse a <len=30> second section of data.\n"
+            //"    autotune [<method>]  run an autotuning algorithm.\n" // TODO
+            "    done                 finish tuning\n"
+            );
       }
       else if (strcmp(cmd, "set") == 0) {
 
@@ -582,9 +584,14 @@ void do_tuning(struct run_data *rd) {
         // TODO log tuning parameter change
 
       }
-      else if (strcmp(cmd, "analyze") == 0) {
+      else if (strcmp(cmd, "analyse") == 0) {
         
-        analyze(analyze_length, rd);
+        analyse(analyse_length, rd);
+
+      }
+      else if (strcmp(cmd, "autotune") == 0) {
+
+        // TODO
 
       }
       else if (strcmp(cmd, "show") == 0) {
