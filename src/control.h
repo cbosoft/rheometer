@@ -65,6 +65,7 @@ void *ctl_thread_func(void *vtd);
 void read_control_scheme(struct run_data *rd, const char *control_scheme_string);
 void control_help(void);
 void update_setpoint(struct run_data *rd);
+void do_tuning(struct run_data *rd);
 
 
 

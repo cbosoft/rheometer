@@ -431,3 +431,93 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   rd->control_params = params;
 
 }
+
+
+
+
+
+
+void do_tuning(struct run_data *rd) {
+  /*
+   * User selects setpoint and an initial set of params, from a scheme.json.
+   * Rheometer runs for a period of time, before allowing the user to select a
+   * new set of tuning parameters.  */
+
+  int l = 10;
+  fprintf(stderr, 
+      "  "BOLD"Welcome to the TD tuner."RESET"\n"
+      "\n"
+      "    The controller will run for %ds, before dropping to an interactive shell\n"
+      "    so you may alter tuning parameters. In the shell, type 'help' to get a list\n"
+      "    of valid commands.\n",
+      l);
+  
+  
+  double value = 0.0;
+  char cmd[100], variable[100];
+
+  while (1) {
+    
+    fprintf(stderr, "Waiting...\n");
+    for (int i = 0; i < l; i++) {
+      fprintf(stderr, "  %d/%d    \r", i+1, l);
+      sleep(1);
+    }
+    fprintf(stderr, "\n");
+
+    while (1) {
+      // read user input
+      fprintf(stderr, "%s", ": ");
+      
+      int nmatch = scanf("%s %s %lf", cmd, variable, &value);
+      if (nmatch == EOF || nmatch < 1) {
+confused:
+        fprintf(stderr, "?\n");
+        continue;
+      }
+
+      if (strcmp(cmd, "help") == 0) {
+        fprintf(stderr, 
+            "  "BOLD"Commands:"RESET"\n"
+            "    set <var> <val>    set var to value, valid vars: kp, ki, kd\n"
+            "    show               show the current params\n"
+            "    done               try the parameters\n"
+            "    exit               exit program\n");
+      }
+      else if (strcmp(cmd, "set") == 0) {
+
+        if (nmatch < 3) goto confused;
+
+        if (strcmp(variable, "kp") == 0) {
+          rd->control_params->kp = value;
+        }
+        else if (strcmp(variable, "ki") == 0) {
+          rd->control_params->ki = value;
+        }
+        else if (strcmp(variable, "kd") == 0) {
+          rd->control_params->kd = value;
+        }
+
+      }
+      else if (strcmp(cmd, "done") == 0) {
+        break;
+      }
+      else if (strcmp(cmd, "show") == 0) {
+        fprintf(stderr, 
+            "  KP = %f\n"
+            "  KI = %f\n"
+            "  KD = %f\n",
+            rd->control_params->kp,
+            rd->control_params->ki,
+            rd->control_params->kd);
+      }
+      else if (strcmp(cmd, "exit") == 0) {
+        fprintf(stderr, BOLD"Tuning finished!"RESET"\n");
+        return;
+      }
+      else {
+        goto confused;
+      }
+    }
+  }
+}

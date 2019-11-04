@@ -1,5 +1,7 @@
 #pragma once
 
+enum MODE{ MODE_NORMAL, MODE_TUNING };
+
 
 struct run_data {
   // {{{
@@ -51,6 +53,7 @@ struct run_data {
   unsigned int lc_ready;
   unsigned int cam_ready;
   int calm_start;
+  int mode;
 
   unsigned int adc_busy;
   double adc_dt;

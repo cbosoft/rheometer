@@ -26,6 +26,7 @@ struct run_data *init_run_data()
   rd->err1 = 0.0;
   rd->err2 = 0.0;
   rd->calm_start = 0;
+  rd->mode = MODE_NORMAL;
 
   rd->log_paths = NULL;
   rd->log_names = NULL;

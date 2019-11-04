@@ -112,16 +112,27 @@ int main (int argc, const char ** argv)
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
   sleep(3);
   
-  info("begin!");
-  unsigned int tish = 0;
-  while ( (!cancelled) && (tish <= rd->length_s) ) {
-    sleep(1);
-    tish ++;
-    display_thread_data(rd);
-    display_titles();
+  switch (rd->mode) {
+
+    case MODE_TUNING:
+      do_tuning(rd);
+      break;
+
+    case MODE_NORMAL:  /* fall through */
+    default:
+      info("begin!");
+      unsigned int tish = 0;
+      while ( (!cancelled) && (tish <= rd->length_s) ) {
+        sleep(1);
+        tish ++;
+        display_thread_data(rd);
+        display_titles();
+      }
+      rd->stopped = 1;
+      fprintf(stderr, "\n");
+      break;
+      
   }
-  rd->stopped = 1;
-  fprintf(stderr, "\n");
 
 #ifndef DEBUG
   system("gpio unexport 16");

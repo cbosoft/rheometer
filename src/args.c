@@ -175,6 +175,9 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
     else if (strcmp(argv[i], "--calm-start") == 0) {
       rd->calm_start = 1;
     }
+    else if (strcmp(argv[i], "--tune") == 0) {
+      rd->mode = MODE_TUNING;
+    }
     else {
       argerr("given unknown arg");
     }
