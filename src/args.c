@@ -3,15 +3,13 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "version.h"
 #include "args.h"
 #include "display.h"
 #include "log.h"
 #include "control.h"
 #include "error.h"
 
-#ifndef VERSION
-#define VERSION "UNSET"
-#endif
 
 #define EITHER(A,B,C) ( (strcmp(A, B) == 0) || (strcmp(A, C) == 0) )
 
@@ -24,7 +22,7 @@ usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start]\n"
+      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start] [-v <video-dev>]\n"
       "    rheometer -h|--help\n"
       "\n"
   );

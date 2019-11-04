@@ -1,2 +1,3 @@
-#pragma once
-#define VERSION "20191018"
+#ifndef VERSION
+#define VERSION "UNSET"
+#endif

@@ -10,10 +10,13 @@
 #include "run.h"
 
 
+#define CENTER_AND_DISPLAY(VAL, FMT)  \
+  snprintf(formatted, colw, FMT, VAL);\
+  centre(formatted, colw, &centered);\
+  fprintf(stderr, "%s ", centered);
 
 
-unsigned int
-get_column_width(void)
+unsigned int get_column_width(void)
 {
   struct winsize ws;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
@@ -45,16 +48,14 @@ get_column_width(void)
 
 
 
-char *
-centre(char *s, unsigned int w)
+void centre(char *s, unsigned int w, char *c[])
 {
-  char *rv = calloc(w+3, sizeof(char));
   char padchar = ' ';
   
   unsigned int l = strlen(s);
   if (l > w) {
     for (unsigned int i = 0; i < w; i++) {
-      rv[i] = s[i];
+      (*c)[i] = s[i];
     }
   }
   else {
@@ -63,142 +64,76 @@ centre(char *s, unsigned int w)
     unsigned int i = 0;
 
     for (; i < p; i++)
-      rv[i] = padchar;
+      (*c)[i] = padchar;
 
     for (; i < (p+l); i++)
-      rv[i] = s[i-p];
+      (*c)[i] = s[i-p];
 
     for (; i < w; i++)
-      rv[i] = padchar;
+      (*c)[i] = padchar;
   }
-  return rv;
 }
 
 
 
 
-void
-display_titles(void)
+void display_titles(void)
 {
   unsigned int colw = get_column_width();
+  char 
+    *formatted = calloc(colw+1, sizeof(char)), 
+    *centered  = calloc(colw+1, sizeof(char));
 
-  char *time = centre("t/s", colw);
-  fprintf(stderr, "%s%s ", BOLD, time);
-  free(time);
+  CENTER_AND_DISPLAY("t/s", "%s");
   
   // for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-  //   char *adcv = calloc(10, sizeof(char));
-  //   sprintf(adcv, "A%u/b", channel);
-  //   char *cadcv = centre(adcv, colw);
-  //   fprintf(stderr, "%s ", cadcv);
-  //   free(cadcv);
-  //   free(adcv);
+  //   CENTER_AND_DISPLAY(channel, "A%u/b");
   // }
   
-  char *adcdt = centre("dt/s", colw);
-  fprintf(stderr, "%s ", adcdt);
-  free(adcdt);
+  CENTER_AND_DISPLAY("dt/s", "%s");
+  CENTER_AND_DISPLAY("s/RPS", "%s");
+  CENTER_AND_DISPLAY("SR/Hz", "%s");
+  CENTER_AND_DISPLAY("LC/24b", "%s");
+  CENTER_AND_DISPLAY("S/Pa", "%s");
+  CENTER_AND_DISPLAY("ca/b", "%s");
+  CENTER_AND_DISPLAY("T/C", "%s");
 
-  char *speed = centre("s/RPS", colw);
-  fprintf(stderr, "%s ", speed);
-  free(speed);
+  fprintf(stderr, "\r");
 
-  char *strainrate = centre("SR/hz", colw);
-  fprintf(stderr, "%s ", strainrate);
-  free(strainrate);
-
-  char *stress_bytes = centre("LC/24b", colw);
-  fprintf(stderr, "%s ", stress_bytes);
-  free(stress_bytes);
-
-  char *stress = centre("S/Pa", colw);
-  fprintf(stderr, "%s ", stress);
-  free(stress);
-
-  char *ca = centre("ca/b", colw);
-  fprintf(stderr, "%5s ", ca);
-  free(ca);
-
-  char *temp = centre("T/C", colw);
-  fprintf(stderr, "%5s%s\r", temp, RESET);
-  free(temp);
+  free(formatted);
+  free(centered);
 }
 
 
 
-void
-display_thread_data(struct run_data *rd)
+void display_thread_data(struct run_data *rd)
 {
 
   unsigned int colw = get_column_width();
   
   unsigned long secs = (unsigned int)(rd->time_s_f);
+  char 
+    *formatted = calloc(colw+1, sizeof(char)), 
+    *centered  = calloc(colw+1, sizeof(char));
 
-  char *time = calloc(5, sizeof(char));
-  sprintf(time, "%lu", secs);
-  char *ctime = centre(time, colw);
-  
-  //char **adcval = calloc(ADC_COUNT, sizeof(char *));
-  //char **cadcval = calloc(ADC_COUNT, sizeof(char *));
-  //for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
-  //  adcval[channel] = calloc(20, sizeof(char));
-  //  sprintf(adcval[channel], "%lu", rd->adc[channel]);
-  //  cadcval[channel] = centre(adcval[channel], colw);
-  //}
+  CENTER_AND_DISPLAY(secs, "%lu");
+  CENTER_AND_DISPLAY(rd->adc_dt, "%f");
 
-  char *adcdt = calloc(20, sizeof(char));
-  sprintf(adcdt, "%f", rd->adc_dt);
-  char *cadcdt = centre(adcdt, colw);
+  // for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
+  //   CENTER_AND_DISPLAY(rd->adc[channel], "%lu");
+  // }
 
-  char *speed = calloc(20, sizeof(char));
-  sprintf(speed, "%f", rd->speed_ind);
-  char *cspeed = centre(speed, colw);
+  CENTER_AND_DISPLAY(rd->speed_ind, "%f");
+  CENTER_AND_DISPLAY(rd->strainrate_ind, "%f");
+  CENTER_AND_DISPLAY( (*rd->loadcell_bytes), "%lu");
+  CENTER_AND_DISPLAY( (*rd->loadcell_units), "%f");
+  CENTER_AND_DISPLAY( rd->last_ca, "%u");
+  CENTER_AND_DISPLAY( (*rd->temperature), "%f");
 
-  char *strainrate = calloc(20, sizeof(char));
-  sprintf(strainrate, "%f", rd->strainrate_ind);
-  char *cstrainrate = centre(strainrate, colw);
+  fprintf(stderr, "\n");
 
-  char *stress_bytes = calloc(20, sizeof(char));
-  sprintf(stress_bytes, "%lu", (*rd->loadcell_bytes));
-  char *cstress_bytes = centre(stress_bytes, colw);
-
-  char *stress = calloc(20, sizeof(char));
-  sprintf(stress, "%f", (*rd->loadcell_units));
-  char *cstress = centre(stress, colw);
-
-  char *ca = calloc(20, sizeof(char));
-  sprintf(ca, "%u", rd->last_ca);
-  char *cca = centre(ca, colw);
-  
-  char *temp = calloc(20, sizeof(char));
-  sprintf(temp, "%f", (*rd->temperature));
-  char *ctemp = centre(temp, colw);
-
-  fprintf(stderr, "%s ", ctime);
-  //for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
-  //  fprintf(stderr, "%s ", cadcval[channel]);
-  //}
-  fprintf(stderr, "%s %s %s %s %s %s %s\n", cadcdt, cspeed, cstrainrate, cstress_bytes, cstress, cca, ctemp);
-
-  free(temp);
-  free(ca);
-  free(speed);
-  //for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
-  //  free(adcval[channel]);
-  //}
-  //free(adcval);
-  free(time);
-
-  free(ctemp);
-  free(cca);
-  free(cstress);
-  free(cstrainrate);
-  free(cspeed);
-  //for (unsigned int channel = 0; channel < ADC_COUNT; channel ++) {
-  //  free(cadcval[channel]);
-  //}
-  //free(cadcval);
-  free(ctime);
+  free(formatted);
+  free(centered);
 }
 
 

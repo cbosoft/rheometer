@@ -32,7 +32,7 @@
 
 
 
-char *centre(char *s, unsigned int w);
+void centre(char *s, unsigned int w, char **c);
 void display_thread_data(struct run_data *td);
 void display_titles();
 

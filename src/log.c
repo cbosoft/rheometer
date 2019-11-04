@@ -19,6 +19,7 @@
 #include "thermometer.h"
 #include "loadcell.h"
 #include "uid.h"
+#include "version.h"
 
 
 #ifndef PATH_MAX
@@ -40,17 +41,17 @@ void generate_log_prefix(struct run_data *rd)
   struct tm *timeinfo;
   time(&rawtime);
   timeinfo = localtime(&rawtime);
-  strftime(date, 50, "%Y-%m-%d", timeinfo);
+  strftime(date, 14, "%Y-%m-%d", timeinfo);
 
   char *pattern = calloc(256, sizeof(char));
-  sprintf(pattern, "%s/%s_%s(*)_%s_%s.csv", log_dir, genpref, date, rd->control_scheme, rd->tag);
+  sprintf(pattern, "%s/%s_%s_*_%s.csv", log_dir, genpref, date, rd->tag);
 
   glob_t glob_res;
   glob((const char *)pattern, GLOB_NOSORT, NULL, &glob_res);
   free(pattern);
 
   char *log_pref = calloc(256, sizeof(char));
-  sprintf(log_pref, "%s/%s_%s(%u)_%s_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->control_scheme, rd->tag);
+  sprintf(log_pref, "%s/%s_%s_%03u_%s", log_dir, genpref, date, (unsigned int)glob_res.gl_pathc, rd->tag);
   rd->log_pref = log_pref;
 
   rd->uid = get_uid();
@@ -84,6 +85,28 @@ void save_run_params_to_json(struct run_data *rd)
   CHECKJSON(depth_mm_json);
   cJSON_AddItemToObject(params, "depth_mm", depth_mm_json);
 
+  cJSON *software_version = cJSON_CreateString(VERSION);
+  CHECKJSON(software_version);
+  cJSON_AddItemToObject(params, "software_version", software_version);
+
+  if (rd->video_device != NULL) {
+    info("video_dev");
+    cJSON *video_device = cJSON_CreateString(rd->video_device);
+    CHECKJSON(video_device);
+    cJSON_AddItemToObject(params, "video_device", video_device);
+
+    info("video_start");
+    cJSON *video_start_json = cJSON_CreateNumber(rd->cam_start);
+    CHECKJSON(video_start_json);
+    cJSON_AddItemToObject(params, "video_start", video_start_json);
+
+    info("video_end");
+    cJSON *video_end_json = cJSON_CreateNumber(rd->cam_end);
+    CHECKJSON(video_end_json);
+    cJSON_AddItemToObject(params, "video_end", video_end_json);
+  }
+
+  info("saving");
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
   sprintf(params_path, "%s_runparams.json", rd->log_pref);
@@ -126,6 +149,37 @@ int add_log(struct run_data *rd, const char* name, const char* fmt, ...)
   rd->log_count ++;
 
   return rd->log_count - 1;
+}
+
+
+
+
+int remove_log(struct run_data *rd, unsigned int index)
+{
+  if (index >= rd->log_count) {
+    warn("remove_log", "Log index outside of list (%d out of %d)", index, rd->log_count);
+  }
+
+  char **log_paths = rd->log_paths, **log_names = rd->log_names;
+
+  rd->log_paths = calloc(rd->log_count-1, sizeof(char*));
+  rd->log_names = calloc(rd->log_count-1, sizeof(char*));
+
+  for (unsigned int i = 0, j = 0; i < rd->log_count; i++) {
+    
+    if (i == index)
+      continue;
+
+    rd->log_paths[j] = log_paths[i];
+    rd->log_names[j] = log_names[i];
+
+    j++;
+
+  }
+
+  rd->log_count --;
+
+  return 0;
 }
 
 
@@ -184,7 +238,7 @@ void *log_thread_func(void *vptr) {
     fprintf(log_fp, "%u,", rd->last_ca);
     fprintf(log_fp, "%f,", (*rd->temperature));
     fprintf(log_fp, "%lu\n", (*rd->loadcell_bytes));
-
+    
     sleep_us(900);
   }
 

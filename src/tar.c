@@ -61,8 +61,8 @@ void tidy_logs(struct run_data *rd)
   free(tar_cmd);
   free(tar_cmd_escaped);
 
-  if (rv == -1) {
+  if (rv) {
     ferr("tidy_logs", "error when tidying logs");
-  } // TODO: what about other rvs?
+  }
 
 }

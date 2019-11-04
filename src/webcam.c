@@ -3,10 +3,12 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 #include "run.h"
 #include "error.h"
 #include "log.h"
+#include "util.h"
 
 
 char *record_args[20] = {
@@ -55,32 +57,41 @@ void *cam_thread_func(void *vtd)
     execvp("ffmpeg", record_args);
   }
 
-  info("ffmpeg forked: PID=%d", child_pid);
+  fcntl(sp_stderr[1], F_SETFL, O_NONBLOCK);
 
+  info("ffmpeg forked: PID=%d", child_pid);
+  time_t now = time(NULL);
   rd->cam_ready = 1;
+  rd->cam_start = now;
 
   int i = 0;
   while ( (!rd->stopped) && (!rd->errored) ) {
 
     if (waitpid(child_pid, NULL, WNOHANG)) {
-      // TODO: remove video from list of logs
-      // TODO: properly read from stderr until stderr has nothing left
-      char *se = malloc(10000*sizeof(char));
-      read(sp_stderr[0], se, 9999);
-      warn("cam_thread_func", "ffmpeg process died unexpectedly: %s", se);
+      warn("cam_thread_func", "ffmpeg process died unexpectedly:");
+      char *se = malloc((100 + 1)*sizeof(char));
+      int c = read(sp_stderr[0], se, 100);
+      while (c) {
+        warn("cam_thread_func", "%s", se);
+        c = read(sp_stderr[0], se, 100);
+      }
       free(se);
+      remove_log(rd, video_idx);
       pthread_exit(0);
     }
 
-    sleep(1);
+    sleep_ms(100);
     i++;
 
   }
+
+  now = time(NULL);
 
   if (!waitpid(child_pid, NULL, WNOHANG)) {
     write(sp_stdin[1], "q", 1);
     waitpid(child_pid, NULL, 0);
   }
+  rd->cam_end = now;
 
   pthread_exit(0);
 
