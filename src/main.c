@@ -138,11 +138,11 @@ int main (int argc, const char ** argv)
         display_thread_data(rd);
         display_titles();
       }
-      rd->stopped = 1;
-      fprintf(stderr, "\n");
       break;
       
   }
+  rd->stopped = 1;
+  fprintf(stderr, "\n");
 
 #ifndef DEBUG
   system("gpio unexport 16");

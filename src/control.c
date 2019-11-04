@@ -40,6 +40,11 @@ typedef enum setter_scheme {
   SETTER_BISTABLE
 } setter_scheme_enum;
 
+struct controller_analysis_result {
+  double stddev_error;
+  double average_error;
+};
+
 
 
 
@@ -437,13 +442,50 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+void analyze(int length, struct run_data *rd, struct controller_analysis_result *res)
+{
+  double *error = calloc(length, sizeof(double));
+  double total = 0.0;
+
+  fprintf(stderr, "Gathering data...\n");
+  for (int i = 0; i < length; i++) {
+    error[i] = rd->err1;
+    total += error[i];
+    fprintf(stderr, "  %d/%d    \r", i+1, length);
+    sleep(1);
+  }
+  fprintf(stderr, "\n");
+
+  res->average_error = total/((double)length);
+
+  double sumsqdiff = 0.0;
+  for (int i = 0; i < length; i++)
+    sumsqdiff += pow(error[i] - res->average_error, 2.0);
+
+  res->stddev_error = pow( sumsqdiff/((double)(length - 1)) ,0.5);
+}
+
+
+
+
 void do_tuning(struct run_data *rd) {
   /*
    * User selects setpoint and an initial set of params, from a scheme.json.
    * Rheometer runs for a period of time, before allowing the user to select a
    * new set of tuning parameters.  */
 
-  int l = 10;
+  int l = 10, analyze_length = 0;
   fprintf(stderr, 
       "  "BOLD"Welcome to the TD tuner."RESET"\n"
       "\n"
@@ -454,7 +496,7 @@ void do_tuning(struct run_data *rd) {
   
   
   double value = 0.0;
-  char cmd[100], variable[100];
+  char input[100], cmd[100], variable[50];
 
   while (1) {
     
@@ -468,12 +510,31 @@ void do_tuning(struct run_data *rd) {
     while (1) {
       // read user input
       fprintf(stderr, "%s", ": ");
-      
-      int nmatch = scanf("%s %s %lf", cmd, variable, &value);
-      if (nmatch == EOF || nmatch < 1) {
-confused:
-        fprintf(stderr, "?\n");
-        continue;
+
+      fgets(input, 100, stdin);
+      int inlen = strlen(input);
+      if (inlen > 1){
+        input[inlen-1] = '\0';
+      }
+
+      if (strncmp(input, "set", 3) == 0) {
+        int nmatch = sscanf(input, "%s %s %lf", cmd, variable, &value);
+
+        if (nmatch < 3) {
+          fprintf(stderr, "'set' needs two arguments.\n");
+          continue;
+        }
+
+      }
+      else if (strncmp(input, "analyze", 7) == 0) {
+        int nmatch = sscanf(input, "%s %d", cmd, &analyze_length);
+
+        if (nmatch < 2) {
+          analyze_length = 30;
+        }
+      }
+      else {
+        strncpy(cmd, input, 99);
       }
 
       if (strcmp(cmd, "help") == 0) {
@@ -481,12 +542,10 @@ confused:
             "  "BOLD"Commands:"RESET"\n"
             "    set <var> <val>    set var to value, valid vars: kp, ki, kd\n"
             "    show               show the current params\n"
-            "    done               try the parameters\n"
-            "    exit               exit program\n");
+            "    done               finish tuning\n"
+            "    analyse [<len>]    analyze a <len=30> second section of data.\n");
       }
       else if (strcmp(cmd, "set") == 0) {
-
-        if (nmatch < 3) goto confused;
 
         if (strcmp(variable, "kp") == 0) {
           rd->control_params->kp = value;
@@ -499,8 +558,16 @@ confused:
         }
 
       }
-      else if (strcmp(cmd, "done") == 0) {
-        break;
+      else if (strcmp(cmd, "analyze") == 0) {
+        
+        struct controller_analysis_result result;
+        analyze(analyze_length, rd, &result);
+
+        fprintf(stderr, 
+            BOLD"Analysis results"RESET": Eav: %f, std: %f\n", 
+            result.average_error, 
+            result.stddev_error);
+
       }
       else if (strcmp(cmd, "show") == 0) {
         fprintf(stderr, 
@@ -511,12 +578,12 @@ confused:
             rd->control_params->ki,
             rd->control_params->kd);
       }
-      else if (strcmp(cmd, "exit") == 0) {
+      else if (strcmp(cmd, "done") == 0) {
         fprintf(stderr, BOLD"Tuning finished!"RESET"\n");
         return;
       }
       else {
-        goto confused;
+        fprintf(stderr, "Input not understood. Try 'help' for help.\n");
       }
     }
   }
