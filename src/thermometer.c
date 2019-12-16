@@ -126,6 +126,7 @@ double read_thermometer()
 void* thermometer_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
+  double temp_temp;
 
   thermometer_setup();
 
@@ -143,8 +144,9 @@ void* thermometer_thread_func(void *vptr)
   rd->tmp_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
     
+    temp_temp = read_thermometer();
     pthread_mutex_lock(&lock_temperature);
-    rd->temperature = read_thermometer();
+    rd->temperature = temp_temp;
     pthread_mutex_unlock(&lock_temperature);
     sleep(3);
 
