@@ -11,7 +11,7 @@
 #define DATA_PIN	5
 
 #define RESET_US 100.0
-#define PULSE_US 1.0
+#define PULSE_US 10.0
 
 #define LOADCELL_CAL_M -2.15940989e-04
 #define LOADCELL_CAL_C 9.27446776e+05

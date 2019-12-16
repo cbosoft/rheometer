@@ -38,9 +38,9 @@ void clock_pulse(double us)
 
    */
   digitalWrite(CLOCK_PIN, HIGH);
-	sleep_us(us);
+	blocking_sleep_us(us);
   digitalWrite(CLOCK_PIN, LOW);
-	sleep_us(us);
+	blocking_sleep_us(us);
 }
 
 
@@ -88,7 +88,7 @@ unsigned long loadcell_read_bytes()
 
   while(digitalRead(DATA_PIN));
 
-  sleep_us(1);
+  blocking_sleep_us(1);
 
   // 24 pulses
   for(int i = 0; i < 24; i++) {
