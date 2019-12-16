@@ -19,9 +19,17 @@ double time_elapsed(struct timeval end, struct timeval start)
 }
 
 
-#ifdef BLOCKING_SLEEP
 
-static void _sleep(double delay_s)
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// blocking sleep functions
+/////////////////////////////////////////////////////////////////////////////
+
+static void _blocking_sleep(double delay_s)
 {
   struct timeval start, now;
   gettimeofday(&start, NULL);
@@ -32,7 +40,24 @@ static void _sleep(double delay_s)
   }
 }
 
-#else
+
+void blocking_sleep_us(double delay_us)
+{
+  _blocking_sleep( delay_us * 1e-6 );
+}
+
+
+void blocking_sleep_ms(double delay_ms)
+{
+  _blocking_sleep( delay_ms * 1e-3 );
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+// non-blocking sleep functions
+/////////////////////////////////////////////////////////////////////////////
+
 
 static void _sleep(double delay_s)
 {
@@ -44,8 +69,6 @@ static void _sleep(double delay_s)
   if (rv)
     warn("nonblocking_sleep", "nanosleep interrupted.");
 }
-
-#endif
 
 
 void sleep_us(double delay_us)
