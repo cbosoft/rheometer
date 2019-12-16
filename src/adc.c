@@ -25,6 +25,8 @@
 unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
 {
 #ifdef DEBUG
+  (void) h;
+  (void) channel;
   return 314;
 #else
   int ret;
