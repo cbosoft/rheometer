@@ -135,6 +135,8 @@ void read_loadcell(struct run_data *rd)
 }
 
 
+
+
 void *loadcell_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *) vptr;
