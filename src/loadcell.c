@@ -22,6 +22,7 @@ enum HX711_GAIN {
 
 int GAIN = CHA_128; // default
 const long halfway = (long)(1 << 31);
+extern pthread_mutex_t lock_loadcell;
 
 
 
@@ -114,24 +115,13 @@ unsigned long loadcell_read_bytes()
 
 void read_loadcell(struct run_data *rd)
 {
-  unsigned long *loadcell_bytes, *ploadcell_bytes;
-  double *loadcell_units, *ploadcell_units;
+  unsigned long lc_bytes = loadcell_read_bytes();
 
-  loadcell_bytes = malloc(sizeof(unsigned long));
-  loadcell_units = malloc(sizeof(double));
+  pthread_mutex_lock(&lock_loadcell);
+  rd->loadcell_bytes = lc_bytes;
+  rd->loadcell_units = (((double)rd->loadcell_bytes) * LOADCELL_CAL_M) + LOADCELL_CAL_C;
+  pthread_mutex_unlock(&lock_loadcell);
 
-  (*loadcell_bytes) = loadcell_read_bytes();
-
-  (*loadcell_units) = (((double)(*loadcell_bytes)) * LOADCELL_CAL_M) + LOADCELL_CAL_C;
-
-  ploadcell_bytes = rd->loadcell_bytes;
-  ploadcell_units = rd->loadcell_units;
-
-  rd->loadcell_bytes = loadcell_bytes;
-  rd->loadcell_units = loadcell_units;
-
-  free(ploadcell_bytes);
-  free(ploadcell_units);
 }
 
 
@@ -142,9 +132,8 @@ void *loadcell_thread_func(void *vptr)
   struct run_data *rd = (struct run_data *) vptr;
 
   rd->lc_ready = 1;
-  while ( (!rd->stopped) && (!rd->errored) ) {
+  while ( (!rd->stopped) && (!rd->errored) )
     read_loadcell(rd);
-  }
 
   pthread_exit(0);
   return NULL;

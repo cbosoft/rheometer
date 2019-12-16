@@ -7,15 +7,15 @@ struct run_data {
   // {{{
 
   // actual data
-  unsigned long *time_s;
-  unsigned long *time_us;
+  unsigned long time_s;
+  unsigned long time_us;
   unsigned long start_time_s;
   unsigned long start_time_us;
   double time_s_f;
   unsigned long *adc;
-  unsigned long *loadcell_bytes;
-  double *loadcell_units;
-  double *temperature;
+  unsigned long loadcell_bytes;
+  double loadcell_units;
+  double temperature;
   
   // process control stuff
   double speed_ind;

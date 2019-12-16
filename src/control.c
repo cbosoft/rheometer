@@ -44,6 +44,7 @@ struct controller_analysis_result {
   double stddev_error;
   double average_error;
 };
+extern pthread_mutex_t lock_control, lock_speed, lock_loadcell;
 
 
 
@@ -99,14 +100,18 @@ void control_help(void)
 void calculate_control_indicators(struct run_data *rd) 
 {
 
+  pthread_mutex_lock(&lock_speed);
   rd->speed_ind = get_speed(rd); // speed in rotations per second (hz)
+  pthread_mutex_unlock(&lock_speed);
 
   double strainrate_invs = rd->speed_ind * PI * 2.0 * RI / (RO - RI);
+
+  pthread_mutex_lock(&lock_loadcell);
+  double stress_Pa = rd->loadcell_units / (2.0 * PI * RI * RI * rd->fill_depth);
+  pthread_mutex_unlock(&lock_loadcell);
+
   rd->strainrate_ind = strainrate_invs;
-
-  double stress_Pa = (*rd->loadcell_units) / (2.0 * PI * RI * RI * rd->fill_depth);
   rd->stress_ind = stress_Pa;
-
   rd->viscosity_ind = stress_Pa / strainrate_invs;
 }
 
@@ -267,7 +272,9 @@ void *ctl_thread_func(void *vptr)
 
     pwmWrite(PWM_PIN, control_action);
 
+    pthread_mutex_lock(&lock_control);
     rd->last_ca = control_action;
+    pthread_mutex_unlock(&lock_control);
 
     sleep_ms(rd->control_params->sleep_ms);
 

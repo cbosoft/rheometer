@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include "display.h"
 #include "error.h"
@@ -15,6 +16,7 @@
   centre(formatted, colw, &centered);\
   fprintf(stderr, "%s ", centered);
 
+extern pthread_mutex_t lock_time, lock_adc, lock_control, lock_loadcell, lock_temperature, lock_speed, lock_adcdt;
 
 unsigned int get_column_width(void)
 {
@@ -117,18 +119,34 @@ void display_thread_data(struct run_data *rd)
     *centered  = calloc(colw+1, sizeof(char));
 
   CENTER_AND_DISPLAY(secs, "%lu");
+
+  pthread_mutex_lock(&lock_adcdt);
   CENTER_AND_DISPLAY(rd->adc_dt, "%f");
+  pthread_mutex_unlock(&lock_adcdt);
 
   // for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
+  //   pthread_mutex_lock(&lock_adc);
   //   CENTER_AND_DISPLAY(rd->adc[channel], "%lu");
+  //   pthread_mutex_unlock(&lock_adc);
   // }
 
+  pthread_mutex_lock(&lock_speed);
   CENTER_AND_DISPLAY(rd->speed_ind, "%f");
   CENTER_AND_DISPLAY(rd->strainrate_ind, "%f");
-  CENTER_AND_DISPLAY( (*rd->loadcell_bytes), "%lu");
-  CENTER_AND_DISPLAY( (*rd->loadcell_units), "%f");
+  pthread_mutex_unlock(&lock_speed);
+
+  pthread_mutex_lock(&lock_loadcell);
+  CENTER_AND_DISPLAY( rd->loadcell_bytes, "%lu");
+  CENTER_AND_DISPLAY( rd->loadcell_units, "%f");
+  pthread_mutex_unlock(&lock_loadcell);
+
+  pthread_mutex_lock(&lock_control);
   CENTER_AND_DISPLAY( rd->last_ca, "%u");
-  CENTER_AND_DISPLAY( (*rd->temperature), "%f");
+  pthread_mutex_unlock(&lock_control);
+
+  pthread_mutex_lock(&lock_temperature);
+  CENTER_AND_DISPLAY( rd->temperature, "%f");
+  pthread_mutex_unlock(&lock_temperature);
 
   fprintf(stderr, "\n");
 

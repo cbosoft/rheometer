@@ -11,15 +11,15 @@ struct run_data *init_run_data()
 {
   struct run_data *rd = calloc(1, sizeof(struct run_data));
 
-  rd->time_s = calloc(1, sizeof(unsigned long));
-  rd->time_us = calloc(1, sizeof(unsigned long));
+  rd->time_s = 0;
+  rd->time_us = 0;
   rd->start_time_s = 0;
   rd->start_time_us = 0;
   rd->time_s_f = 0.0;
   rd->adc = calloc(ADC_COUNT, sizeof(double));
-  rd->temperature = calloc(1, sizeof(double));
-  rd->loadcell_bytes = calloc(1, sizeof(unsigned long));
-  rd->loadcell_units = calloc(1, sizeof(double));
+  rd->temperature = 0;
+  rd->loadcell_bytes = 0;
+  rd->loadcell_units = 0;
 
   rd->speed_ind_timeout = 0.1;
   rd->last_ca = 0;
@@ -61,16 +61,10 @@ void free_run_data(struct run_data *td)
   for (unsigned int i = 0; i < td->log_count; i++)
     free(td->log_paths[i]);
 
-  if (td->time_s != NULL) free(td->time_s);
-  if (td->time_us != NULL) free(td->time_us);
-
   if (td->log_pref != NULL) free(td->log_pref);
   if (td->uid != NULL) free(td->uid);
  
   if (td->adc != NULL) free(td->adc);
-  if (td->temperature != NULL) free(td->temperature);
-  if (td->loadcell_bytes != NULL) free(td->loadcell_bytes);
-  if (td->loadcell_units != NULL) free(td->loadcell_units);
 
   free(td);
 }

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <glob.h>
+#include <pthread.h>
 
 #include "thermometer.h"
 #include "error.h"
@@ -24,6 +25,7 @@
 
 char **devices = NULL;
 int device_count = 0;
+extern pthread_mutex_t lock_temperature;
 
 void thermometer_setup()
 {
@@ -127,26 +129,23 @@ void* thermometer_thread_func(void *vptr)
 
   thermometer_setup();
 
-  rd->temperature = malloc(sizeof(double));
+  rd->temperature = 0.0;
 
   if (!device_count) {
-    (*rd->temperature) = 0.0;
+    rd->temperature = 0.0;
     rd->tmp_ready = 1;
     return NULL;
   }
   else {
-    (*rd->temperature) = read_thermometer();
+    rd->temperature = read_thermometer();
   }
 
   rd->tmp_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
-
-    // pointers are fast to copy. Doubles, not so much.
-    double *reading = malloc(sizeof(double));
-    (*reading) = read_thermometer();
-    double *previous = rd->temperature;
-    rd->temperature = reading;
-    free(previous);
+    
+    pthread_mutex_lock(&lock_temperature);
+    rd->temperature = read_thermometer();
+    pthread_mutex_unlock(&lock_temperature);
     sleep(3);
 
   }

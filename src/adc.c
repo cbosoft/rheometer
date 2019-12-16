@@ -20,6 +20,7 @@
 #include "loadcell.h"
 
 
+extern pthread_mutex_t lock_adc;
 
 
 unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
@@ -88,8 +89,7 @@ struct adc_handle *adc_open(const char *device)
 
 
 
-void
-adc_close(struct adc_handle *h)
+void adc_close(struct adc_handle *h)
 {
   close(h->fd);
   free(h);
@@ -116,7 +116,10 @@ void *adc_thread_func(void *vptr) {
     }
     
     padc = rd->adc;
+
+    pthread_mutex_lock(&lock_adc);
     rd->adc = adc;
+    pthread_mutex_unlock(&lock_adc);
 
     free(padc);
 
