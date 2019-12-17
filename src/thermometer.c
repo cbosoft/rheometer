@@ -51,6 +51,9 @@ void thermometer_setup()
   cyl_thermo_fd = wiringPiI2CSetup(0x60);
   if (cyl_thermo_fd < 0)
     warn("thermometer_setup", "Failed to get fd for thermocouple (cylinder).");
+  else {
+    wiringPiI2CWriteReg8(cyl_thermo_fd, 0x06, 0b11010000);
+  }
 
 }
 
@@ -126,30 +129,6 @@ double read_ambient_temperature()
 }
 
 
-void cyl_thermo_send_start()
-{
-  wiringPiI2CWrite(cyl_thermo_fd, 1);
-  wiringPiI2CWrite(cyl_thermo_fd, 0);
-}
-
-void cyl_thermo_send_stop()
-{
-  wiringPiI2CWrite(cyl_thermo_fd, 0);
-  wiringPiI2CWrite(cyl_thermo_fd, 1);
-}
-
-void cyl_thermo_write(int val)
-{
-  wiringPiI2CWrite(cyl_thermo_fd, val);
-}
-
-int cyl_thermo_read()
-{
-  int rv = wiringPiI2CRead(cyl_thermo_fd);
-  return rv;
-}
-
-
 
 double read_cylinder_temperature()
 {
@@ -157,23 +136,18 @@ double read_cylinder_temperature()
   // http://ww1.microchip.com/downloads/en/DeviceDoc/MCP9600-Data-Sheet-DS20005426D.pdf
   // https://github.com/adafruit/Adafruit_MCP9600/blob/master/Adafruit_MCP9600.cpp
   // http://wiringpi.com/reference/i2c-library/
-  cyl_thermo_send_start();
-  cyl_thermo_write(0b1100000); // WRITE
-  cyl_thermo_write(0); // TH (0), TDELTA (1), TC(2)
-  cyl_thermo_send_stop();
-  cyl_thermo_send_start();
-  cyl_thermo_write(0b1100001); // READ
-  int temp = cyl_thermo_read(); // get temp
-  cyl_thermo_send_stop();
-
-  return (double) temp;
+  
+  int rx = wiringPiI2CReadReg16(cyl_thermo_fd, 0x00);
+  int upper_byte = rx >> 8;
+  int lower_byte = rx & 255; 
+  return ( (((double)upper_byte)*0.0625) + (((double)lower_byte)*16.0) );
 }
 
 
 
 
 
-void* thermometer_thread_func(void *vptr)
+void *thermometer_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
   double temp_ambient, temp_cylinder;
