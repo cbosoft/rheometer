@@ -5,6 +5,8 @@
 #include <glob.h>
 #include <pthread.h>
 
+#include <wiringPiI2C.h>
+
 #include "thermometer.h"
 #include "error.h"
 #include "run.h"
@@ -23,8 +25,9 @@
 
 
 
-char **devices = NULL;
-int device_count = 0;
+static char **devices = NULL;
+static int device_count = 0;
+static int cyl_thermo_fd = -1;
 extern pthread_mutex_t lock_temperature;
 
 void thermometer_setup()
@@ -45,6 +48,9 @@ void thermometer_setup()
   }
   device_count = g.gl_pathc;
 
+  cyl_thermo_fd = wiringPiI2CSetup(0x60);
+  if (cyl_thermo_fd < 0)
+    warn("thermometer_setup", "Failed to get fd for thermocouple (cylinder).");
 
 }
 
@@ -97,7 +103,7 @@ double read_device(char *device_path)
 
 
 
-double read_thermometer()
+double read_ambient_temperature()
 {
   if (!device_count)
     return -314.0;
@@ -120,33 +126,83 @@ double read_thermometer()
 }
 
 
+void cyl_thermo_send_start()
+{
+  wiringPiI2CWrite(cyl_thermo_fd, 1);
+  wiringPiI2CWrite(cyl_thermo_fd, 0);
+}
+
+void cyl_thermo_send_stop()
+{
+  wiringPiI2CWrite(cyl_thermo_fd, 0);
+  wiringPiI2CWrite(cyl_thermo_fd, 1);
+}
+
+void cyl_thermo_write(int val)
+{
+  wiringPiI2CWrite(cyl_thermo_fd, val);
+}
+
+int cyl_thermo_read()
+{
+  int rv = wiringPiI2CRead(cyl_thermo_fd);
+  return rv;
+}
+
+
+
+double read_cylinder_temperature()
+{
+  // https://www.mikroe.com/thermo-k-click
+  // http://ww1.microchip.com/downloads/en/DeviceDoc/MCP9600-Data-Sheet-DS20005426D.pdf
+  // https://github.com/adafruit/Adafruit_MCP9600/blob/master/Adafruit_MCP9600.cpp
+  // http://wiringpi.com/reference/i2c-library/
+  cyl_thermo_send_start();
+  cyl_thermo_write(0b1100000); // WRITE
+  cyl_thermo_write(0); // TH (0), TDELTA (1), TC(2)
+  cyl_thermo_send_stop();
+  cyl_thermo_send_start();
+  cyl_thermo_write(0b1100001); // READ
+  int temp = cyl_thermo_read(); // get temp
+  cyl_thermo_send_stop();
+
+  return (double) temp;
+}
+
+
 
 
 
 void* thermometer_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
-  double temp_temp;
+  double temp_ambient, temp_cylinder;
 
   thermometer_setup();
 
-  rd->temperature = 0.0;
+  pthread_mutex_lock(&lock_temperature);
+  rd->ambient_temperature = 0.0;
+  rd->cylinder_temperature = 0.0;
+  pthread_mutex_unlock(&lock_temperature);
 
   if (!device_count) {
-    rd->temperature = 0.0;
     rd->tmp_ready = 1;
     return NULL;
   }
   else {
-    rd->temperature = read_thermometer();
+    // initialise
+    rd->ambient_temperature = read_ambient_temperature();
   }
 
   rd->tmp_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
     
-    temp_temp = read_thermometer();
+    temp_ambient = read_ambient_temperature();
+    temp_cylinder = read_cylinder_temperature();
+
     pthread_mutex_lock(&lock_temperature);
-    rd->temperature = temp_temp;
+    rd->ambient_temperature = temp_ambient;
+    rd->cylinder_temperature = temp_cylinder;
     pthread_mutex_unlock(&lock_temperature);
     sleep(3);
 
