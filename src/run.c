@@ -17,7 +17,8 @@ struct run_data *init_run_data()
   rd->start_time_us = 0;
   rd->time_s_f = 0.0;
   rd->adc = calloc(ADC_COUNT, sizeof(double));
-  rd->temperature = 0;
+  rd->cylinder_temperature = 0;
+  rd->ambient_temperature = 0;
   rd->loadcell_bytes = 0;
   rd->loadcell_units = 0;
 

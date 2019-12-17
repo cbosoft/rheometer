@@ -245,7 +245,7 @@ void *log_thread_func(void *vptr) {
     pthread_mutex_unlock(&lock_control);
 
     pthread_mutex_lock(&lock_temperature);
-    fprintf(log_fp, "%f,", rd->temperature);
+    fprintf(log_fp, "%f,", rd->cylinder_temperature);
     pthread_mutex_unlock(&lock_temperature);
 
     pthread_mutex_lock(&lock_loadcell);

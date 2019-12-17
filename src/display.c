@@ -145,7 +145,7 @@ void display_thread_data(struct run_data *rd)
   pthread_mutex_unlock(&lock_control);
 
   pthread_mutex_lock(&lock_temperature);
-  CENTER_AND_DISPLAY( rd->temperature, "%f");
+  CENTER_AND_DISPLAY( rd->cylinder_temperature, "%f");
   pthread_mutex_unlock(&lock_temperature);
 
   fprintf(stderr, "\n");

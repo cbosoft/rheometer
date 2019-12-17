@@ -15,7 +15,8 @@ struct run_data {
   unsigned long *adc;
   unsigned long loadcell_bytes;
   double loadcell_units;
-  double temperature;
+  double ambient_temperature;
+  double cylinder_temperature;
   
   // process control stuff
   double speed_ind;
