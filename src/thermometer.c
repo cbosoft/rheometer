@@ -140,7 +140,7 @@ double read_cylinder_temperature()
   int rx = wiringPiI2CReadReg16(cyl_thermo_fd, 0x00);
   int upper_byte = rx >> 8;
   int lower_byte = rx & 255; 
-  return ( (((double)upper_byte)*0.0625) + (((double)lower_byte)*16.0) );
+  return ( (((double)upper_byte)*0.0625) + (((double)lower_byte)*16.0) ); // sometimes misreads?
 }
 
 
