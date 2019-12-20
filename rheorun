@@ -69,4 +69,6 @@ for i, (length, control_param) in enumerate(combined_params):
     sys.stdout.write('\33]0;' + title + '\a')
     sys.stdout.flush()
     print(title)
-    os.system(command)
+    rv = os.system(command)
+    if rv:
+        exit(rv)
