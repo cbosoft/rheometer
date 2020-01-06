@@ -200,6 +200,7 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
     argerr("Length, control scheme, and depth are required parameters.");
 
   // finished setting args, display
+  // TODO: display more run information
   fprintf(stderr, 
       "  "BOLD"rheometer"RESET" v%s\n"
       "\n"
