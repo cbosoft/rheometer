@@ -47,6 +47,7 @@ struct run_data *init_run_data()
 
   rd->error_string = "all is well";
   rd->video_device = NULL;
+  rd->photo_device = NULL;
   rd->cam_start = -1;
   rd->cam_end = -1;
   return rd;
