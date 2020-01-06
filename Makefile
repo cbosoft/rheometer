@@ -35,7 +35,7 @@ debug: wpi rheometer
 	touch debug
 
 obj/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(LINK) -DVERSION=\"$(VERSION)\"
+	$(CC) $(CFLAGS) -c $< -o $@ -DVERSION=\"$(VERSION)\"
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) -shared -o $@ $< -lpthread
