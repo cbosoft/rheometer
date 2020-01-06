@@ -10,24 +10,21 @@
 #include "log.h"
 #include "util.h"
 
-//ffmpeg -f video4linux2 -i /dev/v4l/by-id/usb-0c45_USB_camera-video-index0 -vframes 2 test%3d.jpeg
 char *capture_args[20] = {
   "ffmpeg", "-y", //0 1
   "-f", "v4l2", //2 3
-  "-vframes", "3", //4 5
-  "-input_format", "mjpeg",//6 7
-  "-video_size", "320x240", //8 9
-  "-i", "/dev/video0", //10 11
-  "-f", "jpeg", //12 13
-  "out.jpg", NULL}; //14 15
-static int INPUT_ARG = 11;
-static int OUTPUT_ARG = 14;
+  "-video_size", "1920x1080", //4 5
+  "-i", "/dev/video0", //6 7
+  "-vframes", "1", //8 9
+  "out.jpg", NULL}; //10 11
+static int INPUT_ARG = 7;
+static int OUTPUT_ARG = 10;
 
 
 void take_photo(struct run_data *rd)
 {
 
-  int photo_idx = add_log(rd, "photo", "%s_photo.mp4", rd->log_pref);
+  int photo_idx = add_log(rd, "photo", "%s_photo.jpg", rd->log_pref);
   capture_args[INPUT_ARG] = rd->photo_device;
   capture_args[OUTPUT_ARG] = rd->log_paths[photo_idx];
 
