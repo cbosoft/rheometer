@@ -14,6 +14,7 @@ RHEO = obj/adc.o \
 			 obj/motor.o \
 			 obj/nouns.o \
 			 obj/opt.o \
+			 obj/photo.o \
 			 obj/run.o \
 			 obj/tar.o \
 			 obj/thermometer.o \

@@ -22,7 +22,7 @@ usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start] [-v <video-dev>]\n"
+      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -59,6 +59,11 @@ help(void)
       "                     from during logging. By setting this option, video logging is enabled.\n"
       "                     A video of the name \"${prefix}_video.mp4\" will be created and stored\n"
       "                     alongside the other log files.\n"
+      "\n"
+      "    -p | --photo-device    This argument informs the location of the video device to capture\n"
+      "                     a still photo from before the run begins. By setting this option, a photo\n"
+      "                     of the name \"${prefix}_photo.mp4\" will be created and stored\n"
+      "                     alongside the other log files, taken before the logging begins.\n"
       "\n"
   );
   control_help();
@@ -167,6 +172,13 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       i++;
       check_argc(i, argc);
       rd->video_device = calloc(strlen(argv[i])+1, sizeof(char *));
+      strcpy(rd->video_device, argv[i]);
+      d_set = 1;
+    }
+    else if (EITHER(argv[i], "-v", "--photo-device")) {
+      i++;
+      check_argc(i, argc);
+      rd->photo_device = calloc(strlen(argv[i])+1, sizeof(char *));
       strcpy(rd->video_device, argv[i]);
       d_set = 1;
     }

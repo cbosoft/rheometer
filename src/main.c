@@ -18,6 +18,7 @@
 #include "opt.h"
 #include "control.h"
 #include "webcam.h"
+#include "photo.h"
 #include "log.h"
 #include "adc.h"
 #include "util.h"
@@ -105,6 +106,10 @@ int main (int argc, const char ** argv)
   loadcell_setup();
   info("set up loadcell");
 
+  if (rd->photo_device) {
+    info("photographing device");
+    take_photo(rd);
+  }
 
   info("starting sensor threads...");
   pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread, vid_thread;
