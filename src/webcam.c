@@ -6,6 +6,7 @@
 #include <fcntl.h>
 
 #include "run.h"
+#include "webcam.h"
 #include "error.h"
 #include "log.h"
 #include "util.h"
