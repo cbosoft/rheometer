@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -171,16 +172,12 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
     else if (EITHER(argv[i], "-v", "--video-device")) {
       i++;
       check_argc(i, argc);
-      rd->video_device = calloc(strlen(argv[i])+1, sizeof(char *));
-      strcpy(rd->video_device, argv[i]);
-      d_set = 1;
+      rd->video_device = strdup(argv[i]);
     }
-    else if (EITHER(argv[i], "-v", "--photo-device")) {
+    else if (EITHER(argv[i], "-p", "--photo-device")) {
       i++;
       check_argc(i, argc);
-      rd->photo_device = calloc(strlen(argv[i])+1, sizeof(char *));
-      strcpy(rd->video_device, argv[i]);
-      d_set = 1;
+      rd->photo_device = strdup(argv[i]);
     }
     else if (strcmp(argv[i], "--calm-start") == 0) {
       rd->calm_start = 1;
