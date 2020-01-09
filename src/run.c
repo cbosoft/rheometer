@@ -32,6 +32,7 @@ struct run_data *init_run_data()
   rd->log_names = NULL;
   rd->log_count = 0;
   rd->uid = NULL;
+  rd->phase = PHASE_INIT;
 
   rd->stopped = 0;
   rd->errored = 0;

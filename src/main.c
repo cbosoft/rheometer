@@ -134,13 +134,16 @@ int main (int argc, const char ** argv)
   sleep(1);
 
   motor_setup();
+  rd->phase = PHASE_WARMUP;
   info("warming up motor...");
   motor_warmup(rd, 512 );
   info("  motor ready!");
 
   info("starting control thread...");
+  rd->phase = PHASE_SETTLE;
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
   sleep(3);
+  rd->phase = PHASE_READING;
   
   switch (rd->mode) {
 

@@ -1,6 +1,7 @@
 #pragma once
 
 enum MODE{ MODE_NORMAL, MODE_TUNING };
+enum PHASE{ PHASE_INIT, PHASE_WARMUP, PHASE_SETTLE, PHASE_READING };
 
 
 struct run_data {
@@ -42,6 +43,7 @@ struct run_data {
   char **log_names;
   unsigned int log_count;
   char *uid;
+  int phase;
 
   // program control stuff
   struct adc_handle *adc_handle;
