@@ -33,6 +33,7 @@ struct run_data *init_run_data()
   rd->log_count = 0;
   rd->uid = NULL;
   rd->phase = PHASE_INIT;
+  rd->hardware_version = 0;
 
   rd->stopped = 0;
   rd->errored = 0;
