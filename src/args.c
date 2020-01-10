@@ -184,6 +184,7 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       rd->photo_device = strdup(argv[i]);
     }
     else if (EITHER(argv[i], "-w", "--hardware-version")) {
+      i++;
       rd->hardware_version = atoi(argv[i]);
       hwver_set = 1;
     }
