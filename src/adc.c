@@ -30,29 +30,28 @@ unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
   (void) channel;
   return 314;
 #else
-  int ret;
-  uint8_t tx[] = {
+  const int NBYTES = 3;
+  uint8_t tx[NBYTES] = {
     4 + (channel>>2), (channel&3)<<6, 0
   };
-  unsigned int L = sizeof(tx)/sizeof(tx[0]);
-  uint8_t rx[] = {0, 0, 0};
+  uint8_t rx[NBYTES] = {0, 0, 0};
 
   struct spi_ioc_transfer tr = {
     .tx_buf = (unsigned long)tx,
     .rx_buf = (unsigned long)rx,
-    .len = L,
+    .len = NBYTES,
     .delay_usecs = h->delay,
     .speed_hz = h->speed,
     .bits_per_word = h->bits,
   };
 
-  ret = ioctl(h->fd, SPI_IOC_MESSAGE(1), &tr);
-  if (ret < 1)
+  if (ioctl(h->fd, SPI_IOC_MESSAGE(1), &tr) < 1)
     ferr("read_adc_value", "can't send spi message");
   
   unsigned int total = 0;
-  for (unsigned int i = 0; i < L; i++) {
+  for (unsigned int i = 0; i < NBYTES; i++) {
     total += rx[i];
+    total <<= 8;
   }
 
   return total;
