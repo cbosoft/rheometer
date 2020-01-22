@@ -23,7 +23,7 @@ usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <depth> -c <control scheme> [-t <tag>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
+      "    rheometer -l <length> -d <depth> -c <control scheme> -w <hardware version> [-t <tag>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -47,6 +47,10 @@ help(void)
       "\n"
       "    -c | --control-scheme    Control scheme JSON file path. More information in the\n"
       "                     'Control Schemes' section in the help.\n"
+      "\n"
+      "    -w | --hardware-version  Hardware version specifying when the hardware was last\n"
+      "                     changed. This should be given as a ISO8601 date spec without \n"
+      "                     separating dashes (YYYYMMDD).\n"
       "\n"
       "    -t | --tag       A short descriptive name for the test run. Underscores and spaces\n"
       "                     will be replaced by hyphens. Optional. Default is \""TAGDEFAULT"\".\n"
@@ -139,7 +143,7 @@ void check_argc(unsigned int i, unsigned int argc)
 void parse_args(unsigned int argc, const char **argv, struct run_data *rd) 
 {
   rd->tag = TAGDEFAULT;
-  unsigned int cs_set = 0, l_set = 0, d_set = 0;
+  unsigned int cs_set = 0, l_set = 0, d_set = 0, hwver_set = 0;
 
   for (unsigned int i = 1; i < argc; i++) {
     if (EITHER(argv[i], "-l", "--length")) {
@@ -179,6 +183,11 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       check_argc(i, argc);
       rd->photo_device = strdup(argv[i]);
     }
+    else if (EITHER(argv[i], "-w", "--hardware-version")) {
+      i++;
+      rd->hardware_version = atoi(argv[i]);
+      hwver_set = 1;
+    }
     else if (strcmp(argv[i], "--calm-start") == 0) {
       rd->calm_start = 1;
     }
@@ -193,8 +202,8 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
   if (getuid() != 0)
     argerr("Hardware PWM needs root.");
 
-  if (!cs_set || !l_set || !d_set)
-    argerr("Length, control scheme, and depth are required parameters.");
+  if (!cs_set || !l_set || !d_set || !hwver_set)
+    argerr("Length, control scheme, hardware_version, and depth are required parameters.");
 
   // finished setting args, display
   // TODO: display more run information

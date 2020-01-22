@@ -44,6 +44,7 @@ struct run_data {
   unsigned int log_count;
   char *uid;
   int phase;
+  int hardware_version;
 
   // program control stuff
   struct adc_handle *adc_handle;
