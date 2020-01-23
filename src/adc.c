@@ -45,13 +45,7 @@ unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
   if (ioctl(h->fd, SPI_IOC_MESSAGE(1), &tr) < 1)
     ferr("read_adc_value", "can't send spi message");
   
-  unsigned int total = 0;
-  for (unsigned int i = 0; i < NBYTES; i++) {
-    total += rx[i];
-    total <<= 8;
-  }
-
-  return total;
+  return ((rx[1] & 0b1111) << 8) | rx[2];
 #endif
 }
 
