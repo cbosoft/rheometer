@@ -6,6 +6,7 @@
 #include <fcntl.h>
 
 #include "run.h"
+#include "webcam.h"
 #include "error.h"
 #include "log.h"
 #include "util.h"
@@ -59,7 +60,7 @@ void *cam_thread_func(void *vtd)
 
   fcntl(sp_stderr[1], F_SETFL, O_NONBLOCK);
 
-  info("ffmpeg forked: PID=%d", child_pid);
+  info("ffmpeg forked (video): PID=%d", child_pid);
   time_t now = time(NULL);
   rd->cam_ready = 1;
   rd->cam_start = now;

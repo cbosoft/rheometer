@@ -14,17 +14,19 @@ RHEO = obj/adc.o \
 			 obj/motor.o \
 			 obj/nouns.o \
 			 obj/opt.o \
+			 obj/photo.o \
 			 obj/run.o \
 			 obj/tar.o \
 			 obj/thermometer.o \
 			 obj/uid.o \
 			 obj/util.o \
 			 obj/webcam.o
+HDR = src/run.h
 WPI = wpi/libwiringPi.so
 VERSION = $(shell python get_version.py)
 
 
-rheometer: $(RHEO)
+rheometer: $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 	touch src/args.c
 
@@ -33,8 +35,8 @@ wpi: $(WPI)
 debug: wpi rheometer
 	touch debug
 
-obj/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@ $(LINK) -DVERSION=\"$(VERSION)\"
+obj/%.o: src/%.c $(HDR)
+	$(CC) $(CFLAGS) -c $< -o $@ -DVERSION=\"$(VERSION)\"
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) -shared -o $@ $< -lpthread

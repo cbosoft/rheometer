@@ -1,6 +1,7 @@
 #pragma once
 
 enum MODE{ MODE_NORMAL, MODE_TUNING };
+enum PHASE{ PHASE_INIT, PHASE_WARMUP, PHASE_SETTLE, PHASE_READING };
 
 
 struct run_data {
@@ -43,6 +44,8 @@ struct run_data {
   char **log_names;
   unsigned int log_count;
   char *uid;
+  int phase;
+  int hardware_version;
 
   // program control stuff
   struct adc_handle *adc_handle;
@@ -63,6 +66,7 @@ struct run_data {
   unsigned int errored;
   const char *error_string;
   char *video_device;
+  char *photo_device;
   long cam_start;
   long cam_end;
 

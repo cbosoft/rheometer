@@ -78,7 +78,7 @@ void centre(char *s, unsigned int w, char *c[])
 
 
 
-
+// TODO create a modular/pluggable/argument driven way to choose what to display
 void display_titles(void)
 {
   unsigned int colw = get_column_width();

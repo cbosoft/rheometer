@@ -91,6 +91,10 @@ void save_run_params_to_json(struct run_data *rd)
   CHECKJSON(software_version);
   cJSON_AddItemToObject(params, "software_version", software_version);
 
+  cJSON *hardware_version = cJSON_CreateNumber(rd->hardware_version);
+  CHECKJSON(hardware_version);
+  cJSON_AddItemToObject(params, "hardware_version", hardware_version);
+
   if (rd->video_device != NULL) {
     info("video_dev");
     cJSON *video_device = cJSON_CreateString(rd->video_device);
@@ -249,8 +253,10 @@ void *log_thread_func(void *vptr) {
     pthread_mutex_unlock(&lock_temperature);
 
     pthread_mutex_lock(&lock_loadcell);
-    fprintf(log_fp, "%lu\n", rd->loadcell_bytes);
+    fprintf(log_fp, "%lu,", rd->loadcell_bytes);
     pthread_mutex_unlock(&lock_loadcell);
+
+    fprintf(log_fp, "%d\n", rd->phase);
     
     sleep_us(900);
   }

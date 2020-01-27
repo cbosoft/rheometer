@@ -33,6 +33,8 @@ struct run_data *init_run_data()
   rd->log_names = NULL;
   rd->log_count = 0;
   rd->uid = NULL;
+  rd->phase = PHASE_INIT;
+  rd->hardware_version = 0;
 
   rd->stopped = 0;
   rd->errored = 0;
@@ -48,6 +50,7 @@ struct run_data *init_run_data()
 
   rd->error_string = "all is well";
   rd->video_device = NULL;
+  rd->photo_device = NULL;
   rd->cam_start = -1;
   rd->cam_end = -1;
   return rd;
