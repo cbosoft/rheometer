@@ -92,13 +92,14 @@ void display_titles(void)
   //   CENTER_AND_DISPLAY(channel, "A%u/b");
   // }
   
-  CENTER_AND_DISPLAY("dt/s", "%s");
+  //CENTER_AND_DISPLAY("dt/s", "%s");
   CENTER_AND_DISPLAY("s/RPS", "%s");
   CENTER_AND_DISPLAY("SR/Hz", "%s");
   CENTER_AND_DISPLAY("LC/24b", "%s");
   CENTER_AND_DISPLAY("S/Pa", "%s");
   CENTER_AND_DISPLAY("ca/b", "%s");
-  CENTER_AND_DISPLAY("T/C", "%s");
+  CENTER_AND_DISPLAY("Tc/C", "%s");
+  CENTER_AND_DISPLAY("Ta/C", "%s");
 
   fprintf(stderr, "\r");
 
@@ -120,9 +121,9 @@ void display_thread_data(struct run_data *rd)
 
   CENTER_AND_DISPLAY(secs, "%lu");
 
-  pthread_mutex_lock(&lock_adcdt);
-  CENTER_AND_DISPLAY(rd->adc_dt, "%f");
-  pthread_mutex_unlock(&lock_adcdt);
+  // pthread_mutex_lock(&lock_adcdt);
+  // CENTER_AND_DISPLAY(rd->adc_dt, "%f");
+  // pthread_mutex_unlock(&lock_adcdt);
 
   // for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
   //   pthread_mutex_lock(&lock_adc);
@@ -146,6 +147,7 @@ void display_thread_data(struct run_data *rd)
 
   pthread_mutex_lock(&lock_temperature);
   CENTER_AND_DISPLAY( rd->cylinder_temperature, "%f");
+  CENTER_AND_DISPLAY( rd->ambient_temperature, "%f");
   pthread_mutex_unlock(&lock_temperature);
 
   fprintf(stderr, "\n");
