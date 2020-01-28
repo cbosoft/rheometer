@@ -12,26 +12,30 @@
 #include "util.h"
 
 
+// char *record_args[20] = {
+//   "ffmpeg", "-y", //1
+//   "-f", "v4l2", //3
+//   "-framerate", "10", //5
+//   "-input_format", "mjpeg",//7
+//   "-video_size", "640x480", //9
+//   "-i", "/dev/video0", //11
+//   "-f", "mp4", //13
+//   "out.mp4", NULL};
 char *record_args[20] = {
-  "ffmpeg", "-y", //1
-  "-f", "v4l2", //3
-  "-framerate", "10", //5
-  "-input_format", "mjpeg",//7
-  "-video_size", "320x240", //9
-  "-i", "/dev/video0", //11
-  "-f", "mp4", //13
-  "out.mp4", NULL};
-const int FRAMERATE_ARG = 5;
-const int INPUT_ARG = 11;
-const int OUTPUT_ARG = 14;
+  "raspivid", "-n", "-o", "PATH", "-t" , "0", "-w", "320", "-h", "240", NULL
+};
+// TODO further tweak down settings to get best performance
+//const int FRAMERATE_ARG = 5;
+//const int INPUT_ARG = 11;
+const int OUTPUT_ARG = 3;
 
 
 void *cam_thread_func(void *vtd)
 {
   struct run_data *rd = (struct run_data*)vtd;
 
-  int video_idx = add_log(rd, "video", "%s_video.mp4", rd->log_pref);
-  record_args[INPUT_ARG] = rd->video_device;
+  int video_idx = add_log(rd, "video", "%s_video.h264", rd->log_pref);
+  //record_args[INPUT_ARG] = rd->video_device;
   record_args[OUTPUT_ARG] = rd->log_paths[video_idx];
 
   int sp_stdin[2], sp_stdout[2], sp_stderr[2];
@@ -55,12 +59,12 @@ void *cam_thread_func(void *vtd)
     dup2(sp_stdin[0], STDIN_FILENO);
     dup2(sp_stdout[1], STDOUT_FILENO);
     dup2(sp_stderr[1], STDERR_FILENO);
-    execvp("ffmpeg", record_args);
+    execvp("raspivid", record_args);
   }
 
   fcntl(sp_stderr[1], F_SETFL, O_NONBLOCK);
 
-  info("ffmpeg forked (video): PID=%d", child_pid);
+  info("raspivid forked (video): PID=%d", child_pid);
   time_t now = time(NULL);
   rd->cam_ready = 1;
   rd->cam_start = now;
@@ -89,7 +93,10 @@ void *cam_thread_func(void *vtd)
   now = time(NULL);
 
   if (!waitpid(child_pid, NULL, WNOHANG)) {
-    write(sp_stdin[1], "q", 1);
+    //write(sp_stdin[1], "q", 1);
+    char *killargs[4] = {"kill", "-9", "PID", NULL};
+    sprintf(killargs[2], "%d", child_pid);
+    execvp("kill", record_args);
     waitpid(child_pid, NULL, 0);
   }
   rd->cam_end = now;
