@@ -67,7 +67,7 @@ sleep(3)
 
 for i, (length, control_param) in enumerate(combined_params):
     control_spec = control_pattern.format(control_param)
-    command = f'sudo ./rheometer -t {tag} -d {depth} -l {length} -c {control_spec} -w {hardware_version} -v /dev/video0'
+    command = f'sudo ./rheometer -t {tag} -d {depth} -l {length} -c {control_spec} -w {hardware_version} -p/dev/video0'
     title = f"({i+1}/{len(combined_params)}) - {command}"
     sys.stdout.write('\33]0;' + title + '\a')
     sys.stdout.flush()
