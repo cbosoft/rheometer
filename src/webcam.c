@@ -90,14 +90,17 @@ void *cam_thread_func(void *vtd)
 
   }
 
+
   now = time(NULL);
 
   if (!waitpid(child_pid, NULL, WNOHANG)) {
     //write(sp_stdin[1], "q", 1);
-    char *killargs[4] = {"kill", "-9", "PID", NULL};
-    sprintf(killargs[2], "%d", child_pid);
-    execvp("kill", record_args);
+    char *killargs[4] = {"kill", "-9", NULL, NULL};
+    killargs[2] = calloc(10, sizeof(char));
+    snprintf(killargs[2], 9, "%d", child_pid);
+    execvp("kill", killargs);
     waitpid(child_pid, NULL, 0);
+    free(killargs[2]);
   }
   rd->cam_end = now;
 
