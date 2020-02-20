@@ -28,6 +28,7 @@ char *record_args[20] = {
 //const int FRAMERATE_ARG = 5;
 //const int INPUT_ARG = 11;
 const int OUTPUT_ARG = 3;
+const int FILM_LEN = 5;
 
 
 void *cam_thread_func(void *vtd)
@@ -37,6 +38,8 @@ void *cam_thread_func(void *vtd)
   int video_idx = add_log(rd, "video", "%s_video.h264", rd->log_pref);
   //record_args[INPUT_ARG] = rd->video_device;
   record_args[OUTPUT_ARG] = rd->log_paths[video_idx];
+  record_args[FILM_LEN] = calloc(10, sizeof(char));
+  snprintf(record_args[FILM_LEN], 9, "%d", (rd->length_s+10)*1000);
 
   int sp_stdin[2], sp_stdout[2], sp_stderr[2];
 
@@ -95,12 +98,12 @@ void *cam_thread_func(void *vtd)
 
   if (!waitpid(child_pid, NULL, WNOHANG)) {
     //write(sp_stdin[1], "q", 1);
-    char *killargs[4] = {"kill", "-9", NULL, NULL};
-    killargs[2] = calloc(10, sizeof(char));
-    snprintf(killargs[2], 9, "%d", child_pid);
-    execvp("kill", killargs);
+    //char *killargs[4] = {"pkill", "raspivid", NULL, NULL};
+    //killargs[2] = calloc(10, sizeof(char));
+    //snprintf(killargs[2], 9, "%d", child_pid);
+    //execvp("pkill", killargs);
     waitpid(child_pid, NULL, 0);
-    free(killargs[2]);
+    //free(killargs[2]);
   }
   rd->cam_end = now;
 
