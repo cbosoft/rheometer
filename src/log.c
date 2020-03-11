@@ -257,7 +257,11 @@ void *log_thread_func(void *vptr) {
     pthread_mutex_unlock(&lock_loadcell);
 
     fprintf(log_fp, "%d\n", rd->phase);
-    
+
+    pthread_mutex_lock(&lock_temperature);
+    fprintf(log_fp, "%f,", rd->ambient_temperature);
+    pthread_mutex_unlock(&lock_temperature);
+
     sleep_us(900);
   }
 
