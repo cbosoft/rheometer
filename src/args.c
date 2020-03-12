@@ -23,7 +23,7 @@ usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <depth> -c <control scheme> -w <hardware version> [-t <tag>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
+      "    rheometer -l <length> -d <fill-depth> -c <control scheme> -w <hardware version> [-t <tag>] [-n <needle-depth>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -42,8 +42,12 @@ help(void)
       "                     by a suffixed character. e.g. \"10s\" is 10 seconds, \"10m\"\n"
       "                     is 10 minutes. If ignored, the value is taken as seconds.\n"
       "\n"
-      "    -d | --depth     Fill depth of Couette cell. This is the height fluid extends \n"
-      "                     up on the "BOLD"inner"RESET" cylinder, in mm.\n"
+      "    -d | --fill-depth     Fill depth of Couette cell. This is the height fluid extends \n"
+      "                     up on the "BOLD"inner"RESET" cylinder, in mm. Total height of inner \n"
+      "                     cylinder is ~73mm.\n"
+      "\n"
+      "    -d | --fill-depth     Needle depth in the Couette cell. This is the height needle is in \n"
+      "                     fluid, in mm. Total height of needle is ~37mm.\n"
       "\n"
       "    -c | --control-scheme    Control scheme JSON file path. More information in the\n"
       "                     'Control Schemes' section in the help.\n"
@@ -109,7 +113,7 @@ unsigned int parse_length_string(const char *length_s_str)
   argerr("length arg syntax error");
 
   // this will bever run, but it makes the linter happy.
-  return -1; //unsigned, so this is actually INT_MAX?
+  return 1;
 }
 
 
@@ -167,11 +171,16 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       help();
       exit(0);
     }
-    else if (EITHER(argv[i], "-d", "--depth")) {
+    else if (EITHER(argv[i], "-d", "--fill-depth")) {
       i++;
       check_argc(i, argc);
       rd->fill_depth = atof(argv[i]);
       d_set = 1;
+    }
+    else if (EITHER(argv[i], "-n", "--needle-depth")) {
+      i++;
+      check_argc(i, argc);
+      rd->needle_depth = atof(argv[i]);
     }
     else if (EITHER(argv[i], "-v", "--video-device")) {
       i++;
@@ -203,7 +212,7 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
     argerr("Hardware PWM needs root.");
 
   if (!cs_set || !l_set || !d_set || !hwver_set)
-    argerr("Length, control scheme, hardware_version, and depth are required parameters.");
+    argerr("Length, control scheme, hardware_version, and fill depth are required parameters.");
 
   // finished setting args, display
   // TODO: display more run information

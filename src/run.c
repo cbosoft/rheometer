@@ -35,6 +35,8 @@ struct run_data *init_run_data()
   rd->uid = NULL;
   rd->phase = PHASE_INIT;
   rd->hardware_version = 0;
+  rd->fill_depth = -1;
+  rd->needle_depth = -1;
 
   rd->stopped = 0;
   rd->errored = 0;

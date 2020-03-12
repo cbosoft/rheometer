@@ -83,9 +83,15 @@ void save_run_params_to_json(struct run_data *rd)
   CHECKJSON(length_s_json);
   cJSON_AddItemToObject(params, "length_s", length_s_json);
 
-  cJSON *depth_mm_json = cJSON_CreateNumber(rd->fill_depth);
-  CHECKJSON(depth_mm_json);
-  cJSON_AddItemToObject(params, "depth_mm", depth_mm_json);
+  cJSON *fill_depth_mm_json = cJSON_CreateNumber(rd->fill_depth);
+  CHECKJSON(fill_depth_mm_json);
+  cJSON_AddItemToObject(params, "fill_depth_mm", fill_depth_mm_json);
+
+  if (rd->needle_depth >= 0.0) {
+    cJSON *needle_depth_mm_json = cJSON_CreateNumber(rd->needle_depth);
+    CHECKJSON(needle_depth_mm_json);
+    cJSON_AddItemToObject(params, "needle_depth_mm", needle_depth_mm_json);
+  }
 
   cJSON *software_version = cJSON_CreateString(VERSION);
   CHECKJSON(software_version);

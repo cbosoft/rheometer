@@ -38,6 +38,7 @@ struct run_data {
   // run_data
   unsigned int length_s;
   double fill_depth;
+  double needle_depth;
   char *tag;
   char *log_pref;
   char **log_paths;
