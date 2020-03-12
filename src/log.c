@@ -256,12 +256,13 @@ void *log_thread_func(void *vptr) {
     fprintf(log_fp, "%lu,", rd->loadcell_bytes);
     pthread_mutex_unlock(&lock_loadcell);
 
-    fprintf(log_fp, "%d\n", rd->phase);
+    fprintf(log_fp, "%d,", rd->phase);
 
     pthread_mutex_lock(&lock_temperature);
     fprintf(log_fp, "%f,", rd->ambient_temperature);
     pthread_mutex_unlock(&lock_temperature);
 
+    fprintf(log_fp, "\n");
     sleep_us(900);
   }
 
