@@ -11,7 +11,8 @@
 
 void append_argset(ArgSet *as,
     char *controller_name, double *controller_params, int n_controller_params,
-    char *setter_name, double *setter_params, int n_setter_params)
+    char *setter_name, double *setter_params, int n_setter_params,
+    int each_run_length)
 {
 
   // --controller "name" --controller_params 1,2,3 --setter "name" --setter_params 1,2,3 [additional required params -d,-l,and -w]
@@ -44,6 +45,13 @@ void append_argset(ArgSet *as,
     free(s);
   }
 
+  if (each_run_length > 0) {
+    arglist_add(al, "--length");
+    char *each_run_length_carr = calloc(10, sizeof(char));
+    snprintf(each_run_length_carr, 9, "%d", each_run_length);
+    arglist_add(al, each_run_length_carr);
+  }
+
   argset_add(as, al);
 }
 
@@ -60,6 +68,8 @@ ArgSet *generate_schedule(struct schedule_data *sd)
   int n_setter_interp = 0;
   int setter_interp_needs_free = 0;
   int n_setter_params = 0;
+
+  int each_run_length = sd->each_run_length;
 
   ArgSet *rv = argset_new();
 
@@ -107,7 +117,8 @@ ArgSet *generate_schedule(struct schedule_data *sd)
 
           append_argset(rv,
               controller, controller_interp[ctrl_i], n_controller_params,
-              setter, setter_interp[str_i], n_setter_params);
+              setter, setter_interp[str_i], n_setter_params,
+              each_run_length);
 
         }
 

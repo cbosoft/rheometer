@@ -6,6 +6,7 @@
 #include "../util/double_array.h"
 #include "../util/json.h"
 #include "../util/error.h"
+#include "../args/args.h"
 #include "../defaults.h"
 #include "schedule.h"
 
@@ -24,6 +25,7 @@ struct schedule_data *get_default_schedule_data()
 
   sd->interpolation_type = IT_Linear;
   sd->n_interpolation_points = INTERP_N_DEFAULT;
+  sd->each_run_length = -1;
   return sd;
 }
 
@@ -118,6 +120,20 @@ void sd_add_params(struct schedule_data *sd, cJSON *json)
     }
     else {
       ferr("schedule_add_params", "\"interpolation_type\" must be either \"linear\" or \"log\".");
+    }
+  }
+
+  cJSON *each_run_length_json = cJSON_GetObjectItem(json, "each_run_length");
+  if (each_run_length_json != NULL) {
+    if (cJSON_IsNumber(each_run_length_json)) {
+      sd->each_run_length = each_run_length_json->valueint;
+    }
+    else if (cJSON_IsString(each_run_length_json)) {
+      char *s = each_run_length_json->valuestring;
+      sd->each_run_length = (int)(parse_length_string(s));
+    }
+    else {
+      ferr("schedule_add_params", "\"each_run_length\" must be a number.");
     }
   }
 
