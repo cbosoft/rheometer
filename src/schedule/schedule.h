@@ -3,6 +3,7 @@
 #include "argset.h"
 
 typedef enum {IT_Linear, IT_Log} InterpolationType;
+typedef enum {SD_JSON_CONTROLLER, SD_JSON_SETTER, SD_JSON_PARAMS, SD_JSON_UNKNOWN} ScheduleJsonObjectType;
 
 struct schedule_point {
   char *controller_name;

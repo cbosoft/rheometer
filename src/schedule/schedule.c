@@ -90,6 +90,39 @@ void sd_add_setter(struct schedule_data *sd, const char *name, double *params, i
   sd->n_setter_params[n-1] = nparams;
 }
 
+void sd_add_params(struct schedule_data *sd, cJSON *json)
+{
+  cJSON *npoints_json = cJSON_GetObjectItem(json, "n_interpolation_points");
+  if (npoints_json != NULL) {
+    if (cJSON_IsNumber(npoints_json)) {
+      sd->n_interpolation_points = npoints_json->valueint;
+    }
+    else {
+      ferr("schedule_add_params", "\"n_interpolation_points\" must be a number.");
+    }
+  }
+
+  cJSON *int_type_json = cJSON_GetObjectItem(json, "interpolation_type");
+  if (int_type_json != NULL) {
+    if (cJSON_IsString(int_type_json)) {
+      char *s = int_type_json->valuestring;
+      if (strcmp(s, "linear") == 0) {
+        sd->interpolation_type = IT_Linear;
+      }
+      else if (strcmp(s, "log") == 0) {
+        sd->interpolation_type = IT_Log;
+      }
+      else {
+        ferr("schedule_add_params", "\"interpolation_type\" must be either \"linear\" or \"log\".");
+      }
+    }
+    else {
+      ferr("schedule_add_params", "\"interpolation_type\" must be either \"linear\" or \"log\".");
+    }
+  }
+
+}
+
 
 void sd_set_interpolation(struct schedule_data *sd, InterpolationType type, int n)
 {
@@ -125,7 +158,7 @@ static const char *sd_json_get_name(cJSON *json)
   }
 }
 
-static int sd_json_get_is_controller(cJSON *json)
+static ScheduleJsonObjectType sd_json_get_type(cJSON *json)
 {
   cJSON *type_json = safe_get(json, "type", 0);
   
@@ -133,19 +166,22 @@ static int sd_json_get_is_controller(cJSON *json)
     const char *s = type_json->valuestring;
 
     if (strcmp(s, "controller") == 0) {
-      return 1;
+      return SD_JSON_CONTROLLER;
     }
     else if (strcmp(s, "setter") == 0) {
-      return 0;
+      return SD_JSON_SETTER;
+    }
+    else if (strcmp(s, "params") == 0) {
+      return SD_JSON_PARAMS;
     }
     else {
-      ferr("schedule_add_from_file", "schedule point type should be either \"controller\" or \"setter\", not %s", s);
-      return -1;
+      ferr("schedule_add_from_file", "schedule point type should be \"controller\", \"setter\" or \"params\", not %s", s);
+      return SD_JSON_UNKNOWN;
     }
   }
 
   ferr("schedule_add_from_file", "schedule point type should be a string.");
-  return -1;
+  return SD_JSON_UNKNOWN;
 }
 
 static void sd_json_maybe_get_params(cJSON *json, double **arr_ptr, int *n_ptr)
@@ -171,20 +207,35 @@ void sd_add_from_json(struct schedule_data *sd, cJSON *json)
     }
   }
   else {
-    const char *name = sd_json_get_name(json);
-    int is_controller = sd_json_get_is_controller(json);
-
+    const char *name = NULL;
     double *params = NULL;
     int n_params = 0;
-    sd_json_maybe_get_params(json, &params, &n_params);
 
-    if (is_controller) {
-      sd_add_controller(sd, name, params, n_params);
-    }
-    else {
-      sd_add_setter(sd, name, params, n_params);
-    }
+    ScheduleJsonObjectType type = sd_json_get_type(json);
 
+
+    switch (type) {
+      case SD_JSON_CONTROLLER:
+        name = sd_json_get_name(json);
+        sd_json_maybe_get_params(json, &params, &n_params);
+        sd_add_controller(sd, name, params, n_params);
+        break;
+
+      case SD_JSON_SETTER:
+        name = sd_json_get_name(json);
+        sd_json_maybe_get_params(json, &params, &n_params);
+        sd_add_setter(sd, name, params, n_params);
+        break;
+
+      case SD_JSON_PARAMS:
+        sd_add_params(sd, json);
+        break;
+
+      case SD_JSON_UNKNOWN:
+        warn("schedule_add_from_file", "Unknown schedule point found.");
+        break;
+
+    }
 
   }
 }
