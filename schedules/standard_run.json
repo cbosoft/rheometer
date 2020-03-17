@@ -1,0 +1,21 @@
+[
+  {
+    "name": "none",
+    "type": "controller"
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": 200
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": 1024
+  },
+  {
+    "type": "params",
+    "each_run_length": 300,
+    "n_interpolation_points": 5
+  }
+]
