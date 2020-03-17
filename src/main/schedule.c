@@ -15,7 +15,7 @@ unsigned int get_length(ArgList *al)
 {
   for (int i = 0; i < al->argc; i++) {
     if ((strcmp(al->argv[i], "-l") == 0) || (strcmp(al->argv[i], "--length") == 0)) {
-      return parse_length_string(al->argv[++i]) + (DELAY_THREADS_MS + DELAY_MOTOR_HIGH_MS + DELAY_MOTOR_AFTER_MS + DELAY_LOG_MS + DELAY_CONTROL_MS)/1000;
+      return parse_length_string(al->argv[++i]) + (DELAY_THREADS_MS + DELAY_MOTOR_HIGH_MS + DELAY_MOTOR_LOW_MS + DELAY_LOG_MS + DELAY_CONTROL_MS)/1000;
     }
   }
 
