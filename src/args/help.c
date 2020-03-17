@@ -50,7 +50,7 @@ void args_help()
       "    mm. Total height of needle is ~37mm.\n"
       "\n"                                                                           //
       "    "FGBLUE"-c, --controller"RESET"\n"
-      "    "FGBLUE"-s, --controller"RESET"\n"
+      "    "FGBLUE"-s, --setter"RESET"\n"
       "    Respectively, controller and setter module names. Must be used, or specified\n"
       "    using a control scheme.\n"
       "\n"                                                                           //
@@ -137,9 +137,6 @@ void args_help()
       "\n"
       "    "FGBLUE"-c, --controller"RESET"\n"
       "    Set the controller module name. Resets params.\n"
-      "\n"
-      "    "FGBLUE"-c, --controller"RESET"\n"
-      "    Set the controller module name.\n"
       "\n"
       "    "FGBLUE"-f, --schedule-file"RESET"\n"
       "    Load a series of schedule points (setters, controllers, parameters) from file.\n"
