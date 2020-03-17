@@ -164,9 +164,7 @@ static void sd_json_maybe_get_params(cJSON *json, double **arr_ptr, int *n_ptr)
 
 void sd_add_from_json(struct schedule_data *sd, cJSON *json)
 {
-  fprintf(stderr, "HERE\n");
   if (cJSON_IsArray(json)) {
-    fprintf(stderr, "HERE\n");
     cJSON *elem_json = NULL;
     cJSON_ArrayForEach(elem_json, json) {
       sd_add_from_json(sd, elem_json);
