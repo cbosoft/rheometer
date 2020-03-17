@@ -112,9 +112,11 @@ debug: wpi rheometer
 	touch debug
 
 controllers/%.so: obj/control/controllers/%.o obj/run/run.o
+	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
 
 setters/%.so: obj/control/setters/%.o obj/run/run.o
+	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
 
 obj/%.o: src/%.c $(HDR)
