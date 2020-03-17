@@ -108,7 +108,10 @@ void args_help()
       "\n"                                                                           //
       "    Schedules are defined by file, or directly on the command line. A schedule\n"
       "    file is a JSON file; an array of objects where each element defines either\n"
-      "    a controller or setter, e.g.:\n"
+      "    a controller or setter. In addition you can provide overall schedule settings\n"
+      "    by adding an object to the array the the type \"params\". You can add as many\n"
+      "    as you like, any conflicting params are overidden by subsequent param objects.\n"
+      "    An example of what you can put in a schedule json file:\n"
       "\n"                                                                           //
       FGYELLOW"    [\n"RESET
       FGYELLOW"      { \n"RESET
@@ -126,6 +129,12 @@ void args_help()
       FGYELLOW"        \"type\":\"controller\", \n"RESET
       FGYELLOW"        \"params\": 2.2 \n"RESET
       FGYELLOW"      }, \n"RESET
+      FGYELLOW"      { \n"RESET
+      FGYELLOW"        \"type\":\"params\", \n"RESET
+      FGYELLOW"        \"n_interpolation_points\": 5 \n"RESET
+      FGYELLOW"        \"interpolation_type\": \"log\" \n"RESET
+      FGYELLOW"        \"each_run_length\": \"15s\" \n"RESET
+      FGYELLOW"      } \n"RESET
       FGYELLOW"    ]\n"RESET
       "\n"                                                                           //
       "  "BOLD""FGGREEN"Schedule"RESET""BOLD" Options:"RESET"\n"
