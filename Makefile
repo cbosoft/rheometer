@@ -97,11 +97,19 @@ RHEO = $(MAIN) \
 			 $(SENSORS) \
 			 $(SCHEDULE)
 
+## Colours
+COL_OBJ = $(shell tput setaf 3 2>/dev/null)
+COL_EXE = $(shell tput setaf 4 2>/dev/null)
+COL_SO = $(shell tput setaf 5 2>/dev/null)
+COL_RST = $(shell tput sgr0 2>/dev/null)
+COL_BLD = $(shell tput bold 2>/dev/null)
+
 .PHONY: all modules
 
 all: rheometer modules
 
 rheometer: $(RHEO) $(HDR)
+	@printf "$(COL_OBJ)LINKING OBJECTS TO EXECUTABLE $@$(COL_RST)\n"
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 
 modules: $(shell scripts/get_modules.sh)
@@ -112,21 +120,25 @@ debug: wpi rheometer
 	touch debug
 
 controllers/%.so: obj/control/controllers/%.o obj/run/run.o
-	mkdir -p `dirname $@`
-	$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
+	@printf "$(COL_SO)ASSEMBLING MODULE $@ (CONTROLLER)$(COL_RST)\n"
+	@mkdir -p `dirname $@`
+	@$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
 
 setters/%.so: obj/control/setters/%.o obj/run/run.o
-	mkdir -p `dirname $@`
-	$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
+	@printf "$(COL_SO)ASSEMBLING MODULE $@ (SETTER)$(COL_RST)\n"
+	@mkdir -p `dirname $@`
+	@$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
 
 obj/%.o: src/%.c $(HDR)
-	mkdir -p `dirname $@`
-	$(CC) $(CFLAGS) -c $< -o $@ -DVERSION=\"$(VERSION)\"
+	@printf "$(COL_OBJ)ASSEMBLING OBJECT $@$(COL_RST)\n"
+	@mkdir -p `dirname $@`
+	@$(CC) $(CFLAGS) -c $< -o $@ -DVERSION=\"$(VERSION)\"
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
-	$(CC) -shared -o $@ $< -lpthread
-	sudo cp wpi/libwiringPi.so $(PREFIX)/lib/.
-	sudo cp wpi/*.h $(PREFIX)/include/.
+	@printf "$(COL_SO)ASSEMBLING MODULE $@ (DUMMY)$(COL_RST)\n"
+	@$(CC) -shared -o $@ $< -lpthread
+	@sudo cp wpi/libwiringPi.so $(PREFIX)/lib/.
+	@sudo cp wpi/*.h $(PREFIX)/include/.
 
 clean:
 	rm -rf obj/* rheometer wpi/*.so controllers/*.so setters/*.so
