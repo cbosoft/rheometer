@@ -20,7 +20,9 @@ THERMO = \
 				 obj/sensors/thermometer/thermometer.o
 
 LOADCELL = \
-					 obj/sensors/loadcell/loadcell.o
+					 obj/sensors/loadcell/loadcell.o \
+					 obj/sensors/loadcell/thread.o \
+					 obj/sensors/loadcell/hx711.o
 
 CAMERA = \
 				 obj/sensors/camera/video.o \
