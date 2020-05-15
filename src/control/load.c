@@ -33,7 +33,6 @@ ControllerHandle *load_controller_path(const char *path)
     ferr("load_controller", "%s", error);
   }
   h->doc = *doc_ptr;
-  fprintf(stderr, "%s\n", (char*)doc_ptr);
 
   h->get_control_action = dlsym(h->handle, "get_control_action");
   if ((error = dlerror()) != NULL) {
