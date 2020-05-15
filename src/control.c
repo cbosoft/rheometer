@@ -142,26 +142,31 @@ int setidx_from_str(const char *s)
 
 ControllerHandle *load_controller(const char *name)
 {
-  ControllerHandle *h = calloc(1, sizeof(ControllerHandle));
-
-  h->name = calloc(strlen(name)+1, sizeof(char));
-  snprintf(h->name, strlen(name), name);
-
   char *path = malloc(401*sizeof(char));
   snprintf(path, 400, "./controllers/%s.so", name);
-  h->handle = dlopen(path, RTLD_LAZY);
+  ControllerHandle *rv = load_controller_path(path);
   free(path);
-  
+
+  return rv;
+}
+
+ControllerHandle *load_controller_path(const char *path)
+{
+  ControllerHandle *h = calloc(1, sizeof(ControllerHandle));
+
+  h->handle = dlopen(path, RTLD_LAZY);
   if (!h->handle) {
     ferr("load_controller", "%s", dlerror());
   }
 
   dlerror();
-  h->doc = dlsym(h->handle, "doc");
+  char **doc_ptr = dlsym(h->handle, "doc");
   char *error = NULL;
   if ((error = dlerror()) != NULL) {
     ferr("load_controller", "%s", error);
   }
+  h->doc = *doc_ptr;
+  fprintf(stderr, "%s\n", (char*)doc_ptr);
 
   h->get_control_action = dlsym(h->handle, "get_control_action");
   if ((error = dlerror()) != NULL) {
@@ -173,32 +178,35 @@ ControllerHandle *load_controller(const char *name)
 
 void free_controller(ControllerHandle *h)
 {
-  free(h->name);
   free(h);
 }
 
 SetterHandle *load_setter(const char *name)
 {
-  SetterHandle *h = calloc(1, sizeof(SetterHandle));
-
-  h->name = calloc(strlen(name)+1, sizeof(char));
-  snprintf(h->name, strlen(name), name);
-
   char *path = malloc(401*sizeof(char));
   snprintf(path, 400, "./setters/%s.so", name);
-  h->handle = dlopen(path, RTLD_LAZY);
+  SetterHandle *rv = load_setter_path(path);
   free(path);
-  
+  return rv;
+}
+
+SetterHandle *load_setter_path(const char *path)
+{
+  SetterHandle *h = calloc(1, sizeof(SetterHandle));
+
+  h->handle = dlopen(path, RTLD_LAZY);
+
   if (!h->handle) {
     ferr("load_setter", "%s", dlerror());
   }
 
   dlerror();
-  h->doc = dlsym(h->handle, "doc");
+  char **doc_ptr = dlsym(h->handle, "doc");
   char *error = NULL;
   if ((error = dlerror()) != NULL) {
     ferr("load_setter", "%s", error);
   }
+  h->doc = *doc_ptr;
 
   h->get_setpoint = dlsym(h->handle, "get_setpoint");
   if ((error = dlerror()) != NULL) {
@@ -210,7 +218,6 @@ SetterHandle *load_setter(const char *name)
 
 void free_setter(SetterHandle *h)
 {
-  free(h->name);
   free(h);
 }
 

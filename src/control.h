@@ -18,7 +18,6 @@ typedef double (*setter_func_t)(struct run_data *);
 
 
 typedef struct {
-  char *name;
   const char *doc;
   unsigned int (*get_control_action)(struct run_data *rd);
   void *handle;
@@ -26,7 +25,6 @@ typedef struct {
 
 
 typedef struct {
-  char *name;
   const char *doc;
   double (*get_setpoint)(struct run_data *rd);
   void *handle;
@@ -74,6 +72,13 @@ void do_tuning(struct run_data *rd);
 
 double get_control_param_or_default(struct run_data *rd, int index, double def);
 double get_setter_param_or_default(struct run_data *rd, int index, double def);
+
+ControllerHandle *load_controller(const char *name);
+ControllerHandle *load_controller_path(const char *path);
+void free_controller(ControllerHandle *h);
+SetterHandle *load_setter(const char *name);
+SetterHandle *load_setter_path(const char *path);
+void free_setter(SetterHandle *h);
 
 
 // vim: ft=c
