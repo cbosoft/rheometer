@@ -25,7 +25,6 @@ struct run_data {
   double strainrate_ind;
   double stress_ind;
   double viscosity_ind;
-  double **ptimes;
   char *control_scheme;
   char *setter_scheme;
   char *control_scheme_path;
