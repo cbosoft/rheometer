@@ -73,13 +73,15 @@ HDR = $(shell ls **/*.h)
 WPI = wpi/libwiringPi.so
 VERSION = $(shell scripts/get_version.sh)
 
-.PHONY: all
+.PHONY: all modules
 
-all: rheometer $(MODULES)
+all: rheometer modules
 
 rheometer: $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
 	touch src/args.c
+
+modules: $(shell scripts/get_modules.sh)
 
 wpi: $(WPI)
 
