@@ -83,10 +83,10 @@ wpi: $(WPI)
 debug: wpi rheometer
 	touch debug
 
-controllers/%.so: obj/controllers/%.o
+controllers/%.so: obj/control/controllers/%.o
 	$(CC) $(CFLAGS) -shared $< -o $@
 
-setters/%.so: obj/setters/%.o
+setters/%.so: obj/control/setters/%.o
 	$(CC) $(CFLAGS) -shared $< -o $@
 
 obj/%.o: src/%.c $(HDR)
