@@ -86,11 +86,11 @@ wpi: $(WPI)
 debug: wpi rheometer
 	touch debug
 
-controllers/%.so: obj/control/controllers/%.o
-	$(CC) $(CFLAGS) -shared $< -o $@
+controllers/%.so: obj/control/controllers/%.o obj/run/run.o
+	$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
 
-setters/%.so: obj/control/setters/%.o
-	$(CC) $(CFLAGS) -shared $< -o $@
+setters/%.so: obj/control/setters/%.o obj/run/run.o
+	$(CC) $(CFLAGS) -fPIC -shared $^ -o $@
 
 obj/%.o: src/%.c $(HDR)
 	mkdir -p `dirname $@`
