@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <glob.h>
 
 #include <dlfcn.h>
 #include <wiringPi.h>
@@ -52,48 +53,45 @@ extern pthread_mutex_t lock_control, lock_speed, lock_loadcell;
 
 void control_help(void)
 {
-  fprintf(stdout,
+  fprintf(stdout,"%s",
       "  "BOLD"Control Schemes"RESET"\n"
       "    Control schemes are defined in JSON files (stored in the data/ directory).\n"
       "    These JSON files dictate what function should be used, and what parameters \n"
       "    are passed. Different functions and their associated parameters are discussed\n"
       "    below. Scheme names, and all parameter names, are expected to be written in\n"
-      "    lowercase in the JSON file.\n"
-      "\n"
-      "  - "BOLD"PID control"RESET", 'pid'\n"
-      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n\n"
-      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n\n"
-      "      Three tuning parameters (kp, ki, kd) are required, delta time is measured setpoint \n"
-      "      parameter. It is usual to not use all three parts of the algorithm, a section can be \n"
-      "      turned off by setting the relevant coefficient to zero.\n"
-      "\n"
-      "  - "BOLD"No control"RESET", 'none'\n"
-      "      None actual controlling of the variable is performed; just a simple conversion from \n"
-      "      the stress/strainrate setpoint to DC. A single required parameter is \"mult\", the \n"
-      "      multiplier which does the conversion. This method is not intended to provide robust \n"
-      "      control, but is intended to take the controller out of the equation.\n"
+      "    lowercase in the JSON file.\n");
+
+  glob_t res;
+  glob("./controllers/*.so", 0, NULL, &res);
+
+  for (size_t i = 0; i < res.gl_pathc; i++) {
+    ControllerHandle *h = load_controller_path(res.gl_pathv[i]);
+    fprintf(stdout, "%s\n", h->doc);
+    free_controller(h);
+  }
+
+  globfree(&res);
+
+
+  fprintf(stdout, "%s",
       "\n"
       "  "BOLD"Setpoint (setter) Schemes"RESET"\n"
       "    Setpoint for the controller is set by one of these functions. It takes in sensor \n"
       "    readings and time, then deciding the new setpoint. Normally this is a constant, \n"
       "    being varied by the user between different constants between runs. It is possible that\n"
       "    dynamic testing may be applied which would require the use of one of the other functions.\n"
-      "    This is a property within the control scheme json file. See the ./dat folder for examples.\n"
-      "\n"
-      "  - "BOLD"Constant value setter"RESET", 'constant'\n"
-      "      A constant setpoint, the only required parameter is \"setpoint\", the constant (double)\n"
-      "      value of stress/strainrate to provide the controller.\n"
-      "\n"
-      "  - "BOLD"Sinusoid setter"RESET", 'sine'\n"
-      "      Sine function operating on the time the experiment has run for. Evaluated as:\n"
-      "        ca = ( sin( 2 × Pi × (t / period) ) × magnitude) + magnitude + mean\n"
-      "      This will produce a sine wave which varies around \"mean\" by an amount \"magnitude\"\n"
-      "      with period \"period\".\n"
-      "\n"
-      "  - "BOLD"Bistable"RESET", 'bistable'\n"
-      "      Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.\n"
-      "\n"
-  );
+      "    This is a property within the control scheme json file. See the ./dat folder for examples.\n");
+  
+  glob("./setters/*.so", 0, NULL, &res);
+
+  for (size_t i = 0; i < res.gl_pathc; i++) {
+    SetterHandle *h = load_setter_path(res.gl_pathv[i]);
+    fprintf(stdout, "%s\n", h->doc);
+    free_setter(h);
+  }
+
+  globfree(&res);
+
 }
 
 
