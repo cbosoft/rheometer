@@ -4,12 +4,13 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "util/display.h"
+#include "util/error.h"
+#include "log/log.h"
+#include "control/control.h"
 #include "version.h"
+
 #include "args.h"
-#include "display.h"
-#include "log.h"
-#include "control.h"
-#include "error.h"
 
 
 #define EITHER(A,B,C) ( (strcmp(A, B) == 0) || (strcmp(A, C) == 0) )

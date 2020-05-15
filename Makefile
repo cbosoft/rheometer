@@ -11,32 +11,64 @@ SETTERS = \
 					setters/sine.so \
 					setters/bistable.so
 
-MAIN = obj/adc.o \
-			 obj/args.o \
-			 obj/cJSON.o \
-			 obj/control.o \
-			 obj/display.o \
-			 obj/error.o \
-			 obj/json.o \
-			 obj/loadcell.o \
-			 obj/log.o \
-			 obj/main.o \
-			 obj/motor.o \
-			 obj/nouns.o \
-			 obj/opt.o \
-			 obj/photo.o \
-			 obj/run.o \
-			 obj/tar.o \
-			 obj/thermometer.o \
-			 obj/uid.o \
-			 obj/util.o \
-			 obj/webcam.o
+MODULES = $(CONTROLLERS) $(SETTERS)
 
-HDR = src/run.h
+ADC = \
+			obj/sensors/adc/adc.o
+
+THERMO = \
+				 obj/sensors/thermometer/thermometer.o
+
+LOADCELL = \
+					 obj/sensors/loadcell/loadcell.o
+
+CAMERA = \
+				 obj/sensors/camera/video.o \
+				 obj/sensors/camera/photo.o
+
+ENCODER = \
+			obj/sensors/encoder/encoder.o
+
+SENSORS = $(ADC) $(THERMO) $(LOADCELL) $(ENCODER) $(CAMERA)
+
+UTIL = \
+			 obj/util/cJSON.o \
+			 obj/util/json.o \
+			 obj/util/display.o \
+			 obj/util/error.o \
+			 obj/util/unique_name.o \
+			 obj/util/time.o \
+			 obj/util/sleep.o \
+			 obj/util/nouns.o
+
+CONTROL = \
+					obj/control/control.o
+
+MOTOR = \
+				obj/motor/motor.o
+
+LOG = \
+			obj/log/log.o \
+			obj/log/tar.o
+
+RUN = \
+			obj/run/run.o
+
+RHEO = obj/main.o obj/args.o \
+			 $(RUN) \
+			 $(LOG) \
+			 $(MOTOR) \
+			 $(CONTROL) \
+			 $(UTIL) \
+			 $(SENSORS)
+
+HDR = $(shell ls **/*.h)
 WPI = wpi/libwiringPi.so
-RHEO = $(MAIN) $(CONTROLLERS) $(SETTERS)
 VERSION = $(shell scripts/get_version.sh)
 
+.PHONY: all
+
+all: rheometer $(MODULES)
 
 rheometer: $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)

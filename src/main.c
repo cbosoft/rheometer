@@ -10,21 +10,21 @@
 
 #include <wiringPi.h>
 
-#include "run.h"
+#include "run/run.h"
 #include "args.h"
-#include "error.h"
-#include "motor.h"
-#include "loadcell.h"
-#include "opt.h"
-#include "control.h"
-#include "webcam.h"
-#include "photo.h"
-#include "log.h"
-#include "adc.h"
-#include "util.h"
-#include "tar.h"
-#include "display.h"
-#include "thermometer.h"
+#include "util/error.h"
+#include "motor/motor.h"
+#include "sensors/loadcell/loadcell.h"
+#include "sensors/encoder/encoder.h"
+#include "sensors/camera/video.h"
+#include "sensors/camera/photo.h"
+#include "sensors/thermometer/thermometer.h"
+#include "control/control.h"
+#include "log/log.h"
+#include "sensors/adc/adc.h"
+#include "util/sleep.h"
+#include "log/tar.h"
+#include "util/display.h"
 
   pthread_t tmp_thread;
 
