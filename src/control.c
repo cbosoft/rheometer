@@ -117,18 +117,6 @@ void calculate_control_indicators(struct run_data *rd)
 
 
 
-// setpoint updaters "setters"
-
-
-double sine_setter(struct run_data *rd)
-{
-  double theta = 2.0 * PI * rd->time_s_f / rd->control_params->period;
-  double rv = (sin(theta) * (double)rd->control_params->magnitude) + rd->control_params->mean;
-  return (unsigned int)rv;
-}
-
-
-
 double bistable_setter(struct run_data *rd)
 {
   int periods_passed = (int)(rd->time_s_f / rd->control_params->period);
