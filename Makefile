@@ -58,6 +58,7 @@ LOG = \
 
 RUN = \
 			obj/run/run.o \
+			obj/run/free.o \
 			obj/run/defaults.o
 
 RHEO = obj/main.o obj/args.o \
