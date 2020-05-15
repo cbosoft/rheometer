@@ -42,10 +42,6 @@
     info("  "NAME" done"); \
 
 
-#define INIT_MUTEX(MUTEX) \
-    if (pthread_mutex_init(&MUTEX, NULL) != 0) {\
-      ferr("main", "error setting up mutex");\
-    }
 
 
 
@@ -81,8 +77,6 @@ void inthandle(int signo)
 
 
 
-pthread_mutex_t lock_time, lock_adc, lock_adcdt, lock_control, lock_loadcell, lock_temperature, lock_speed;
-
 int main (int argc, const char ** argv)
 {
   struct run_data *rd = init_run_data();
@@ -115,14 +109,7 @@ int main (int argc, const char ** argv)
 
   info("starting sensor threads...");
   pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread, vid_thread;
-  INIT_MUTEX(lock_time);
-  INIT_MUTEX(lock_adc);
-  INIT_MUTEX(lock_adcdt);
-  INIT_MUTEX(lock_control);
-  INIT_MUTEX(lock_loadcell);
-  INIT_MUTEX(lock_temperature);
-  INIT_MUTEX(lock_speed);
-
+  init_locks();
   SETUP_THREAD(tmp_thread, thermometer_thread_func, "thermometer", rd->tmp_ready);
   SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
   SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);

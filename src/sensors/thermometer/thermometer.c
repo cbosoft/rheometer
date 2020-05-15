@@ -28,7 +28,7 @@
 static char **devices = NULL;
 static int device_count = 0;
 static int cyl_thermo_fd = -1;
-extern pthread_mutex_t lock_temperature;
+
 
 void thermometer_setup()
 {
@@ -165,10 +165,8 @@ void *thermometer_thread_func(void *vptr)
 
   thermometer_setup();
 
-  pthread_mutex_lock(&lock_temperature);
-  rd->ambient_temperature = 0.0;
-  rd->cylinder_temperature = 0.0;
-  pthread_mutex_unlock(&lock_temperature);
+  set_ambient_temperature(rd, 0.0);
+  set_cylinder_temperature(rd, 0.0);
 
   if (!device_count) {
     rd->tmp_ready = 1;
@@ -181,14 +179,13 @@ void *thermometer_thread_func(void *vptr)
 
   rd->tmp_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
-    
+
     temp_ambient = read_ambient_temperature();
     temp_cylinder = read_cylinder_temperature();
 
-    pthread_mutex_lock(&lock_temperature);
-    rd->ambient_temperature = temp_ambient;
-    rd->cylinder_temperature = temp_cylinder;
-    pthread_mutex_unlock(&lock_temperature);
+    set_ambient_temperature(rd, temp_ambient);
+    set_cylinder_temperature(rd, temp_cylinder);
+
     sleep(1);
 
   }

@@ -19,8 +19,6 @@
 #include "adc.h"
 
 
-extern pthread_mutex_t lock_adc;
-
 #define NBYTES 3
 unsigned int read_adc_value(struct adc_handle *h, unsigned int channel)
 {
@@ -91,26 +89,20 @@ void *adc_thread_func(void *vptr) {
 
   struct run_data *rd = (struct run_data *)vptr;
 
-  unsigned long *adc, *padc;
+  unsigned long *adc;
 
   struct timeval start, now;
   gettimeofday(&start, NULL);
 
   rd->adc_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
-    
+
     adc = malloc(ADC_COUNT*sizeof(unsigned long));
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
       adc[channel] = read_adc_value(rd->adc_handle, channel);
     }
-    
-    padc = rd->adc;
 
-    pthread_mutex_lock(&lock_adc);
-    rd->adc = adc;
-    pthread_mutex_unlock(&lock_adc);
-
-    free(padc);
+    free(swap_adc(rd, adc));
 
     gettimeofday(&now, NULL);
 

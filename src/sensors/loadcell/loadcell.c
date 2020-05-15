@@ -11,26 +11,26 @@
 #include "hx711.h"
 #include "loadcell.h"
 
+const double K_LC_to_M = 1.0;
+const double K_W_to_M = 1.0;
+const double LCZ = 1.0;
 
 
-extern pthread_mutex_t lock_loadcell;
-
-double get_torque_from_loadcell(struct run_data *rd, unsigned long bytes)
+double loadcell_cal(struct run_data *rd, unsigned long bytes)
 {
-  (void) rd;
-  (void) bytes;
-  return 0.1;
+  double speed = get_speed(rd);
+
+  double M_fric = speed * K_W_to_M;
+  double lcmlcz = ((double)bytes) - LCZ;
+  double M_total = lcmlcz * K_LC_to_M;
+  double M_load = M_total - M_fric;
+
+  return M_load;
 }
-
-
 
 void read_loadcell(struct run_data *rd)
 {
-  unsigned long lc_bytes = hx711_read();
 
-  pthread_mutex_lock(&lock_loadcell);
-  rd->loadcell_bytes = lc_bytes;
-  rd->loadcell_units = get_torque_from_loadcell(rd, lc_bytes);
-  pthread_mutex_unlock(&lock_loadcell);
+  set_loadcell_bytes(rd, hx711_read());
 
 }

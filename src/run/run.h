@@ -73,11 +73,39 @@ struct run_data {
 
 
 
-
+void init_locks();
 struct run_data *init_run_data();
 void free_run_data(struct run_data *td);
 
+// speed getter/setter
+void set_speed(struct run_data *rd, double value);
+double get_speed(struct run_data *rd);
+double get_strainrate(struct run_data *rd);
+double get_fill_depth(struct run_data *rd);
 
+// temperature getter/setter
+void set_ambient_temperature(struct run_data *rd, double value);
+double get_ambient_temperature(struct run_data *rd);
+void set_cylinder_temperature(struct run_data *rd, double value);
+double get_cylinder_temperature(struct run_data *rd);
 
+// loadcell getter/setter
+void set_loadcell_bytes(struct run_data *rd, unsigned long value);
+unsigned long get_loadcell_bytes(struct run_data *rd);
+double get_loadcell_units(struct run_data *rd);
+double get_stress(struct run_data *rd);
+
+// control getter/setter
+void set_last_control_action(struct run_data *rd, unsigned int value);
+unsigned int get_last_control_action(struct run_data *rd);
+
+// time getter/setter
+void set_time(struct run_data *rd);
+double get_time(struct run_data *rd);
+void get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *time_us);
+
+// adc getter/setter
+unsigned long get_adc(struct run_data *rd, int i);
+unsigned long *swap_adc(struct run_data *rd, unsigned long *value);
 
 // vim: ft=c foldmethod=marker

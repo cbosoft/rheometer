@@ -17,7 +17,6 @@
   centre(formatted, colw, &centered);\
   fprintf(stderr, "%s ", centered);
 
-extern pthread_mutex_t lock_time, lock_adc, lock_control, lock_loadcell, lock_temperature, lock_speed, lock_adcdt;
 
 unsigned int get_column_width(void)
 {
@@ -132,24 +131,16 @@ void display_thread_data(struct run_data *rd)
   //   pthread_mutex_unlock(&lock_adc);
   // }
 
-  pthread_mutex_lock(&lock_speed);
-  CENTER_AND_DISPLAY(rd->speed_ind, "%f");
-  CENTER_AND_DISPLAY(rd->strainrate_ind, "%f");
-  pthread_mutex_unlock(&lock_speed);
+  CENTER_AND_DISPLAY(get_speed(rd), "%f");
+  CENTER_AND_DISPLAY(get_strainrate(rd), "%f");
 
-  pthread_mutex_lock(&lock_loadcell);
-  CENTER_AND_DISPLAY( rd->loadcell_bytes, "%lu");
-  CENTER_AND_DISPLAY( rd->loadcell_units, "%f");
-  pthread_mutex_unlock(&lock_loadcell);
+  CENTER_AND_DISPLAY(get_loadcell_bytes(rd), "%lu");
+  CENTER_AND_DISPLAY(get_loadcell_units(rd), "%f");
 
-  pthread_mutex_lock(&lock_control);
-  CENTER_AND_DISPLAY( rd->last_ca, "%u");
-  pthread_mutex_unlock(&lock_control);
+  CENTER_AND_DISPLAY(get_last_control_action(rd), "%u");
 
-  pthread_mutex_lock(&lock_temperature);
-  CENTER_AND_DISPLAY( rd->cylinder_temperature, "%f");
-  CENTER_AND_DISPLAY( rd->ambient_temperature, "%f");
-  pthread_mutex_unlock(&lock_temperature);
+  CENTER_AND_DISPLAY(get_cylinder_temperature(rd), "%f");
+  CENTER_AND_DISPLAY(get_ambient_temperature(rd), "%f");
 
   fprintf(stderr, "\n");
 

@@ -7,7 +7,6 @@
 #include "run.h"
 
 
-
 struct run_data *init_run_data()
 {
   struct run_data *rd = calloc(1, sizeof(struct run_data));

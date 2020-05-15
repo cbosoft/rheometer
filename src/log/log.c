@@ -28,8 +28,6 @@
 
 #define CHECKJSON(C) if (C == NULL) { warn("CHECKJSON", "Error creating run params JSON. \n  Write down the fill depth for this run!"); return; }
 
-extern pthread_mutex_t lock_time, lock_adc, lock_control, lock_loadcell, lock_temperature;
-
 
 
 
@@ -196,37 +194,6 @@ int remove_log(struct run_data *rd, unsigned int index)
 
 
 
-void set_time(struct run_data *rd)
-{
-  struct timeval tv;
-  unsigned long sec, usec;
-
-  gettimeofday(&tv, 0);
-  sec = tv.tv_sec;
-  usec = tv.tv_usec;
-
-  pthread_mutex_lock(&lock_time);
-  rd->time_s = sec;
-  rd->time_us = usec;
-  pthread_mutex_unlock(&lock_time);
-
-  unsigned long dt_sec = sec - rd->start_time_s, dt_usec;
-  if (usec < rd->start_time_us) {
-    dt_sec -= 1;
-    dt_usec = rd->start_time_us - usec;
-  }
-  else {
-    dt_usec = usec - rd->start_time_us;
-  }
-
-  pthread_mutex_lock(&lock_time);
-  rd->time_s_f = (double)dt_sec + (0.001 * 0.001 * ((double)dt_usec));
-  pthread_mutex_unlock(&lock_time);
-}
-
-
-
-
 void *log_thread_func(void *vptr) {
 
   struct run_data *rd = (struct run_data *)vptr;
@@ -238,35 +205,22 @@ void *log_thread_func(void *vptr) {
 
   FILE *log_fp = fopen(rd->log_paths[log_idx], "w");
 
+  unsigned long time_s, time_us;
   rd->log_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
     set_time(rd);
-    pthread_mutex_lock(&lock_time);
-    fprintf(log_fp, "%lu.%06lu,", rd->time_s, rd->time_us);
-    pthread_mutex_unlock(&lock_time);
+    get_time_parts(rd, &time_s, &time_us);
+    fprintf(log_fp, "%lu.%06lu,", time_s, time_us);
 
-    pthread_mutex_lock(&lock_adc);
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
-      fprintf(log_fp, "%lu,", rd->adc[channel]);
-    pthread_mutex_unlock(&lock_adc);
+      fprintf(log_fp, "%lu,", get_adc(rd, channel));
 
-    pthread_mutex_lock(&lock_control);
-    fprintf(log_fp, "%u,", rd->last_ca);
-    pthread_mutex_unlock(&lock_control);
+    fprintf(log_fp, "%u,", get_last_control_action(rd));
 
-    pthread_mutex_lock(&lock_temperature);
-    fprintf(log_fp, "%f,", rd->cylinder_temperature);
-    pthread_mutex_unlock(&lock_temperature);
-
-    pthread_mutex_lock(&lock_loadcell);
-    fprintf(log_fp, "%lu,", rd->loadcell_bytes);
-    pthread_mutex_unlock(&lock_loadcell);
-
+    fprintf(log_fp, "%f,", get_cylinder_temperature(rd));
+    fprintf(log_fp, "%lu,", get_loadcell_bytes(rd));
     fprintf(log_fp, "%d,", rd->phase);
-
-    pthread_mutex_lock(&lock_temperature);
-    fprintf(log_fp, "%f,", rd->ambient_temperature);
-    pthread_mutex_unlock(&lock_temperature);
+    fprintf(log_fp, "%f,", get_ambient_temperature(rd));
 
     fprintf(log_fp, "\n");
     sleep_us(900);
