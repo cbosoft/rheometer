@@ -136,12 +136,6 @@ unsigned int no_control(struct run_data *rd) {
 
 // setpoint updaters "setters"
 
-double constant_setter(struct run_data *rd)
-{
-  return rd->control_params->setpoint;
-}
-
-
 
 double sine_setter(struct run_data *rd)
 {
