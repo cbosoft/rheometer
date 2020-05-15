@@ -23,7 +23,7 @@ RHEO = obj/adc.o \
 			 obj/webcam.o
 HDR = src/run.h
 WPI = wpi/libwiringPi.so
-VERSION = $(shell python get_version.py)
+VERSION = $(shell scripts/get_version.sh)
 
 
 rheometer: $(RHEO) $(HDR)
