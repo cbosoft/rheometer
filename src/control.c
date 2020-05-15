@@ -116,23 +116,6 @@ void calculate_control_indicators(struct run_data *rd)
 }
 
 
-/*
-  Control algorithms: functions that convert a setpoint (in stress, or
-  strainrate) to a DC.
-
-unsigned int no_control(struct run_data *rd) {
-
-  /*
-    "no_control" - multiplies the setpoint by a number to get a DC, no adaptive
-    control or anything.
-   */
-
-  return (unsigned int)(rd->control_params->mult * rd->control_params->setpoint);
-}
-
-
-
-
 
 // setpoint updaters "setters"
 
