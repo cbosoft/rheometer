@@ -29,7 +29,7 @@ void init_locks()
   INIT_MUTEX(lock_speed);
 }
 
-
+// TODO: move locks to rd
 
 // Speed {{
 
