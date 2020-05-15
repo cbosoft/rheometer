@@ -51,13 +51,6 @@ struct control_params {
 
 
 
-double control_PID(double tuning[3], double input);
-
-control_func_t ctlfunc_from_str(char *s);
-setter_func_t setfunc_from_str(char *s);
-int ctlidx_from_str(const char *s);
-int setidx_from_str(const char *s);
-
 void *ctl_thread_func(void *vtd);
 void read_control_scheme(struct run_data *rd, const char *control_scheme_string);
 void control_help(void);
@@ -69,10 +62,8 @@ double get_setter_param_or_default(struct run_data *rd, int index, double def);
 
 ControllerHandle *load_controller(const char *name);
 ControllerHandle *load_controller_path(const char *path);
-void free_controller(ControllerHandle *h);
 SetterHandle *load_setter(const char *name);
 SetterHandle *load_setter_path(const char *path);
-void free_setter(SetterHandle *h);
 
 
 // vim: ft=c

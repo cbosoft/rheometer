@@ -42,7 +42,10 @@ UTIL = \
 			 obj/util/nouns.o
 
 CONTROL = \
-					obj/control/control.o
+					obj/control/control.o \
+					obj/control/load.o \
+					obj/control/args.o \
+					obj/control/tuning.o
 
 MOTOR = \
 				obj/motor/motor.o
