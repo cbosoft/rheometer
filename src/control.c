@@ -117,14 +117,6 @@ void calculate_control_indicators(struct run_data *rd)
 
 
 
-double bistable_setter(struct run_data *rd)
-{
-  int periods_passed = (int)(rd->time_s_f / rd->control_params->period);
-  return periods_passed % 2 ? rd->control_params->upper : rd->control_params->lower;
-}
-
-
-
 int ctlidx_from_str(const char *s)
 {
   if STREQ(s, "pid")
