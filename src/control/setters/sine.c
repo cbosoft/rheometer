@@ -7,7 +7,9 @@
 const char *doc =
       "  - "BOLD"Sinusoid setter"RESET", 'sine'\n"
       "      Sine function operating on the time the experiment has run for. Evaluated as:\n"
+      "\n"
       "        ca = ( sin( 2 × Pi × (t / period) ) × magnitude) + mean\n"
+      "\n"
       "      This will produce a sine wave which varies around \"mean\" by an amount \"magnitude\"\n"
       "      with period \"period\".\n";
 

@@ -4,8 +4,10 @@
 
 const char *doc =
       "  - "BOLD"PID control"RESET", 'pid'\n"
-      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n\n"
-      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n\n"
+      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n"
+      "\n"
+      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n"
+      "\n"
       "      Three tuning parameters (kp, ki, kd) are required, delta time is measured setpoint \n"
       "      parameter. It is usual to not use all three parts of the algorithm, a section can be \n"
       "      turned off by setting the relevant coefficient to zero.\n";
