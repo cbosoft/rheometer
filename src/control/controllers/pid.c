@@ -28,9 +28,9 @@ unsigned int get_control_action(struct run_data *rd)
   double err = rd->control_params->setpoint - input;
   double delta_t = rd->control_params->sleep_ms * 0.001;
 
-  double kp = get_control_param_or_default(rd, 0, 0.0);
-  double ki = get_control_param_or_default(rd, 1, 0.0);
-  double kd = get_control_param_or_default(rd, 2, 0.0);
+  double kp = GET_CONTROL_PARAM_OR_DEFAULT(rd, 0, 0.0);
+  double ki = GET_CONTROL_PARAM_OR_DEFAULT(rd, 1, 0.0);
+  double kd = GET_CONTROL_PARAM_OR_DEFAULT(rd, 2, 0.0);
   static double errhist[2] = {0.0, 0.0};
 
   // Proportional control

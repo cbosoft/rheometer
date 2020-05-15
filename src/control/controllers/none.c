@@ -16,6 +16,6 @@ unsigned int get_control_action(struct run_data *rd)
     control or anything.
    */
 
-  double m = get_control_param_or_default(rd, 0, 1.0);
+  double m = GET_CONTROL_PARAM_OR_DEFAULT(rd, 0, 1.0);
   return (unsigned int)(m * rd->control_params->setpoint);
 }

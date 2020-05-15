@@ -7,6 +7,9 @@
 #define CONTROL_MAXIMUM 1024
 #define CONTROL_MINIMUM 0
 
+#define GET_CONTROL_PARAM_OR_DEFAULT(rd, I, D)  (((I < rd->control_params->n_control_params) && (I >= 0)) ? rd->control_params->control_params[I] : D)
+#define GET_SETTER_PARAM_OR_DEFAULT(rd, I, D)  (((I < rd->control_params->n_setter_params) && (I >= 0)) ? rd->control_params->setter_params[I] : D)
+
 typedef unsigned int (*control_func_t)(struct run_data *);
 typedef double (*setter_func_t)(struct run_data *);
 
@@ -56,9 +59,6 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_string)
 void control_help(void);
 void update_setpoint(struct run_data *rd);
 void do_tuning(struct run_data *rd);
-
-double get_control_param_or_default(struct run_data *rd, int index, double def);
-double get_setter_param_or_default(struct run_data *rd, int index, double def);
 
 ControllerHandle *load_controller(const char *name);
 ControllerHandle *load_controller_path(const char *path);

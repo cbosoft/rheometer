@@ -16,9 +16,9 @@ const char *doc =
 double get_setpoint(struct run_data *rd)
 {
   // TODO get sensible defaults
-  double mean = get_setter_param_or_default(rd, 0, 100);
-  double magnitude = get_setter_param_or_default(rd, 1, 1.0);
-  double period = get_setter_param_or_default(rd, 2, 1.0);
+  double mean      = GET_SETTER_PARAM_OR_DEFAULT(rd, 0, 100);
+  double magnitude = GET_SETTER_PARAM_OR_DEFAULT(rd, 1, 1.0);
+  double period    = GET_SETTER_PARAM_OR_DEFAULT(rd, 2, 1.0);
 
   double theta = 2.0 * 3.1415926 * rd->time_s_f / period;
   double rv = (sin(theta) * magnitude) + mean;

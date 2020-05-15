@@ -8,9 +8,9 @@ const char *doc =
 
 double get_setpoint(struct run_data *rd)
 {
-  double upper = get_setter_param_or_default(rd, 0, 700);
-  double lower = get_setter_param_or_default(rd, 1, 300);
-  double period = get_setter_param_or_default(rd, 2, 1.0);
+  double upper  = GET_SETTER_PARAM_OR_DEFAULT(rd, 0, 700);
+  double lower  = GET_SETTER_PARAM_OR_DEFAULT(rd, 1, 300);
+  double period = GET_SETTER_PARAM_OR_DEFAULT(rd, 2, 1.0);
 
   int periods_passed = (int)(rd->time_s_f / period);
   return periods_passed % 2 ? upper : lower;

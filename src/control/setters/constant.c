@@ -9,5 +9,5 @@ const char *doc =
 
 double get_setpoint(struct run_data *rd)
 {
-  return get_setter_param_or_default(rd, 0, 0.0);
+  return GET_SETTER_PARAM_OR_DEFAULT(rd, 0, 0.0);
 }

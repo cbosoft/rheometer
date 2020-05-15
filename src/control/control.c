@@ -240,27 +240,3 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   rd->control_params = params;
 
 }
-
-
-double get_control_param_or_default(struct run_data *rd, int index, double def)
-{
-  int l = rd->control_params->n_control_params;
-
-  if ((index < l) && (index >= 0)) {
-    return rd->control_params->control_params[index];
-  }
-
-  return def;
-}
-
-
-double get_setter_param_or_default(struct run_data *rd, int index, double def)
-{
-  int l = rd->control_params->n_setter_params;
-
-  if ((index < l) && (index >= 0)) {
-    return rd->control_params->setter_params[index];
-  }
-
-  return def;
-}
