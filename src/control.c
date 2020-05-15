@@ -119,43 +119,6 @@ void calculate_control_indicators(struct run_data *rd)
 /*
   Control algorithms: functions that convert a setpoint (in stress, or
   strainrate) to a DC.
- */
-
-unsigned int pid_control(struct run_data *rd)
-{
-  /*
-    PID - proportional -- integral -- derivative control
-
-    Usual velocity algorthm:
-
-    dCA = KP*dErr + KI*Err*dt + KD * (Err - 2Err1 + Err2)/dt
-
-   */
-
-  double dca = 0.0;
-  double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
-  double err = rd->control_params->setpoint - input;
-  double delta_t = rd->control_params->sleep_ms * 0.001;
-
-  
-  // Proportional control
-  dca += rd->control_params->kp * (err - rd->err1);
-  
-  // Integral control
-  dca += rd->control_params->ki * err * delta_t;
-
-  // Derivative control
-  dca += rd->control_params->kd * (err - rd->err1 - rd->err1 + rd->err2) / delta_t;
-
-  // Update error history
-  rd->err2 = rd->err1;
-  rd->err1 = err;
-
-  return (unsigned int)(dca + rd->last_ca);
-}
-
-
-
 
 unsigned int no_control(struct run_data *rd) {
 
