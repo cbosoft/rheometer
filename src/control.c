@@ -351,61 +351,46 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
     cJSON_Delete(json);
     ferr("read_control_scheme", "control scheme json must name a setter scheme.\n  e.g. { ... \"setter\": \"constant\" ... }");
   }
-  
-  int control_idx = ctlidx_from_str(rd->control_scheme);
-  if (control_idx < 0) {
-    cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme JSON must name a known control scheme. See rheometer -h for a list.");
-  }
-
-  int setter_idx = setidx_from_str(rd->setter_scheme);
-  if (setter_idx < 0) {
-    cJSON_Delete(json);
-    ferr("read_control_scheme", "control scheme JSON must name a known setter scheme. See rheometer -h for a list.");
-  }
 
   struct control_params *params = malloc(sizeof(struct control_params));
-  params->kp = 0.0;
-  params->ki = 0.0;
-  params->kd = 0.0;
-  params->setpoint = 0.0;
   params->sleep_ms = 100;
   params->is_stress_controlled = 0;
-  params->mult = 1.0;
-  
-  switch (control_idx) {
-    case CONTROL_PID:
-      get_control_scheme_parameter(json, PARAM_REQ, "pid", "kp", "proportional control coefficient, double", &params->kp, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "pid", "ki", "integral control coefficient, double", &params->ki, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "pid", "kd", "derivative control coefficient, double", &params->kd, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_OPT, "pid", "stress_controlled", "boolean: true if stress is controlled parameter, or false for strainrate control", NULL, &params->is_stress_controlled, NULL);
-      break;
-    case CONTROL_NONE:
-      get_control_scheme_parameter(json, PARAM_REQ, "none", "mult", "multiplier: used to convert the constant setpoint to a DC. Accuracy of this is not assumed, this is a very very rough conversion.", &params->mult, NULL, NULL);
-      break;
-    default:
-      // will not get here; is checked in ctlidx_from_str(char *)
-      break;
+  params->controller = load_controller(rd->control_scheme);
+  params->setter = load_setter(rd->setter_scheme);
+  params->setpoint = 0.0;
+
+
+  cJSON *control_params_json = cJSON_GetObjectItem(json, "control_params");
+  if (cJSON_IsArray(control_params_json)) {
+
+    params->control_params = malloc(cJSON_GetArraySize(control_params_json)*sizeof(double));
+    int i = 0;
+    for (cJSON *it = control_params_json->child; it != NULL; it = it->next, i++) {
+      params->control_params[i] = it->valuedouble;
+    }
+    params->n_control_params = i;
+
+  }
+  else {
+    warn("read_control_scheme", "could not read control params.");
   }
 
-  switch(setter_idx) {
-    case SETTER_CONSTANT:
-      get_control_scheme_parameter(json, PARAM_REQ, "constant", "setpoint", "set point/target, double", &params->setpoint, NULL, NULL);
-      break;
-    case SETTER_SINE:
-      get_control_scheme_parameter(json, PARAM_REQ, "sine", "magnitude", "amplitude of the sine wave (mean to peak), double", &params->magnitude, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "sine", "mean", "mean value of the sine wave, double", &params->mean, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "sine", "period", "period of the sine wave in seconds, double", &params->period, NULL, NULL);
-      break;
-    case SETTER_BISTABLE:
-      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "lower", "lower stable value, double", &params->lower, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "upper", "upper stable value, double", &params->upper, NULL, NULL);
-      get_control_scheme_parameter(json, PARAM_REQ, "bistable", "period", "switching period in seconds, double", &params->period, NULL, NULL);
-      break;
-    default:
-      // will not get here; is checked in ctlidx_from_str(char *)
-      break;
+  cJSON *setter_params_json = cJSON_GetObjectItem(json, "setter_params");
+  if (cJSON_IsArray(setter_params_json)) {
+
+    params->setter_params = malloc(cJSON_GetArraySize(setter_params_json)*sizeof(double));
+    int i = 0;
+    for (cJSON *it = setter_params_json->child; it != NULL; it = it->next, i++) {
+      params->setter_params[i] = it->valuedouble;
+    }
+    params->n_setter_params = i;
+
   }
+  else {
+    warn("read_control_scheme", "could not read setter params.");
+  }
+
+
 
   // universal (optional) params
   get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ms", "interval between control calculations, milliseconds", NULL, &params->sleep_ms, NULL);
@@ -443,7 +428,9 @@ void analyse(int length, struct run_data *rd)
 
   fprintf(stderr, "Gathering data...\n");
   for (int i = 0; i < length; i++) {
-    error[i] = rd->err1;
+    double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
+    double err = rd->control_params->setpoint - input;
+    error[i] = err;
     total += error[i];
     fprintf(stderr, "  %d/%d    \r", i+1, length);
     if (plotting) {
@@ -462,10 +449,10 @@ void analyse(int length, struct run_data *rd)
 
   double stddev_error = pow( sumsqdiff/((double)(length - 1)) ,0.5);
 
-  system("gnuplot /home/pi/gits/rheometer/plot_control_analysis.gplot");
-  fprintf(stderr, 
-      BOLD"Analysis results"RESET": Eav: %f, std: %f\n", 
-      average_error, 
+  system("gnuplot ./scripts/plot_control_analysis.gplot");
+  fprintf(stderr,
+      BOLD"Analysis results"RESET": Eav: %f, std: %f\n",
+      average_error,
       stddev_error);
 }
 
@@ -551,15 +538,26 @@ void do_tuning(struct run_data *rd) {
       }
       else if (strcmp(cmd, "set") == 0) {
 
-        if (strcmp(variable, "kp") == 0) {
-          rd->control_params->kp = value;
+        int i = atoi(variable);
+
+        if ((i > 0) && (i < rd->control_params->n_control_params)) {
+
+          rd->control_params->control_params = realloc(rd->control_params->control_params, (i+1)*sizeof(double) );
+
+          if ((rd->control_params->n_control_params - i) > 1) {
+
+            for (int j = rd->control_params->n_control_params; j < i+1; j++) {
+              rd->control_params->control_params[i] = 0;
+            }
+
+          }
+          
+          rd->control_params->n_control_params = i+1;
+
         }
-        else if (strcmp(variable, "ki") == 0) {
-          rd->control_params->ki = value;
-        }
-        else if (strcmp(variable, "kd") == 0) {
-          rd->control_params->kd = value;
-        }
+
+        rd->control_params->control_params[i] = value;
+
         // TODO log tuning parameter change
 
       }
@@ -574,13 +572,9 @@ void do_tuning(struct run_data *rd) {
 
       }
       else if (strcmp(cmd, "show") == 0) {
-        fprintf(stderr, 
-            "  KP = %f\n"
-            "  KI = %f\n"
-            "  KD = %f\n",
-            rd->control_params->kp,
-            rd->control_params->ki,
-            rd->control_params->kd);
+        for (int i = 0; i < rd->control_params->n_control_params; i++) {
+          fprintf(stderr, "  p[%d] = %f\n", i, rd->control_params->control_params[i]);
+        }
       }
       else if (strcmp(cmd, "done") == 0) {
         fprintf(stderr, BOLD"Tuning finished!"RESET"\n");
@@ -591,4 +585,30 @@ void do_tuning(struct run_data *rd) {
       }
     }
   }
+}
+
+
+
+
+
+double get_control_param_or_default(struct run_data *rd, int index, double def)
+{
+  int l = rd->control_params->n_control_params;
+
+  if ((index < l) && (index >= 0)) {
+    return rd->control_params->control_params[index];
+  }
+
+  return def;
+}
+
+double get_setter_param_or_default(struct run_data *rd, int index, double def)
+{
+  int l = rd->control_params->n_setter_params;
+
+  if ((index < l) && (index >= 0)) {
+    return rd->control_params->setter_params[index];
+  }
+
+  return def;
 }

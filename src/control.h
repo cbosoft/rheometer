@@ -37,31 +37,18 @@ typedef struct {
 struct control_params {
 
   /* Control information */
-  // pid
-  double kp;
-  double ki;
-  double kd;
+  double *control_params;
+  int n_control_params;
   unsigned int is_stress_controlled;
   ControllerHandle *controller;
 
-  // none
-  double mult;
 
   /* Setter information */
-  // constant
+  double *setter_params;
+  int n_setter_params;
   double setpoint;
   SetterHandle *setter;
 
-  // sin
-  double period;
-  double magnitude;
-  double mean;
-
-  // bistable
-  // also period
-  double lower;
-  double upper;
-  
   /* universal */
   unsigned int sleep_ms;
 };
@@ -85,7 +72,8 @@ void control_help(void);
 void update_setpoint(struct run_data *rd);
 void do_tuning(struct run_data *rd);
 
-
+double get_control_param_or_default(struct run_data *rd, int index, double def);
+double get_setter_param_or_default(struct run_data *rd, int index, double def);
 
 
 // vim: ft=c

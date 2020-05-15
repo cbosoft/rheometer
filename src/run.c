@@ -24,8 +24,6 @@ struct run_data *init_run_data()
 
   rd->speed_ind_timeout = 0.1;
   rd->last_ca = 0;
-  rd->err1 = 0.0;
-  rd->err2 = 0.0;
   rd->calm_start = 0;
   rd->mode = MODE_NORMAL;
 
