@@ -1,7 +1,17 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
-LINK = -lwiringPi -lpthread -lm
-RHEO = obj/adc.o \
+LINK = -lwiringPi -lpthread -lm -ldl
+
+CONTROLLERS = \
+							controllers/pid.so \
+							controllers/none.so
+
+SETTERS = \
+					setters/constant.so \
+					setters/sine.so \
+					setters/bistable.so
+
+MAIN = obj/adc.o \
 			 obj/args.o \
 			 obj/cJSON.o \
 			 obj/control.o \
@@ -21,8 +31,10 @@ RHEO = obj/adc.o \
 			 obj/uid.o \
 			 obj/util.o \
 			 obj/webcam.o
+
 HDR = src/run.h
 WPI = wpi/libwiringPi.so
+RHEO = $(MAIN) $(CONTROLLERS) $(SETTERS)
 VERSION = $(shell scripts/get_version.sh)
 
 
@@ -35,7 +47,14 @@ wpi: $(WPI)
 debug: wpi rheometer
 	touch debug
 
+controllers/%.so: obj/controllers/%.o
+	$(CC) $(CFLAGS) -shared $< -o $@
+
+setters/%.so: obj/setters/%.o
+	$(CC) $(CFLAGS) -shared $< -o $@
+
 obj/%.o: src/%.c $(HDR)
+	mkdir -p `dirname $@`
 	$(CC) $(CFLAGS) -c $< -o $@ -DVERSION=\"$(VERSION)\"
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
