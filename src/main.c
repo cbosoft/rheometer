@@ -62,14 +62,19 @@ void inthandle(int signo)
     cancelled ++;
   }
 
-  if (cancelled > 10) {
-    fprintf(stderr, "\n\n CONTINUE PRESSING CTRL+C TO HALT EXECUTION FORCEFULLY.\n THIS WILL RUIN THE RUN.\n DON'T TAKE THIS WARNING LIGHTLY.\n\n");
-    //warn("interrupt_handler", "continue pressing CTRL+c to halt execution forcefully.")
-  }
-  else if (cancelled > 20) {
+  if (cancelled > 20) {
     exit(1);
   }
-  else {
+  else if (cancelled == 10) {
+    fprintf(stderr, "%s",
+        "\n"
+        "\n"
+        "CONTINUE PRESSING CTRL+C TO HALT EXECUTION FORCEFULLY.\n"
+        "THIS WILL RUIN THE RUN.\n"
+        "DON'T TAKE THIS WARNING LIGHTLY.\n"
+        "\n");
+  }
+  else if (cancelled == 1) {
     fprintf(stderr, "\n\nInterrupted...\n\n");
   }
 }
