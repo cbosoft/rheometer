@@ -1,6 +1,5 @@
 {
   "control": "none",
   "setter": "constant",
-  "mult": 1.0,
-  "setpoint" : 1024
+  "setter_params" : [1024]
 }

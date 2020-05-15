@@ -1,6 +1,5 @@
 {
-  "name": "sine",
-  "magnitude": 512,
-  "mean": 512,
-  "period" : 10
+  "control": "none",
+  "setter": "sine",
+  "setter_params": [512, 512, 10]
 }
