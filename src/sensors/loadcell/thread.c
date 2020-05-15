@@ -11,6 +11,7 @@ void *loadcell_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
 
+  hx711_setup();
   rd->lc_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) )
     read_loadcell(rd);

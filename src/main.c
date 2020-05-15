@@ -108,9 +108,6 @@ int main (int argc, const char ** argv)
   opt_setup(rd);
   info("set up optical encoder");
 
-  loadcell_setup();
-  info("set up loadcell");
-
   if (rd->photo_device) {
     info("photographing device");
     take_photo(rd);
