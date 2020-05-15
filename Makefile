@@ -55,7 +55,8 @@ LOG = \
 			obj/log/tar.o
 
 RUN = \
-			obj/run/run.o
+			obj/run/run.o \
+			obj/run/defaults.o
 
 RHEO = obj/main.o obj/args.o \
 			 $(RUN) \
