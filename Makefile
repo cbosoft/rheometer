@@ -102,6 +102,4 @@ wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	sudo cp wpi/*.h /usr/include/.
 
 clean:
-	rm -rf obj/*.o rheometer wpi/*.so
-
-
+	rm -rf obj/* rheometer wpi/*.so
