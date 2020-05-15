@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <math.h>
 
+#include <dlfcn.h>
 #include <wiringPi.h>
 
 #include "control.h"
@@ -139,30 +140,81 @@ int setidx_from_str(const char *s)
 }
 
 
-
-
-control_func_t ctlfunc_from_str(char *s)
+ControllerHandle *load_controller(const char *name)
 {
-  if STREQ(s, "pid")
-    return &pid_control;
-  else if STREQ(s, "none")
-    return &no_control;
-  ferr("ctlfunc_from_int", "unrecognised control scheme index");
-  return NULL;
+  ControllerHandle *h = calloc(1, sizeof(ControllerHandle));
+
+  h->name = calloc(strlen(name)+1, sizeof(char));
+  snprintf(h->name, strlen(name), name);
+
+  char *path = malloc(401*sizeof(char));
+  snprintf(path, 400, "./controllers/%s.so", name);
+  h->handle = dlopen(path, RTLD_LAZY);
+  free(path);
+  
+  if (!h->handle) {
+    ferr("load_controller", "%s", dlerror());
+  }
+
+  dlerror();
+  h->doc = dlsym(h->handle, "doc");
+  char *error = NULL;
+  if ((error = dlerror()) != NULL) {
+    ferr("load_controller", "%s", error);
+  }
+
+  h->get_control_action = dlsym(h->handle, "get_control_action");
+  if ((error = dlerror()) != NULL) {
+    ferr("load_controller", "%s", error);
+  }
+
+  return h;
+}
+
+void free_controller(ControllerHandle *h)
+{
+  free(h->name);
+  free(h);
+}
+
+SetterHandle *load_setter(const char *name)
+{
+  SetterHandle *h = calloc(1, sizeof(SetterHandle));
+
+  h->name = calloc(strlen(name)+1, sizeof(char));
+  snprintf(h->name, strlen(name), name);
+
+  char *path = malloc(401*sizeof(char));
+  snprintf(path, 400, "./setters/%s.so", name);
+  h->handle = dlopen(path, RTLD_LAZY);
+  free(path);
+  
+  if (!h->handle) {
+    ferr("load_setter", "%s", dlerror());
+  }
+
+  dlerror();
+  h->doc = dlsym(h->handle, "doc");
+  char *error = NULL;
+  if ((error = dlerror()) != NULL) {
+    ferr("load_setter", "%s", error);
+  }
+
+  h->get_setpoint = dlsym(h->handle, "get_setpoint");
+  if ((error = dlerror()) != NULL) {
+    ferr("load_setter", "%s", error);
+  }
+
+  return h;
+}
+
+void free_setter(SetterHandle *h)
+{
+  free(h->name);
+  free(h);
 }
 
 
-setter_func_t setfunc_from_str(char *s)
-{
-  if STREQ(s, "constant")
-    return &constant_setter;
-  else if STREQ(s, "bistable")
-    return &bistable_setter;
-  else if STREQ(s, "sine")
-    return &sine_setter;
-  ferr("setfunc_from_str", "unrecognised setter scheme index");
-  return NULL;
-}
 
 
 
@@ -170,19 +222,19 @@ setter_func_t setfunc_from_str(char *s)
 void *ctl_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
-  
-  control_func_t ctlfunc = ctlfunc_from_str(rd->control_scheme);
-  setter_func_t setfunc = setfunc_from_str(rd->setter_scheme);
-  
+
+  ControllerHandle *controller = load_controller(rd->control_scheme);
+  SetterHandle *setter = load_setter(rd->setter_scheme);
+
   rd->ctl_ready = 1;
 
   while ( (!rd->stopped) && (!rd->errored) ) {
 
     calculate_control_indicators(rd);
 
-    rd->control_params->setpoint = setfunc(rd);
+    rd->control_params->setpoint = setter->get_setpoint(rd);
 
-    unsigned int control_action = ctlfunc(rd);
+    unsigned int control_action = controller->get_control_action(rd);
 
     if (control_action > CONTROL_MAXIMUM)
       control_action = CONTROL_MAXIMUM;

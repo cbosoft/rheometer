@@ -17,6 +17,22 @@ typedef unsigned int (*control_func_t)(struct run_data *);
 typedef double (*setter_func_t)(struct run_data *);
 
 
+typedef struct {
+  char *name;
+  const char *doc;
+  unsigned int (*get_control_action)(struct run_data *rd);
+  void *handle;
+} ControllerHandle;
+
+
+typedef struct {
+  char *name;
+  const char *doc;
+  double (*get_setpoint)(struct run_data *rd);
+  void *handle;
+} SetterHandle;
+
+
 
 struct control_params {
 
@@ -26,6 +42,7 @@ struct control_params {
   double ki;
   double kd;
   unsigned int is_stress_controlled;
+  ControllerHandle *controller;
 
   // none
   double mult;
@@ -33,6 +50,7 @@ struct control_params {
   /* Setter information */
   // constant
   double setpoint;
+  SetterHandle *setter;
 
   // sin
   double period;
