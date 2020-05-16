@@ -8,6 +8,12 @@ it is able to change to meet the needs of the researcher.
 The control software is a simple command line application for setting up runs,
 controlling flow, and data acquisition.
 
+The rheometer software is designed for speed, but also flexibility. Control
+modules are shared objects which dynamically link in to the program when you
+start it. This just means a control module is a piece of a program that can be
+loaded on the fly or modified without modifying the whole program. This is to
+facilitate investigation of control algorithms for use with dense suspensions.
+
 
 # Installation
 
@@ -52,18 +58,19 @@ Control schemes are JSON files and so look like this:
 `"control"` specifies the name of a control module, `"setter"` a setter module.
 `"_params"` are arrays of double which are available to the control/setter
 modules to calculate the control action. See the documentation for each module
-(`const char *doc` in the module source `src/control/controllers/*.c`, 
+(`const char *doc` in the module source `src/control/controllers/*.c`,
 `src/control/setters/*.c`, or see `./rheometer --help`).
 
+There are a few modules included as default ("none", and "pid" for controller,
+"constant", "sine", "bistable" for setter modules), but you can write a custom
+controller/setter very easily.
 
-# Control modules
+## Control modules
 
-The rheometer software is designed for speed, but also flexibility. Control
-modules are shared objects which dynamically link in to the program when you
-start it. This just means a control module is a piece of a program that can be
-loaded on the fly or modified without modifying the whole program.
+A control module is a single source file, which must have two things in it: a
+`const char *doc` variable and a function `unsigned int get_control_action(struct run_data *rd)`.
 
-You can write a control module very easily:
+More information on writing control modules is in [[writing_modules.md]].
 
 ```c
 #include "../../run.h"
@@ -79,21 +86,20 @@ unsigned int get_control_action(struct run_data *rd)
 }
 ```
 
-To get access to the accessor functions for the run data (get_speed(rd) etc),
-the shared object needs to link with the run.o object. To facilitate this, its
-easiest to put your custom modules in the same folder as the default ons. Put
-your new module source file in the `src/control/controllers/` directory and build
-with:
+To use the getter/setter functions for the run data, the shared object needs to
+link with the `run.o` object. To facilitate this, its easiest to put your custom
+modules in the same folder as the default ons. Put your new module source file
+in the `src/control/controllers/` directory and build with:
 
 ```bash
 make modules
 ```
 
-Then you can create a controlscheme JSON in the `data/` directory to make use of
+Then you can create a control scheme JSON in the `data/` directory to make use of
 your new controller!
 
 
-# Setter modules
+## Setter modules
 
 Similar to control modules, you can write a custom setter to recalculate the
 setpoint for the controller over the course of the experiment. The format is
@@ -111,4 +117,10 @@ double get_setpoint(struct run_data *rd)
   // information: speed, stress, temperature, torque etc
   return 3.14; // new setpoint
 }
+```
+
+Setter modules are compiled in the same manner as controller modules:
+
+```bash
+$ make modules
 ```
