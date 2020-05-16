@@ -108,6 +108,9 @@ double get_stress(struct run_data *rd);
 // control getter/setter
 void set_last_control_action(struct run_data *rd, unsigned int value);
 unsigned int get_last_control_action(struct run_data *rd);
+void set_strainrate_controlled(struct run_data *rd);
+void set_stress_controlled(struct run_data *rd);
+int get_is_stress_controlled(struct run_data *rd);
 
 // time getter/setter
 void set_time(struct run_data *rd);

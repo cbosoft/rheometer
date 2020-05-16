@@ -145,6 +145,29 @@ unsigned int get_last_control_action(struct run_data *rd)
   return rv;
 }
 
+void set_stress_controlled(struct run_data *rd)
+{
+  pthread_mutex_lock(&rd->lock_control);
+  rd->control_params->is_stress_controlled = 1;
+  pthread_mutex_unlock(&rd->lock_control);
+}
+
+void set_strainrate_controlled(struct run_data *rd)
+{
+  pthread_mutex_lock(&rd->lock_control);
+  rd->control_params->is_stress_controlled = 0;
+  pthread_mutex_unlock(&rd->lock_control);
+}
+
+int get_is_stress_controlled(struct run_data *rd)
+{
+  int rv;
+  pthread_mutex_lock(&rd->lock_control);
+  rv = rd->control_params->is_stress_controlled;
+  pthread_mutex_unlock(&rd->lock_control);
+  return rv;
+}
+
 // }}}
 
 // Time {{{
