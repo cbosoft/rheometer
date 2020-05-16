@@ -109,7 +109,6 @@ int main (int argc, const char ** argv)
 
   info("starting sensor threads...");
   pthread_t tmp_thread, adc_thread, ctl_thread, log_thread, lc_thread, vid_thread;
-  init_locks();
   SETUP_THREAD(tmp_thread, thermometer_thread_func, "thermometer", rd->tmp_ready);
   SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
   SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);

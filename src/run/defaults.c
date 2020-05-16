@@ -1,11 +1,17 @@
 #include <stdlib.h>
 
 #include "../util/sleep.h"
+#include "../util/error.h"
 #include "../control/control.h"
 #include "../sensors/adc/adc.h"
 
 #include "run.h"
 
+
+#define INIT_MUTEX(MUTEX) \
+    if (pthread_mutex_init(&MUTEX, NULL) != 0) {\
+      ferr("main", "error setting up mutex");\
+    }
 
 struct run_data *init_run_data()
 {
@@ -53,5 +59,14 @@ struct run_data *init_run_data()
   rd->photo_device = NULL;
   rd->cam_start = -1;
   rd->cam_end = -1;
+
+  INIT_MUTEX(rd->lock_time);
+  INIT_MUTEX(rd->lock_adc);
+  INIT_MUTEX(rd->lock_adcdt);
+  INIT_MUTEX(rd->lock_control);
+  INIT_MUTEX(rd->lock_loadcell);
+  INIT_MUTEX(rd->lock_temperature);
+  INIT_MUTEX(rd->lock_speed);
+
   return rd;
 }

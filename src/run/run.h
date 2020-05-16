@@ -1,4 +1,5 @@
 #pragma once
+#include <pthread.h>
 
 enum MODE{ MODE_NORMAL, MODE_TUNING };
 enum PHASE{ PHASE_INIT, PHASE_WARMUP, PHASE_SETTLE, PHASE_READING };
@@ -13,6 +14,7 @@ struct run_data {
   unsigned long start_time_s;
   unsigned long start_time_us;
   double time_s_f;
+
   unsigned long *adc;
   unsigned long loadcell_bytes;
   double loadcell_units;
@@ -68,12 +70,20 @@ struct run_data {
   long cam_start;
   long cam_end;
 
+  // locks
+  pthread_mutex_t lock_time;
+  pthread_mutex_t lock_adc;
+  pthread_mutex_t lock_adcdt;
+  pthread_mutex_t lock_control;
+  pthread_mutex_t lock_loadcell;
+  pthread_mutex_t lock_temperature;
+  pthread_mutex_t lock_speed;
+
   // }}}
 };
 
 
 
-void init_locks();
 struct run_data *init_run_data();
 void free_run_data(struct run_data *td);
 
