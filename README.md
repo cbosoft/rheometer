@@ -88,7 +88,7 @@ unsigned int get_control_action(struct run_data *rd)
 
 To use the getter/setter functions for the run data, the shared object needs to
 link with the `run.o` object. To facilitate this, its easiest to put your custom
-modules in the same folder as the default ons. Put your new module source file
+modules in the same folder as the default ones. Put your new module source file
 in the `src/control/controllers/` directory and build with:
 
 ```bash
