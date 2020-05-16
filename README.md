@@ -119,7 +119,7 @@ double get_setpoint(struct run_data *rd)
 }
 ```
 
-Setter modules are compiled in the same manner as controller modules:
+Setter modules are compiled with the same command as controller modules:
 
 ```bash
 $ make modules
