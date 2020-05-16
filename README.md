@@ -70,7 +70,7 @@ controller/setter very easily.
 A control module is a single source file, which must have two things in it: a
 `const char *doc` variable and a function `unsigned int get_control_action(struct run_data *rd)`.
 
-More information on writing control modules is in [[writing_modules.md]].
+More information on writing control modules is documented [here](writing_modules.md.
 
 ```c
 #include "../../run.h"
