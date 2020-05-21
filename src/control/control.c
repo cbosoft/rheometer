@@ -200,7 +200,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
   }
   else {
-    warn("read_control_scheme", "could not read control params.");
+    warn("read_control_scheme", "could not read control params: using defaults.");
   }
 
   cJSON *setter_params_json = cJSON_GetObjectItem(json, "setter_params");
@@ -215,7 +215,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
   }
   else {
-    warn("read_control_scheme", "could not read setter params.");
+    warn("read_control_scheme", "could not read setter params: using defaults.");
   }
 
 
