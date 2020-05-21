@@ -88,7 +88,7 @@ void *ctl_thread_func(void *vptr)
 
 
 
-void get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemename, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
+static void get_control_scheme_parameter(cJSON *json, unsigned int type, const char *schemename, const char *paramname, const char *description, double *dbl_value, unsigned int *int_value, char **str_value)
 {
   cJSON *param = cJSON_GetObjectItem(json, paramname);
 
