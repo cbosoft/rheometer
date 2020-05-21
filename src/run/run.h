@@ -20,6 +20,12 @@ struct run_data {
   double loadcell_units;
   double ambient_temperature;
   double cylinder_temperature;
+  struct {
+    const char *name;
+    double k_lc_to_m;
+    double k_omega_to_m;
+    double lc_z;
+  } loadcell_calibration;
   
   // process control stuff
   double speed_ind;

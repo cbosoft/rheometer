@@ -53,6 +53,9 @@ help(void)
       "    -c | --control-scheme    Control scheme JSON file path. More information in the\n"
       "                     'Control Schemes' section in the help.\n"
       "\n"
+      "    -a | --loadcell-calibration    Selects an alternate loadcell calibration name from \n"
+      "                     \"data/loadcell_calibration.json\"."
+      "\n"
       "    -w | --hardware-version  Hardware version specifying when the hardware was last\n"
       "                     changed. This should be given as a ISO8601 date spec without \n"
       "                     separating dashes (YYYYMMDD).\n"
@@ -119,7 +122,7 @@ unsigned int parse_length_string(const char *length_s_str)
 
 
 
-char * parse_tag_string(const char *s) 
+char *parse_tag_string(const char *s)
 {
   unsigned int l = strlen(s);
   char *rv = calloc(l+1, sizeof(char));
@@ -197,6 +200,10 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       i++;
       rd->hardware_version = atoi(argv[i]);
       hwver_set = 1;
+    }
+    else if (EITHER(argv[i], "-a", "--loadcell-calibration")) {
+      i++;
+      rd->loadcell_calibration.name = strdup(argv[i]);
     }
     else if (strcmp(argv[i], "--calm-start") == 0) {
       rd->calm_start = 1;

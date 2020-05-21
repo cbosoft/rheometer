@@ -11,22 +11,19 @@
 #include "hx711.h"
 #include "loadcell.h"
 
-const double K_LC_to_M = 1.0;
-const double K_W_to_M = 1.0;
-const double LCZ = 1.0;
-
 
 double loadcell_cal(struct run_data *rd, unsigned long bytes)
 {
   double speed = get_speed(rd);
 
-  double M_fric = speed * K_W_to_M;
-  double lcmlcz = ((double)bytes) - LCZ;
-  double M_total = lcmlcz * K_LC_to_M;
+  double M_fric = speed * rd->loadcell_calibration.k_omega_to_m;
+  double lcmlcz = ((double)bytes) - rd->loadcell_calibration.lc_z;
+  double M_total = lcmlcz * rd->loadcell_calibration.k_lc_to_m;
   double M_load = M_total - M_fric;
 
   return M_load;
 }
+
 
 void read_loadcell(struct run_data *rd)
 {

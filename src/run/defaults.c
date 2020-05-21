@@ -27,6 +27,7 @@ struct run_data *init_run_data()
   rd->ambient_temperature = 0;
   rd->loadcell_bytes = 0;
   rd->loadcell_units = 0;
+  rd->loadcell_calibration.name = "default";
 
   rd->speed_ind_timeout = 0.1;
   rd->last_ca = 0;
