@@ -74,6 +74,8 @@ void centre(char *s, unsigned int w, char *c[])
     for (; i < w; i++)
       (*c)[i] = padchar;
   }
+
+  // TODO show elipssis on crop
 }
 
 
