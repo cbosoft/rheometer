@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -Werror
 LINK = -lwiringPi -lpthread -lm -ldl
 
 HDR = $(shell ls **/*.h)
