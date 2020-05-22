@@ -76,6 +76,31 @@ void centre(char *s, unsigned int w, char *c[])
   }
 
   // TODO show elipssis on crop
+
+
+
+void display_progress(struct run_data *rd)
+{
+  struct winsize ws;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+  int width_total = (int)ws.ws_col;
+
+  int width_progress = width_total - 2;
+  double dwid = (double)width_progress;
+  double dprog = dwid * rd->time_s_f / ((double)rd->length_s);
+  int prog = (int)dprog;
+
+  if (prog > width_progress)
+    prog = width_progress;
+
+  int rest = width_progress - prog;
+
+  fprintf(stderr, "\r[");
+  for (int i = 0; i < prog; i++)
+    fprintf(stderr, "▉");
+  for (int i = 0; i < rest; i++)
+    fprintf(stderr, " ");
+  fprintf(stderr, "]");
 }
 
 
@@ -83,6 +108,10 @@ void centre(char *s, unsigned int w, char *c[])
 // TODO create a modular/pluggable/argument driven way to choose what to display
 void display_titles(void)
 {
+  if (get_quiet()) {
+    return;
+  }
+
   unsigned int colw = get_column_width();
   char 
     *formatted = calloc(colw+1, sizeof(char)), 
@@ -113,12 +142,16 @@ void display_titles(void)
 
 void display_thread_data(struct run_data *rd)
 {
+  if (get_quiet()) {
+    display_progress(rd);
+    return;
+  }
 
   unsigned int colw = get_column_width();
   
   unsigned long secs = (unsigned int)(rd->time_s_f);
-  char 
-    *formatted = calloc(colw+1, sizeof(char)), 
+  char
+    *formatted = calloc(colw+1, sizeof(char)),
     *centered  = calloc(colw+1, sizeof(char));
 
   CENTER_AND_DISPLAY(secs, "%lu");

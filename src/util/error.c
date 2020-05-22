@@ -24,6 +24,12 @@ void set_loud()
 }
 
 
+int get_quiet()
+{
+  return quiet;
+}
+
+
 void ferr(const char* source, const char* fmt, ...)
 {
   size_t mesglen = 256;
