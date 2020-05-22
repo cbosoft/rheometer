@@ -9,10 +9,22 @@
 #include "error.h"
 
 
+static int quiet = 0;
 
 
-void
-ferr (const char* source, const char* fmt, ...)
+void set_quiet()
+{
+  quiet = 1;
+}
+
+
+void set_loud()
+{
+  quiet = 0;
+}
+
+
+void ferr(const char* source, const char* fmt, ...)
 {
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
@@ -32,8 +44,7 @@ ferr (const char* source, const char* fmt, ...)
 
 
 
-void
-argerr(const char *fmt, ...)
+void argerr(const char *fmt, ...)
 {
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
@@ -52,8 +63,7 @@ argerr(const char *fmt, ...)
 
 
 
-void
-warn (const char *source, const char *fmt, ...)
+void warn(const char *source, const char *fmt, ...)
 {
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
@@ -70,9 +80,10 @@ warn (const char *source, const char *fmt, ...)
 
 
 
-void
-info (const char *fmt, ...)
+void info(const char *fmt, ...)
 {
+  if (quiet) return;
+
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
 

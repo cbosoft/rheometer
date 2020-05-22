@@ -1,7 +1,8 @@
 #pragma once
 
 
-
+void set_quiet();
+void set_loud();
 
 void ferr(const char *source, const char* fmt, ...);
 void warn(const char *source, const char* fmt, ...);

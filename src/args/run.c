@@ -78,6 +78,9 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     else if (ARGEQ("--tune")) {
       rd->mode = MODE_TUNING;
     }
+    else if (ARGEQ("--quiet")) {
+      set_quiet();
+    }
     else {
       argerr("Argument \"%s\" not understood.", argv[i]);
     }
