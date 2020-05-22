@@ -14,7 +14,7 @@
 
 
 #define CENTER_AND_DISPLAY(VAL, FMT)  \
-  snprintf(formatted, colw, FMT, VAL);\
+  snprintf(formatted, colw+19, FMT, VAL);\
   centre(formatted, colw, &centered);\
   fprintf(stderr, "%s ", centered);
 
@@ -58,11 +58,17 @@ void centre(char *s, unsigned int w, char *c[])
   
   unsigned int l = strlen(s);
   if (l > w) {
-    for (unsigned int i = 0; i < w; i++) {
+    // crop to width
+    unsigned int i = 0;
+    for (; i < w-3; i++) {
       (*c)[i] = s[i];
+    }
+    for (; i < w; i++) {
+      (*c)[i] = '.';
     }
   }
   else {
+    // pad to width
     unsigned int diff = w - l;
     unsigned int p = ( (diff % 2) == 1 ) ? ((diff-1)/2) : (diff/2);
     unsigned int i = 0;
@@ -76,8 +82,6 @@ void centre(char *s, unsigned int w, char *c[])
     for (; i < w; i++)
       (*c)[i] = padchar;
   }
-
-  // TODO show ellipsis on crop
 }
 
 
@@ -154,8 +158,8 @@ void display_thread_data(struct run_data *rd)
   
   unsigned long secs = (unsigned int)(rd->time_s_f);
   char
-    *formatted = calloc(colw+1, sizeof(char)),
-    *centered  = calloc(colw+1, sizeof(char));
+    *formatted = calloc(colw+20, sizeof(char)),
+    *centered  = calloc(colw+20, sizeof(char));
 
   CENTER_AND_DISPLAY(secs, "%lu");
 
