@@ -91,10 +91,21 @@ cJSON *construct_save_control_scheme_json(struct run_data *rd)
   strftime(date, 14, "%Y-%m-%d", timeinfo);
 
   char *scheme_path = calloc(300, sizeof(char));
-  snprintf(scheme_path, 299, "data/generated_%s_%s_%s_*_%s.json", rd->control_scheme, rd->setter_scheme, date, rd->tag);
+  snprintf(scheme_path, 299, "data/generated_%s_%s_%s_*_%s.json",
+      rd->control_scheme.controller_name,
+      rd->control_scheme.setter_name,
+      date,
+      rd->tag);
+
   glob_t glob_res;
   glob((const char *)scheme_path, GLOB_NOSORT, NULL, &glob_res);
-  snprintf(scheme_path, 299, "data/generated_%s_%s_%s_%d_%s.json", rd->control_scheme, rd->setter_scheme, date, (int)glob_res.gl_pathc, rd->tag);
+
+  snprintf(scheme_path, 299, "data/generated_%s_%s_%s_%d_%s.json",
+      rd->control_scheme.controller_name,
+      rd->control_scheme.setter_name,
+      date,
+      (int)glob_res.gl_pathc,
+      rd->tag);
 
   FILE *f = fopen(scheme_path, "w");
   char *contents = cJSON_Print(control_scheme_json);
