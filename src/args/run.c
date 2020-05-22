@@ -5,8 +5,7 @@
 #include <string.h>
 
 #include "../util/error.h"
-#include "../version.h"
-#include "../util/display.h"
+#include "../util/help.h"
 #include "../log/tag.h"
 #include "../control/control.h"
 
@@ -91,22 +90,4 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
 
   if (!cs_set || !l_set || !d_set || !hwver_set)
     argerr("Length, control scheme, hardware_version, and fill depth are required parameters.");
-
-  // finished setting args, display
-  // TODO: display more run information
-  fprintf(stderr, 
-      "  "BOLD"rheometer"RESET" v%s\n"
-      "\n"
-      "  Run options:\n"
-      "    "FGYELLOW"tag"RESET": \"%s\"\n"
-      "    "FGYELLOW"control scheme"RESET": %s\n"
-      "    "FGYELLOW"setter scheme"RESET": %s\n"
-      "    "FGYELLOW"controlled variable"RESET": %s\n"
-      "    "FGYELLOW"length"RESET": %u s\n",
-      VERSION,
-      rd->tag, 
-      rd->control_scheme, 
-      rd->setter_scheme, 
-      rd->control_params->is_stress_controlled ? "stress" : "strainrate",
-      rd->length_s);
 }

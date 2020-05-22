@@ -24,6 +24,7 @@
 #include "../sensors/adc/adc.h"
 #include "../util/sleep.h"
 #include "../log/tar.h"
+#include "../version.h"
 #include "../util/display.h"
 
 #define SETUP_THREAD(THREADVAR,THREADFUNC,NAME,WATCHVAR) \
@@ -80,6 +81,8 @@ int run_main(int argc, const char ** argv)
   struct run_data *rd = init_run_data();
 
   parse_run_args((unsigned int)argc, argv, rd);
+
+  info(BOLD"rheometer"RESET" v%s\n", VERSION);
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("main", "could not create signal handler");
