@@ -137,6 +137,28 @@ char *parse_tag_string(const char *s)
 
 
 
+RunCommand get_run_command(int argc, const char **argv)
+{
+  if ((argc > 1) && (argv[1][0] != '-')) {
+
+    const char *command = argv[1];
+    if (strcmp(command, "run") == 0) {
+      return RC_RUN;
+    }
+    else if (strcmp(command, "schedule") == 0) {
+      return RC_SCHEDULE;
+    }
+    else if (strcmp(command, "config") == 0) {
+      return RC_CONFIG;
+    }
+    else {
+      argerr("Unrecognised run command \"%s\".", command);
+    }
+  }
+
+  return RC_RUN;
+}
+
 
 
 
