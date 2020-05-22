@@ -80,6 +80,9 @@ struct common_args *parse_common(int *argc, const char ***argv_ptr) {
     if (ARGEQ("--quiet")) {
       set_quiet();
     }
+    if (ARGEQ("--silent")) {
+      set_silent();
+    }
     else if (ARGEQ("run")) {
       ca->rc = RC_RUN;
     }

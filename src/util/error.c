@@ -9,24 +9,38 @@
 #include "error.h"
 
 
-static int quiet = 0;
+static int verbosity = 2;
 
+void set_silent()
+{
+  verbosity = 0;
+}
 
 void set_quiet()
 {
-  quiet = 1;
+  verbosity = 1;
 }
 
 
 void set_loud()
 {
-  quiet = 0;
+  verbosity = 2;
 }
 
 
+int get_loud()
+{
+  return !get_quiet();
+}
+
 int get_quiet()
 {
-  return quiet;
+  return verbosity < 2;
+}
+
+int get_silent()
+{
+  return verbosity < 1;
 }
 
 
@@ -71,6 +85,8 @@ void argerr(const char *fmt, ...)
 
 void warn(const char *source, const char *fmt, ...)
 {
+  if (get_silent()) return;
+
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
 
@@ -88,7 +104,7 @@ void warn(const char *source, const char *fmt, ...)
 
 void info(const char *fmt, ...)
 {
-  if (quiet) return;
+  if (get_quiet()) return;
 
   size_t mesglen = 256;
   char *mesg = calloc(mesglen, sizeof(char));
