@@ -15,7 +15,10 @@ void usage(void)
       "  "BOLD"rheometer"RESET" control program v"VERSION"\n"
       "\n"
       "  "BOLD"Usage:"RESET"\n"
-      "    rheometer -l <length> -d <fill-depth> -c <control scheme> -w <hardware version> [-t <tag>] [-n <needle-depth>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
+      "    rheometer [common options] [command] [command options]\n"
+      "    rheometer [run] -l <length> -d <fill-depth> -c <control scheme> -w <hardware version> [-t <tag>] [-n <needle-depth>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
+      "    rheometer config (add|edit|remove) (controlscheme|calibration|schedule)\n"
+      "    rheometer schedule <schedule-file>\n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -27,7 +30,10 @@ void usage(void)
 void args_help()
 {
   fprintf(stdout,
-      "  "BOLD"Options:"RESET"\n"
+      "  "BOLD"Common Options:"RESET"\n"
+      "    --quiet          suppress most output; progress is given by a bar.\n"
+      "\n"
+      "  "BOLD"Run Options:"RESET"\n"
       "    -l | --length    Length of run, can be given in seconds or minutes, dictated\n"
       "                     by a suffixed character. e.g. \"10s\" is 10 seconds, \"10m\"\n"
       "                     is 10 minutes. If ignored, the value is taken as seconds.\n"
@@ -67,6 +73,6 @@ void args_help()
       "                     of the name \"${prefix}_photo.mp4\" will be created and stored\n"
       "                     alongside the other log files, taken before the logging begins.\n"
       "\n"
-  );
+  ); // TODO: config and schedule options
   control_help();
 }
