@@ -67,13 +67,8 @@ void generate_log_prefix(struct run_data *rd)
 }
 
 
-
-
-void save_run_params_to_json(struct run_data *rd)
+cJSON *construct_save_control_scheme_json(struct run_data *rd)
 {
-  cJSON *params = cJSON_CreateObject();
-  CHECKJSON(params);
-  
   cJSON *control_scheme_json = cJSON_CreateObject();
   cJSON_AddStringToObject(control_scheme_json, "control", rd->control_scheme);
   cJSON_AddStringToObject(control_scheme_json, "setter", rd->setter_scheme);
@@ -87,6 +82,38 @@ void save_run_params_to_json(struct run_data *rd)
     cJSON *setter_params_json = cJSON_CreateDoubleArray(rd->control_params->setter_params, rd->control_params->n_setter_params);
     cJSON_AddItemToObject(control_scheme_json, "setter_params", setter_params_json);
   }
+
+  char *date = calloc(15, sizeof(char));
+  time_t rawtime;
+  struct tm *timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(date, 14, "%Y-%m-%d", timeinfo);
+
+  char *scheme_path = calloc(300, sizeof(char));
+  snprintf(scheme_path, 299, "data/generated_%s_%s_%s_*_%s.json", rd->control_scheme, rd->setter_scheme, date, rd->tag);
+  glob_t glob_res;
+  glob((const char *)scheme_path, GLOB_NOSORT, NULL, &glob_res);
+  snprintf(scheme_path, 299, "data/generated_%s_%s_%s_%d_%s.json", rd->control_scheme, rd->setter_scheme, date, (int)glob_res.gl_pathc, rd->tag);
+
+  FILE *f = fopen(scheme_path, "w");
+  char *contents = cJSON_Print(control_scheme_json);
+  fprintf(f, "%s\n", contents);
+  fclose(f);
+  free(contents);
+  free(date);
+
+  return control_scheme_json;
+}
+
+
+
+void save_run_params_to_json(struct run_data *rd)
+{
+  cJSON *params = cJSON_CreateObject();
+  CHECKJSON(params);
+
+  cJSON *control_scheme_json = construct_save_control_scheme_json(rd);
 
   CHECKJSON(control_scheme_json);
   cJSON_AddItemToObject(params, "control_scheme", control_scheme_json);
