@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "../args/args.h"
 #include "display.h"
-#include "../args.h"
 #include "error.h"
 
 

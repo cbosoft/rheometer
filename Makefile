@@ -2,6 +2,10 @@ CC = gcc
 CFLAGS = -Wall -Wextra
 LINK = -lwiringPi -lpthread -lm -ldl
 
+HDR = $(shell ls **/*.h)
+WPI = wpi/libwiringPi.so
+VERSION = $(shell scripts/get_version.sh)
+
 CONTROLLERS = \
 							controllers/pid.so \
 							controllers/none.so
@@ -35,6 +39,7 @@ SENSORS = $(ADC) $(THERMO) $(LOADCELL) $(ENCODER) $(CAMERA)
 
 UTIL = \
 			 obj/util/cJSON.o \
+			 obj/util/help.o \
 			 obj/util/json.o \
 			 obj/util/display.o \
 			 obj/util/error.o \
@@ -61,7 +66,21 @@ RUN = \
 			obj/run/free.o \
 			obj/run/defaults.o
 
-RHEO = obj/main.o obj/args.o \
+MAIN = \
+			 obj/main/main.o \
+			 obj/main/run.o \
+			 obj/main/schedule.o \
+			 obj/main/config.o
+
+ARGS = \
+			 obj/args/args.o \
+			 obj/args/help.o \
+			 obj/args/run.o \
+			 obj/args/schedule.o \
+			 obj/args/config.o
+
+RHEO = $(MAIN) \
+			 $(ARGS) \
 			 $(RUN) \
 			 $(LOG) \
 			 $(MOTOR) \
@@ -69,17 +88,12 @@ RHEO = obj/main.o obj/args.o \
 			 $(UTIL) \
 			 $(SENSORS)
 
-HDR = $(shell ls **/*.h)
-WPI = wpi/libwiringPi.so
-VERSION = $(shell scripts/get_version.sh)
-
 .PHONY: all modules
 
 all: rheometer modules
 
 rheometer: $(RHEO) $(HDR)
 	$(CC) $(CFLAGS) $(RHEO) -o $@ $(LINK)
-	touch src/args.c
 
 modules: $(shell scripts/get_modules.sh)
 

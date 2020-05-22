@@ -1,0 +1,88 @@
+#define _POSIX_C_SOURCE 200809L
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+#include "../util/display.h"
+#include "../util/error.h"
+#include "../log/tag.h"
+#include "../control/control.h"
+#include "../version.h"
+
+#include "args.h"
+
+
+unsigned int parse_length_string(const char *length_s_str)
+{
+  unsigned int len = strlen(length_s_str);
+
+  // is just numbers?
+  unsigned int justnumber = 1;
+  unsigned int notnumbers = 0;
+  for (unsigned int i = 0; i < len; i++) {
+    unsigned int ic = ((unsigned int)length_s_str[i]);
+    if ( ic < 48 || ic > 57) {
+      justnumber = 0;
+      notnumbers ++;
+    }
+  }
+
+  if (notnumbers > 1) {
+    argerr("length arg must be a number or suffixed by a single 's' or 'm' to explicitly specify 'seconds' or 'minutes'");
+  }
+
+  unsigned int toi = atoi(length_s_str);
+
+  if (length_s_str[len-1] == 's' || justnumber) {
+    return toi;
+  }
+
+  if (length_s_str[len-1] == 'm') {
+    return toi * 60;
+  }
+
+  argerr("length arg syntax error");
+
+  // this will never run, but it makes the linter happy.
+  return 1;
+}
+
+
+
+char *parse_tag_string(const char *s)
+{
+  unsigned int l = strlen(s);
+  char *rv = calloc(l+1, sizeof(char));
+  for (unsigned int i = 0; i < l; i++) {
+    if (s[i] == ' ' || s[i] == '_')
+      rv[i] = '-';
+    else
+      rv[i] = s[i];
+  }
+  return rv;
+}
+
+
+
+RunCommand get_run_command(int *argc, const char ***argv)
+{
+  if (( (*argc) > 0) && ( (*argv)[0][0] != '-')) {
+    const char *command = (*argv)[0];
+    (*argc)--; (*argv)++;
+    if (strcmp(command, "run") == 0) {
+      return RC_RUN;
+    }
+    else if (strcmp(command, "schedule") == 0) {
+      return RC_SCHEDULE;
+    }
+    else if (strcmp(command, "config") == 0) {
+      return RC_CONFIG;
+    }
+    else {
+      argerr("Unrecognised run command \"%s\".", command);
+    }
+  }
+
+  return RC_RUN;
+}
