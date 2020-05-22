@@ -7,6 +7,7 @@
 
 #include "../sensors/adc/adc.h"
 #include "../run/run.h"
+#include "../util/error.h"
 #include "error.h"
 
 #include "display.h"
@@ -28,13 +29,14 @@ unsigned int get_column_width(void)
   unsigned int number_cols = 0;
   number_cols += 1; // time
   //number_cols += 8; // adc
-  number_cols += 1; // adc_dt
+  //number_cols += 1; // adc_dt
   number_cols += 1; // speed
   number_cols += 1; // strainrate
-  number_cols += 1; // stress (bytes)
+  //number_cols += 1; // stress (bytes)
   number_cols += 1; // stress (units)
   number_cols += 1; // control action
-  number_cols += 1; // temperature
+  number_cols += 1; // temperature (ambient)
+  number_cols += 1; // temperature (cylinder)
   unsigned int min_total = (number_cols * (min_cols+1));
 
   if (width_total < min_total) {
@@ -75,7 +77,8 @@ void centre(char *s, unsigned int w, char *c[])
       (*c)[i] = padchar;
   }
 
-  // TODO show elipssis on crop
+  // TODO show ellipsis on crop
+}
 
 
 
@@ -118,15 +121,15 @@ void display_titles(void)
     *centered  = calloc(colw+1, sizeof(char));
 
   CENTER_AND_DISPLAY("t/s", "%s");
-  
+
   // for (unsigned int channel = 0; channel < ADC_COUNT; channel++) {
   //   CENTER_AND_DISPLAY(channel, "A%u/b");
   // }
-  
+
   //CENTER_AND_DISPLAY("dt/s", "%s");
   CENTER_AND_DISPLAY("s/RPS", "%s");
   CENTER_AND_DISPLAY("SR/Hz", "%s");
-  CENTER_AND_DISPLAY("LC/24b", "%s");
+  //CENTER_AND_DISPLAY("LC/24b", "%s");
   CENTER_AND_DISPLAY("S/Pa", "%s");
   CENTER_AND_DISPLAY("ca/b", "%s");
   CENTER_AND_DISPLAY("Tc/C", "%s");
@@ -169,7 +172,7 @@ void display_thread_data(struct run_data *rd)
   CENTER_AND_DISPLAY(get_speed(rd), "%f");
   CENTER_AND_DISPLAY(get_strainrate(rd), "%f");
 
-  CENTER_AND_DISPLAY(get_loadcell_bytes(rd), "%lu");
+  //CENTER_AND_DISPLAY(get_loadcell_bytes(rd), "%lu");
   CENTER_AND_DISPLAY(get_loadcell_units(rd), "%f");
 
   CENTER_AND_DISPLAY(get_last_control_action(rd), "%u");
