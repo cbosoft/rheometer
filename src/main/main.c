@@ -26,8 +26,6 @@
 #include "../log/tar.h"
 #include "../util/display.h"
 
-  pthread_t tmp_thread;
-
 #define SETUP_THREAD(THREADVAR,THREADFUNC,NAME,WATCHVAR) \
   if (pthread_create(& THREADVAR, NULL, THREADFUNC, rd)) \
     ferr("main", "could not create "NAME" thread"); \
