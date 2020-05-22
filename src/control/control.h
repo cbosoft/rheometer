@@ -7,8 +7,8 @@
 #define CONTROL_MAXIMUM 1024
 #define CONTROL_MINIMUM 0
 
-#define GET_CONTROL_PARAM_OR_DEFAULT(rd, I, D)  (((I < rd->control_params->n_control_params) && (I >= 0)) ? rd->control_params->control_params[I] : D)
-#define GET_SETTER_PARAM_OR_DEFAULT(rd, I, D)  (((I < rd->control_params->n_setter_params) && (I >= 0)) ? rd->control_params->setter_params[I] : D)
+#define GET_CONTROL_PARAM_OR_DEFAULT(rd, I, D)  (((I < rd->control_scheme.n_control_params) && (I >= 0)) ? rd->control_scheme.control_params[I] : D)
+#define GET_SETTER_PARAM_OR_DEFAULT(rd, I, D)  (((I < rd->control_scheme.n_setter_params) && (I >= 0)) ? rd->control_scheme.setter_params[I] : D)
 
 typedef unsigned int (*control_func_t)(struct run_data *);
 typedef double (*setter_func_t)(struct run_data *);

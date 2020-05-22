@@ -165,8 +165,8 @@ void *thermometer_thread_func(void *vptr)
 
   thermometer_setup();
 
-  set_ambient_temperature(rd, 0.0);
-  set_cylinder_temperature(rd, 0.0);
+  rd_set_ambient_temperature(rd, 0.0);
+  rd_set_cylinder_temperature(rd, 0.0);
 
   if (!device_count) {
     rd->tmp_ready = 1;
@@ -183,8 +183,8 @@ void *thermometer_thread_func(void *vptr)
     temp_ambient = read_ambient_temperature();
     temp_cylinder = read_cylinder_temperature();
 
-    set_ambient_temperature(rd, temp_ambient);
-    set_cylinder_temperature(rd, temp_cylinder);
+    rd_set_ambient_temperature(rd, temp_ambient);
+    rd_set_cylinder_temperature(rd, temp_cylinder);
 
     sleep(1);
 

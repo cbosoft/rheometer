@@ -61,24 +61,24 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     else if (ARGEQ("--controller")) {
       i++;
       CHECK_ARG_HAS_VALUE;
-      rd->control_scheme = strdup(argv[i]);
+      rd->control_scheme.controller_name = strdup(argv[i]);
       c_set = 1;
     }
     else if (ARGEQ("--controller-params")) {
       i++;
       CHECK_ARG_HAS_VALUE;
-      str2darr(argv[i], &rd->control_params->control_params, &rd->control_params->n_control_params);
+      str2darr(argv[i], &rd->control_scheme.control_params, &rd->control_scheme.n_control_params);
     }
     else if (ARGEQ("--setter")) {
       i++;
       CHECK_ARG_HAS_VALUE;
-      rd->setter_scheme = strdup(argv[i]);
+      rd->control_scheme.setter_name = strdup(argv[i]);
       s_set = 1;
     }
     else if (ARGEQ("--setter-params")) {
       i++;
       CHECK_ARG_HAS_VALUE;
-      str2darr(argv[i], &rd->control_params->setter_params, &rd->control_params->n_setter_params);
+      str2darr(argv[i], &rd->control_scheme.setter_params, &rd->control_scheme.n_setter_params);
     }
     else if (ARGEITHER("-t", "--tag")) {
       i++;

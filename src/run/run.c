@@ -14,7 +14,7 @@
 
 // Speed {{{
 
-void set_speed(struct run_data *rd, double speed)
+void rd_set_speed(struct run_data *rd, double speed)
 {
   double strainrate_invs = speed * PI * 2.0 * RI / (RO - RI);
   pthread_mutex_lock(&rd->lock_speed);
@@ -24,7 +24,7 @@ void set_speed(struct run_data *rd, double speed)
 }
 
 
-double get_speed(struct run_data *rd)
+double rd_get_speed(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_speed);
@@ -34,7 +34,7 @@ double get_speed(struct run_data *rd)
 }
 
 
-double get_strainrate(struct run_data *rd)
+double rd_get_strainrate(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_speed);
@@ -48,14 +48,14 @@ double get_strainrate(struct run_data *rd)
 
 // Temperature {{{
 
-void set_ambient_temperature(struct run_data *rd, double value)
+void rd_set_ambient_temperature(struct run_data *rd, double value)
 {
   pthread_mutex_lock(&rd->lock_temperature);
   rd->ambient_temperature = value;
   pthread_mutex_unlock(&rd->lock_temperature);
 }
 
-double get_ambient_temperature(struct run_data *rd)
+double rd_get_ambient_temperature(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_temperature);
@@ -64,14 +64,14 @@ double get_ambient_temperature(struct run_data *rd)
   return rv;
 }
 
-void set_cylinder_temperature(struct run_data *rd, double value)
+void rd_set_cylinder_temperature(struct run_data *rd, double value)
 {
   pthread_mutex_lock(&rd->lock_temperature);
   rd->cylinder_temperature = value;
   pthread_mutex_unlock(&rd->lock_temperature);
 }
 
-double get_cylinder_temperature(struct run_data *rd)
+double rd_get_cylinder_temperature(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_temperature);
@@ -85,7 +85,7 @@ double get_cylinder_temperature(struct run_data *rd)
 
 // Loadcell {{{
 
-void set_loadcell_bytes(struct run_data *rd, unsigned long bytes)
+void rd_set_loadcell_bytes(struct run_data *rd, unsigned long bytes)
 {
   double loadcell_units = loadcell_cal(rd, bytes);
   double stress_Pa = rd->loadcell_units / (2.0 * PI * RI * RI * rd->fill_depth);
@@ -97,7 +97,7 @@ void set_loadcell_bytes(struct run_data *rd, unsigned long bytes)
   pthread_mutex_unlock(&rd->lock_loadcell);
 }
 
-unsigned long get_loadcell_bytes(struct run_data *rd)
+unsigned long rd_get_loadcell_bytes(struct run_data *rd)
 {
   unsigned long rv;
   pthread_mutex_lock(&rd->lock_loadcell);
@@ -106,7 +106,7 @@ unsigned long get_loadcell_bytes(struct run_data *rd)
   return rv;
 }
 
-double get_loadcell_units(struct run_data *rd)
+double rd_get_loadcell_units(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_loadcell);
@@ -115,7 +115,7 @@ double get_loadcell_units(struct run_data *rd)
   return rv;
 }
 
-double get_stress(struct run_data *rd)
+double rd_get_stress(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_loadcell);
@@ -129,14 +129,14 @@ double get_stress(struct run_data *rd)
 
 // Control {{{
 
-void set_last_control_action(struct run_data *rd, unsigned int value)
+void rd_set_last_control_action(struct run_data *rd, unsigned int value)
 {
   pthread_mutex_lock(&rd->lock_control);
   rd->last_ca = value;
   pthread_mutex_unlock(&rd->lock_control);
 }
 
-unsigned int get_last_control_action(struct run_data *rd)
+unsigned int rd_get_last_control_action(struct run_data *rd)
 {
   unsigned int rv;
   pthread_mutex_lock(&rd->lock_control);
@@ -145,25 +145,43 @@ unsigned int get_last_control_action(struct run_data *rd)
   return rv;
 }
 
-void set_stress_controlled(struct run_data *rd)
+void rd_set_stress_controlled(struct run_data *rd)
 {
   pthread_mutex_lock(&rd->lock_control);
-  rd->control_params->is_stress_controlled = 1;
+  rd->control_scheme.is_stress_controlled = 1;
   pthread_mutex_unlock(&rd->lock_control);
 }
 
-void set_strainrate_controlled(struct run_data *rd)
+void rd_set_strainrate_controlled(struct run_data *rd)
 {
   pthread_mutex_lock(&rd->lock_control);
-  rd->control_params->is_stress_controlled = 0;
+  rd->control_scheme.is_stress_controlled = 0;
   pthread_mutex_unlock(&rd->lock_control);
 }
 
-int get_is_stress_controlled(struct run_data *rd)
+int rd_get_is_stress_controlled(struct run_data *rd)
 {
   int rv;
   pthread_mutex_lock(&rd->lock_control);
-  rv = rd->control_params->is_stress_controlled;
+  rv = rd->control_scheme.is_stress_controlled;
+  pthread_mutex_unlock(&rd->lock_control);
+  return rv;
+}
+
+double rd_get_setpoint(struct run_data *rd)
+{
+  double rv;
+  pthread_mutex_lock(&rd->lock_control);
+  rv = rd->control_scheme.setpoint;
+  pthread_mutex_unlock(&rd->lock_control);
+  return rv;
+}
+
+unsigned int rd_get_control_interval(struct run_data *rd)
+{
+  unsigned int rv;
+  pthread_mutex_lock(&rd->lock_control);
+  rv = rd->control_scheme.sleep_ms;
   pthread_mutex_unlock(&rd->lock_control);
   return rv;
 }
@@ -172,7 +190,7 @@ int get_is_stress_controlled(struct run_data *rd)
 
 // Time {{{
 
-void set_start_time(struct run_data *rd)
+void rd_set_start_time(struct run_data *rd)
 {
   struct timeval tv;
   unsigned long sec, usec;
@@ -187,7 +205,7 @@ void set_start_time(struct run_data *rd)
   pthread_mutex_unlock(&rd->lock_time);
 }
 
-void set_time(struct run_data *rd)
+void rd_set_time(struct run_data *rd)
 {
   struct timeval tv;
   unsigned long sec, usec;
@@ -215,7 +233,7 @@ void set_time(struct run_data *rd)
   pthread_mutex_unlock(&rd->lock_time);
 }
 
-double get_time(struct run_data *rd)
+double rd_get_time(struct run_data *rd)
 {
   double rv;
   pthread_mutex_lock(&rd->lock_time);
@@ -224,7 +242,7 @@ double get_time(struct run_data *rd)
   return rv;
 }
 
-void get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *time_us)
+void rd_get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *time_us)
 {
   pthread_mutex_lock(&rd->lock_time);
   (*time_s) = rd->time_s;
@@ -235,7 +253,7 @@ void get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *t
 // }}}
 // ADC {{{
 
-unsigned long *swap_adc(struct run_data *rd, unsigned long *value)
+unsigned long *rd_swap_adc(struct run_data *rd, unsigned long *value)
 {
   unsigned long *rv = NULL;
   pthread_mutex_lock(&rd->lock_adc);
@@ -245,7 +263,7 @@ unsigned long *swap_adc(struct run_data *rd, unsigned long *value)
   return rv;
 }
 
-unsigned long get_adc(struct run_data *rd, int i)
+unsigned long rd_get_adc(struct run_data *rd, int i)
 {
   unsigned long rv;
   pthread_mutex_lock(&rd->lock_adc);

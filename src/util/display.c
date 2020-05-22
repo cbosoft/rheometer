@@ -169,16 +169,16 @@ void display_thread_data(struct run_data *rd)
   //   pthread_mutex_unlock(&lock_adc);
   // }
 
-  CENTER_AND_DISPLAY(get_speed(rd), "%f");
-  CENTER_AND_DISPLAY(get_strainrate(rd), "%f");
+  CENTER_AND_DISPLAY(rd_get_speed(rd), "%f");
+  CENTER_AND_DISPLAY(rd_get_strainrate(rd), "%f");
 
   //CENTER_AND_DISPLAY(get_loadcell_bytes(rd), "%lu");
-  CENTER_AND_DISPLAY(get_loadcell_units(rd), "%f");
+  CENTER_AND_DISPLAY(rd_get_loadcell_units(rd), "%f");
 
-  CENTER_AND_DISPLAY(get_last_control_action(rd), "%u");
+  CENTER_AND_DISPLAY(rd_get_last_control_action(rd), "%u");
 
-  CENTER_AND_DISPLAY(get_cylinder_temperature(rd), "%f");
-  CENTER_AND_DISPLAY(get_ambient_temperature(rd), "%f");
+  CENTER_AND_DISPLAY(rd_get_cylinder_temperature(rd), "%f");
+  CENTER_AND_DISPLAY(rd_get_ambient_temperature(rd), "%f");
 
   fprintf(stderr, "\n");
 

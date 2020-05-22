@@ -144,7 +144,7 @@ int run_main(int argc, const char ** argv)
     default:
       info("begin!");
       unsigned int tish = 0;
-      set_start_time(rd);
+      rd_set_start_time(rd);
       while ( (!cancelled) && (tish <= rd->length_s) ) {
         sleep(1);
         tish ++;

@@ -94,38 +94,40 @@ struct run_data *init_run_data();
 void free_run_data(struct run_data *td);
 
 // speed getter/setter
-void set_speed(struct run_data *rd, double value);
-double get_speed(struct run_data *rd);
-double get_strainrate(struct run_data *rd);
-double get_fill_depth(struct run_data *rd);
+void rd_set_speed(struct run_data *rd, double value);
+double rd_get_speed(struct run_data *rd);
+double rd_get_strainrate(struct run_data *rd);
+double rd_get_fill_depth(struct run_data *rd);
 
 // temperature getter/setter
-void set_ambient_temperature(struct run_data *rd, double value);
-double get_ambient_temperature(struct run_data *rd);
-void set_cylinder_temperature(struct run_data *rd, double value);
-double get_cylinder_temperature(struct run_data *rd);
+void rd_set_ambient_temperature(struct run_data *rd, double value);
+double rd_get_ambient_temperature(struct run_data *rd);
+void rd_set_cylinder_temperature(struct run_data *rd, double value);
+double rd_get_cylinder_temperature(struct run_data *rd);
 
 // loadcell getter/setter
-void set_loadcell_bytes(struct run_data *rd, unsigned long value);
-unsigned long get_loadcell_bytes(struct run_data *rd);
-double get_loadcell_units(struct run_data *rd);
-double get_stress(struct run_data *rd);
+void rd_set_loadcell_bytes(struct run_data *rd, unsigned long value);
+unsigned long rd_get_loadcell_bytes(struct run_data *rd);
+double rd_get_loadcell_units(struct run_data *rd);
+double rd_get_stress(struct run_data *rd);
 
 // control getter/setter
-void set_last_control_action(struct run_data *rd, unsigned int value);
-unsigned int get_last_control_action(struct run_data *rd);
-void set_strainrate_controlled(struct run_data *rd);
-void set_stress_controlled(struct run_data *rd);
-int get_is_stress_controlled(struct run_data *rd);
+void rd_set_last_control_action(struct run_data *rd, unsigned int value);
+unsigned int rd_get_last_control_action(struct run_data *rd);
+void rd_set_strainrate_controlled(struct run_data *rd);
+void rd_set_stress_controlled(struct run_data *rd);
+int rd_get_is_stress_controlled(struct run_data *rd);
+double rd_get_setpoint(struct run_data *rd);
+unsigned int rd_get_control_interval(struct run_data *rd);
 
 // time getter/setter
-void set_start_time(struct run_data *rd);
-void set_time(struct run_data *rd);
-double get_time(struct run_data *rd);
-void get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *time_us);
+void rd_set_start_time(struct run_data *rd);
+void rd_set_time(struct run_data *rd);
+double rd_get_time(struct run_data *rd);
+void rd_get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *time_us);
 
 // adc getter/setter
-unsigned long get_adc(struct run_data *rd, int i);
-unsigned long *swap_adc(struct run_data *rd, unsigned long *value);
+unsigned long rd_get_adc(struct run_data *rd, int i);
+unsigned long *rd_swap_adc(struct run_data *rd, unsigned long *value);
 
 // vim: ft=c foldmethod=marker

@@ -102,7 +102,7 @@ void *adc_thread_func(void *vptr) {
       adc[channel] = read_adc_value(rd->adc_handle, channel);
     }
 
-    free(swap_adc(rd, adc));
+    free(rd_swap_adc(rd, adc));
 
     gettimeofday(&now, NULL);
 

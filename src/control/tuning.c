@@ -19,8 +19,8 @@ void analyse(int length, struct run_data *rd)
 
   fprintf(stderr, "Gathering data...\n");
   for (int i = 0; i < length; i++) {
-    double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
-    double err = rd->control_params->setpoint - input;
+    double input = rd_get_is_stress_controlled(rd) ? rd->stress_ind : rd->strainrate_ind;
+    double err = rd_get_setpoint(rd) - input;
     error[i] = err;
     total += error[i];
     fprintf(stderr, "  %d/%d    \r", i+1, length);
@@ -131,23 +131,23 @@ void do_tuning(struct run_data *rd) {
 
         int i = atoi(variable);
 
-        if ((i > 0) && (i < rd->control_params->n_control_params)) {
+        if ((i > 0) && (i < rd->control_scheme.n_control_params)) {
 
-          rd->control_params->control_params = realloc(rd->control_params->control_params, (i+1)*sizeof(double) );
+          rd->control_scheme.control_params = realloc(rd->control_scheme.control_params, (i+1)*sizeof(double) );
 
-          if ((rd->control_params->n_control_params - i) > 1) {
+          if ((rd->control_scheme.n_control_params - i) > 1) {
 
-            for (int j = rd->control_params->n_control_params; j < i+1; j++) {
-              rd->control_params->control_params[i] = 0;
+            for (int j = rd->control_scheme.n_control_params; j < i+1; j++) {
+              rd->control_scheme.control_params[i] = 0;
             }
 
           }
           
-          rd->control_params->n_control_params = i+1;
+          rd->control_scheme.n_control_params = i+1;
 
         }
 
-        rd->control_params->control_params[i] = value;
+        rd->control_scheme.control_params[i] = value;
 
         // TODO log tuning parameter change
 
@@ -163,8 +163,8 @@ void do_tuning(struct run_data *rd) {
 
       }
       else if (strcmp(cmd, "show") == 0) {
-        for (int i = 0; i < rd->control_params->n_control_params; i++) {
-          fprintf(stderr, "  p[%d] = %f\n", i, rd->control_params->control_params[i]);
+        for (int i = 0; i < rd->control_scheme.n_control_params; i++) {
+          fprintf(stderr, "  p[%d] = %f\n", i, rd->control_scheme.control_params[i]);
         }
       }
       else if (strcmp(cmd, "done") == 0) {

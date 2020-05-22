@@ -14,7 +14,7 @@
 
 double loadcell_cal(struct run_data *rd, unsigned long bytes)
 {
-  double speed = get_speed(rd);
+  double speed = rd_get_speed(rd);
 
   double M_fric = speed * rd->loadcell_calibration.k_omega_to_m;
   double lcmlcz = ((double)bytes) - rd->loadcell_calibration.lc_z;
@@ -28,6 +28,6 @@ double loadcell_cal(struct run_data *rd, unsigned long bytes)
 void read_loadcell(struct run_data *rd)
 {
 
-  set_loadcell_bytes(rd, hx711_read());
+  rd_set_loadcell_bytes(rd, hx711_read());
 
 }

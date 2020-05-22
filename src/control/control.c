@@ -37,7 +37,7 @@ void calculate_control_indicators(struct run_data *rd)
 {
 
   // update speed from optenc
-  set_speed(rd, measure_speed());
+  rd_set_speed(rd, measure_speed());
   // speed in rotations per second (hz)
 
 }
@@ -74,9 +74,9 @@ void *ctl_thread_func(void *vptr)
 
     pwmWrite(PWM_PIN, control_action);
 
-    set_last_control_action(rd, control_action);
+    rd_set_last_control_action(rd, control_action);
 
-    sleep_ms(rd->control_params->sleep_ms);
+    sleep_ms(rd->control_scheme.sleep_ms);
 
   }
 
