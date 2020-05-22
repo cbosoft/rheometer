@@ -180,23 +180,19 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
     ferr("read_control_scheme", "control scheme json must name a setter scheme.\n  e.g. { ... \"setter\": \"constant\" ... }");
   }
 
-  struct control_params *params = malloc(sizeof(struct control_params));
-  params->sleep_ms = 100;
-  params->is_stress_controlled = 0;
-  params->controller = load_controller(rd->control_scheme);
-  params->setter = load_setter(rd->setter_scheme);
-  params->setpoint = 0.0;
+  rd->control_params->controller = load_controller(rd->control_scheme);
+  rd->control_params->setter = load_setter(rd->setter_scheme);
 
 
   cJSON *control_params_json = cJSON_GetObjectItem(json, "control_params");
   if (cJSON_IsArray(control_params_json)) {
 
-    params->control_params = malloc(cJSON_GetArraySize(control_params_json)*sizeof(double));
+    rd->control_params->control_params = malloc(cJSON_GetArraySize(control_params_json)*sizeof(double));
     int i = 0;
     for (cJSON *it = control_params_json->child; it != NULL; it = it->next, i++) {
-      params->control_params[i] = it->valuedouble;
+      rd->control_params->control_params[i] = it->valuedouble;
     }
-    params->n_control_params = i;
+    rd->control_params->n_control_params = i;
 
   }
   else {
@@ -206,12 +202,12 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   cJSON *setter_params_json = cJSON_GetObjectItem(json, "setter_params");
   if (cJSON_IsArray(setter_params_json)) {
 
-    params->setter_params = malloc(cJSON_GetArraySize(setter_params_json)*sizeof(double));
+    rd->control_params->setter_params = malloc(cJSON_GetArraySize(setter_params_json)*sizeof(double));
     int i = 0;
     for (cJSON *it = setter_params_json->child; it != NULL; it = it->next, i++) {
-      params->setter_params[i] = it->valuedouble;
+      rd->control_params->setter_params[i] = it->valuedouble;
     }
-    params->n_setter_params = i;
+    rd->control_params->n_setter_params = i;
 
   }
   else {
@@ -221,10 +217,8 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
 
 
   // universal (optional) params
-  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ms", "interval between control calculations, milliseconds", NULL, &params->sleep_ms, NULL);
+  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ms", "interval between control calculations, milliseconds", NULL, &rd->control_params->sleep_ms, NULL);
 
   cJSON_Delete(json);
-
-  rd->control_params = params;
 
 }
