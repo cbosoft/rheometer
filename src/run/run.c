@@ -172,6 +172,21 @@ int get_is_stress_controlled(struct run_data *rd)
 
 // Time {{{
 
+void set_start_time(struct run_data *rd)
+{
+  struct timeval tv;
+  unsigned long sec, usec;
+
+  gettimeofday(&tv, 0);
+  sec = tv.tv_sec;
+  usec = tv.tv_usec;
+
+  pthread_mutex_lock(&rd->lock_time);
+  rd->start_time_s = sec;
+  rd->start_time_us = usec;
+  pthread_mutex_unlock(&rd->lock_time);
+}
+
 void set_time(struct run_data *rd)
 {
   struct timeval tv;

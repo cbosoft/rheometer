@@ -119,6 +119,7 @@ void set_stress_controlled(struct run_data *rd);
 int get_is_stress_controlled(struct run_data *rd);
 
 // time getter/setter
+void set_start_time(struct run_data *rd);
 void set_time(struct run_data *rd);
 double get_time(struct run_data *rd);
 void get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *time_us);
