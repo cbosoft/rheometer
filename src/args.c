@@ -138,13 +138,15 @@ char *parse_tag_string(const char *s)
 
 
 
-void check_argc(unsigned int i, unsigned int argc) 
-{
-  if (i >= argc) {
-    argerr("Option needs a value!");
-  }
-}
 
+
+
+#define CHECK_ARG_HAS_VALUE \
+{\
+  if ((i >= argc) || (argv[i][0] == '-')) {\
+    argerr("Option \"%s\" needs a value!", argv[i-1]);\
+  }\
+}
 
 
 
@@ -156,19 +158,19 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
   for (unsigned int i = 1; i < argc; i++) {
     if (EITHER(argv[i], "-l", "--length")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       rd->length_s = parse_length_string(argv[i]);
       l_set = 1;
     }
     else if (EITHER(argv[i], "-c", "--control-scheme")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       read_control_scheme(rd, argv[i]);
       cs_set = 1;
     }
     else if (EITHER(argv[i], "-t", "--tag")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       rd->tag = parse_tag_string(argv[i]);
     }
     else if (EITHER(argv[i], "-h", "--help")) {
@@ -177,32 +179,34 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
     }
     else if (EITHER(argv[i], "-d", "--fill-depth")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       rd->fill_depth = atof(argv[i]);
       d_set = 1;
     }
     else if (EITHER(argv[i], "-n", "--needle-depth")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       rd->needle_depth = atof(argv[i]);
     }
     else if (EITHER(argv[i], "-v", "--video-device")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       rd->video_device = strdup(argv[i]);
     }
     else if (EITHER(argv[i], "-p", "--photo-device")) {
       i++;
-      check_argc(i, argc);
+      CHECK_ARG_HAS_VALUE;
       rd->photo_device = strdup(argv[i]);
     }
     else if (EITHER(argv[i], "-w", "--hardware-version")) {
       i++;
+      CHECK_ARG_HAS_VALUE;
       rd->hardware_version = atoi(argv[i]);
       hwver_set = 1;
     }
     else if (EITHER(argv[i], "-a", "--loadcell-calibration")) {
       i++;
+      CHECK_ARG_HAS_VALUE;
       rd->loadcell_calibration.name = strdup(argv[i]);
     }
     else if (strcmp(argv[i], "--calm-start") == 0) {
@@ -212,7 +216,7 @@ void parse_args(unsigned int argc, const char **argv, struct run_data *rd)
       rd->mode = MODE_TUNING;
     }
     else {
-      argerr("given unknown arg");
+      argerr("Argument \"%s\" not understood.", argv[i]);
     }
   }
 
