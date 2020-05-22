@@ -10,8 +10,14 @@
 
 typedef enum {RC_RUN, RC_SCHEDULE, RC_CONFIG} RunCommand;
 
+struct common_args {
+  RunCommand rc;
+};
 
-RunCommand get_run_command(int *argc, const char ***argv);
+
+struct common_args *default_common_args();
+struct common_args *parse_common(int *argc, const char ***argv);
+void free_common_args(struct common_args *ca);
 void parse_run_args(int argc, const char **argv, struct run_data *rd);
 void parse_config_args(int argc, const char **argv, struct config_data *rd);
 void parse_schedule_args(int argc, const char **argv, struct schedule_data *rd);

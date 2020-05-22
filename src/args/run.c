@@ -78,6 +78,7 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       rd->mode = MODE_TUNING;
     }
     else if (ARGEQ("--quiet")) {
+      warn("parse_run_args", "common args should be given first, before the command or other args.");
       set_quiet();
     }
     else {

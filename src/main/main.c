@@ -8,10 +8,9 @@
 int main(int argc, const char **argv)
 {
 
-  argc--; argv++;
-  RunCommand rc = get_run_command(&argc, &argv);
+  struct common_args *ca = parse_common(&argc, &argv);
 
-  switch (rc) {
+  switch (ca->rc) {
 
     case RC_RUN:
       run_main(argc, argv);

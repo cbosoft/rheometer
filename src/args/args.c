@@ -64,25 +64,49 @@ char *parse_tag_string(const char *s)
 }
 
 
+#define argv (*argv_ptr)
+struct common_args *parse_common(int *argc, const char ***argv_ptr) {
 
-RunCommand get_run_command(int *argc, const char ***argv)
-{
-  if (( (*argc) > 0) && ( (*argv)[0][0] != '-')) {
-    const char *command = (*argv)[0];
-    (*argc)--; (*argv)++;
-    if (strcmp(command, "run") == 0) {
-      return RC_RUN;
+  struct common_args *ca = default_common_args();
+  const int i = 0;
+  while (1) {
+    (*argc)--;
+    (*argv_ptr)++;
+
+    if (!*argc) {
+      break;
     }
-    else if (strcmp(command, "schedule") == 0) {
-      return RC_SCHEDULE;
+
+    if (ARGEQ("--quiet")) {
+      set_quiet();
     }
-    else if (strcmp(command, "config") == 0) {
-      return RC_CONFIG;
+    else if (ARGEQ("run")) {
+      ca->rc = RC_RUN;
+    }
+    else if (ARGEQ("config")) {
+      ca->rc = RC_CONFIG;
+    }
+    else if (ARGEQ("schedule")) {
+      ca->rc = RC_SCHEDULE;
     }
     else {
-      argerr("Unrecognised run command \"%s\".", command);
+      break;
     }
   }
 
-  return RC_RUN;
+  return ca;
+}
+#undef argv
+
+
+struct common_args *default_common_args()
+{
+  struct common_args *ca = malloc(sizeof(struct common_args));
+  ca->rc = RC_RUN;
+  return ca;
+}
+
+void free_common_args(struct common_args *ca)
+{
+  free(ca);
 }
