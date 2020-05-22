@@ -10,6 +10,7 @@
 #include <glob.h>
 
 #include "../run/run.h"
+#include "../control/control.h"
 #include "../util/json.h"
 #include "../util/sleep.h"
 #include "../util/error.h"
@@ -73,7 +74,20 @@ void save_run_params_to_json(struct run_data *rd)
   cJSON *params = cJSON_CreateObject();
   CHECKJSON(params);
   
-  cJSON *control_scheme_json = read_json(rd->control_scheme_path);
+  cJSON *control_scheme_json = cJSON_CreateObject();
+  cJSON_AddStringToObject(control_scheme_json, "control", rd->control_scheme);
+  cJSON_AddStringToObject(control_scheme_json, "setter", rd->setter_scheme);
+
+  if (rd->control_params->n_control_params) {
+    cJSON *control_params_json = cJSON_CreateDoubleArray(rd->control_params->control_params, rd->control_params->n_control_params);
+    cJSON_AddItemToObject(control_scheme_json, "control_params", control_params_json);
+  }
+
+  if (rd->control_params->n_setter_params) {
+    cJSON *setter_params_json = cJSON_CreateDoubleArray(rd->control_params->setter_params, rd->control_params->n_setter_params);
+    cJSON_AddItemToObject(control_scheme_json, "setter_params", setter_params_json);
+  }
+
   CHECKJSON(control_scheme_json);
   cJSON_AddItemToObject(params, "control_scheme", control_scheme_json);
 

@@ -11,11 +11,38 @@
 
 #include "args.h"
 
+void str2darr(const char *s, double **rv, int *n)
+{
+  int l = strlen(s);
+  char *buffer = calloc(l+3, sizeof(char));
+  int bufferi = 0;
+  for (int i = 0; i < l; i++) {
+
+    if (s[i] == ',') {
+      (*n)++;
+      (*rv) = realloc(*rv, (*n)*sizeof(double));
+      (*rv)[(*n)-1] = atof(buffer);
+      bufferi=0;
+    }
+    else {
+      buffer[bufferi++] = s[i];
+      buffer[bufferi] = 0;
+    }
+    
+  }
+
+  (*n)++;
+  (*rv) = realloc(*rv, (*n)*sizeof(double));
+  (*rv)[(*n)-1] = atof(buffer);
+  bufferi=0;
+}
+
 
 void parse_run_args(int argc, const char **argv, struct run_data *rd) 
 {
   rd->tag = TAGDEFAULT;
-  int cs_set = 0, l_set = 0, d_set = 0, hwver_set = 0;
+  int l_set=0, d_set=0, hwver_set=0, c_set=0, s_set=0;
+
 
   for (int i = 0; i < argc; i++) {
     if (ARGEITHER("-l", "--length")) {
@@ -28,7 +55,30 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       i++;
       CHECK_ARG_HAS_VALUE;
       read_control_scheme(rd, argv[i]);
-      cs_set = 1;
+      c_set = 1;
+      s_set = 1;
+    }
+    else if (ARGEQ("--controller")) {
+      i++;
+      CHECK_ARG_HAS_VALUE;
+      rd->control_scheme = strdup(argv[i]);
+      c_set = 1;
+    }
+    else if (ARGEQ("--controller-params")) {
+      i++;
+      CHECK_ARG_HAS_VALUE;
+      str2darr(argv[i], &rd->control_params->control_params, &rd->control_params->n_control_params);
+    }
+    else if (ARGEQ("--setter")) {
+      i++;
+      CHECK_ARG_HAS_VALUE;
+      rd->setter_scheme = strdup(argv[i]);
+      s_set = 1;
+    }
+    else if (ARGEQ("--setter-params")) {
+      i++;
+      CHECK_ARG_HAS_VALUE;
+      str2darr(argv[i], &rd->control_params->setter_params, &rd->control_params->n_setter_params);
     }
     else if (ARGEITHER("-t", "--tag")) {
       i++;
@@ -91,6 +141,6 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
   if (getuid() != 0)
     argerr("Hardware PWM needs root.");
 
-  if (!cs_set || !l_set || !d_set || !hwver_set)
-    argerr("Length, control scheme, hardware_version, and fill depth are required parameters.");
+  if (!c_set || !s_set || !l_set || !d_set || !hwver_set)
+    argerr("Length, controller and setter (or scheme), hardware_version, and fill depth are required parameters.");
 }
