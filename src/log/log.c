@@ -249,19 +249,19 @@ void *log_thread_func(void *vptr) {
   unsigned long time_s, time_us;
   rd->log_ready = 1;
   while ( (!rd->stopped) && (!rd->errored) ) {
-    set_time(rd);
-    get_time_parts(rd, &time_s, &time_us);
+    rd_set_time(rd);
+    rd_get_time_parts(rd, &time_s, &time_us);
     fprintf(log_fp, "%lu.%06lu,", time_s, time_us);
 
     for (unsigned int channel = 0; channel < ADC_COUNT; channel++)
-      fprintf(log_fp, "%lu,", get_adc(rd, channel));
+      fprintf(log_fp, "%lu,", rd_get_adc(rd, channel));
 
-    fprintf(log_fp, "%u,", get_last_control_action(rd));
+    fprintf(log_fp, "%u,", rd_get_last_control_action(rd));
 
-    fprintf(log_fp, "%f,", get_cylinder_temperature(rd));
-    fprintf(log_fp, "%lu,", get_loadcell_bytes(rd));
+    fprintf(log_fp, "%f,", rd_get_cylinder_temperature(rd));
+    fprintf(log_fp, "%lu,", rd_get_loadcell_bytes(rd));
     fprintf(log_fp, "%d,", rd->phase);
-    fprintf(log_fp, "%f,", get_ambient_temperature(rd));
+    fprintf(log_fp, "%f,", rd_get_ambient_temperature(rd));
 
     fprintf(log_fp, "\n");
     sleep_us(900);
