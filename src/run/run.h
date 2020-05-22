@@ -33,12 +33,20 @@ struct run_data {
   double strainrate_ind;
   double stress_ind;
   double viscosity_ind;
-  char *control_scheme;
-  char *setter_scheme;
-  char *control_scheme_path;
-  char *setter_scheme_path;
-  struct control_params *control_params;
   unsigned int last_ca;
+  struct {
+    const char *controller_name;
+    double *control_params;
+    int n_control_params;
+
+    const char *setter_name;
+    double *setter_params;
+    int n_setter_params;
+
+    int is_stress_controlled;
+    double setpoint;
+    unsigned int sleep_ms;
+  } control_scheme;
 
   // run_data
   unsigned int length_s;

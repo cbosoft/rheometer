@@ -30,14 +30,13 @@ struct run_data *init_run_data()
   rd->loadcell_calibration.name = "default";
 
 
-  rd->control_params = malloc(sizeof(struct control_params));
-  rd->control_params->sleep_ms = 100;
-  rd->control_params->is_stress_controlled = 0;
-  rd->control_params->setpoint = 0.0;
-  rd->control_params->control_params = NULL;
-  rd->control_params->n_control_params = 0;
-  rd->control_params->setter_params = NULL;
-  rd->control_params->n_setter_params = 0;
+  rd->control_scheme.sleep_ms = 100;
+  rd->control_scheme.is_stress_controlled = 0;
+  rd->control_scheme.setpoint = 0.0;
+  rd->control_scheme.control_params = NULL;
+  rd->control_scheme.n_control_params = 0;
+  rd->control_scheme.setter_params = NULL;
+  rd->control_scheme.n_setter_params = 0;
 
   rd->speed_ind_timeout = 0.1;
   rd->last_ca = 0;

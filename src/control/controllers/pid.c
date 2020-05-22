@@ -24,9 +24,9 @@ unsigned int get_control_action(struct run_data *rd)
    */
 
   double dca = 0.0;
-  double input = (rd->control_params->is_stress_controlled) ? rd->stress_ind : rd->strainrate_ind;
-  double err = rd->control_params->setpoint - input;
-  double delta_t = rd->control_params->sleep_ms * 0.001;
+  double input = (rd_get_is_stress_controlled(rd)) ? rd->stress_ind : rd->strainrate_ind;
+  double err = rd_get_setpoint(rd) - input;
+  double delta_t = rd_get_control_interval(rd) * 0.001;
 
   double kp = GET_CONTROL_PARAM_OR_DEFAULT(rd, 0, 0.0);
   double ki = GET_CONTROL_PARAM_OR_DEFAULT(rd, 1, 0.0);

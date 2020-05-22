@@ -70,16 +70,16 @@ void generate_log_prefix(struct run_data *rd)
 cJSON *construct_save_control_scheme_json(struct run_data *rd)
 {
   cJSON *control_scheme_json = cJSON_CreateObject();
-  cJSON_AddStringToObject(control_scheme_json, "control", rd->control_scheme);
-  cJSON_AddStringToObject(control_scheme_json, "setter", rd->setter_scheme);
+  cJSON_AddStringToObject(control_scheme_json, "control", rd->control_scheme.controller_name);
+  cJSON_AddStringToObject(control_scheme_json, "setter", rd->control_scheme.setter_name);
 
-  if (rd->control_params->n_control_params) {
-    cJSON *control_params_json = cJSON_CreateDoubleArray(rd->control_params->control_params, rd->control_params->n_control_params);
+  if (rd->control_scheme.n_control_params) {
+    cJSON *control_params_json = cJSON_CreateDoubleArray(rd->control_scheme.control_params, rd->control_scheme.n_control_params);
     cJSON_AddItemToObject(control_scheme_json, "control_params", control_params_json);
   }
 
-  if (rd->control_params->n_setter_params) {
-    cJSON *setter_params_json = cJSON_CreateDoubleArray(rd->control_params->setter_params, rd->control_params->n_setter_params);
+  if (rd->control_scheme.n_setter_params) {
+    cJSON *setter_params_json = cJSON_CreateDoubleArray(rd->control_scheme.setter_params, rd->control_scheme.n_setter_params);
     cJSON_AddItemToObject(control_scheme_json, "setter_params", setter_params_json);
   }
 

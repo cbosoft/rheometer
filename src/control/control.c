@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -53,8 +54,8 @@ void *ctl_thread_func(void *vptr)
 {
   struct run_data *rd = (struct run_data *)vptr;
 
-  ControllerHandle *controller = load_controller(rd->control_scheme);
-  SetterHandle *setter = load_setter(rd->setter_scheme);
+  ControllerHandle *controller = load_controller(rd->control_scheme.controller_name);
+  SetterHandle *setter = load_setter(rd->control_scheme.setter_name);
 
   rd->ctl_ready = 1;
 
@@ -62,7 +63,7 @@ void *ctl_thread_func(void *vptr)
 
     calculate_control_indicators(rd);
 
-    rd->control_params->setpoint = setter->get_setpoint(rd);
+    rd->control_scheme.setpoint = setter->get_setpoint(rd);
 
     unsigned int control_action = controller->get_control_action(rd);
 
@@ -156,11 +157,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   cJSON *control_scheme_name_json = cJSON_GetObjectItem(json, "control");
   if (cJSON_IsString(control_scheme_name_json) && (control_scheme_name_json->valuestring != NULL)) {
 
-    rd->control_scheme = calloc(strlen(control_scheme_name_json->valuestring)+1, sizeof(char));
-    strcpy(rd->control_scheme, control_scheme_name_json->valuestring);
-
-    rd->control_scheme_path = calloc(strlen(control_scheme_json_path)+1, sizeof(char));
-    strcpy(rd->control_scheme_path, control_scheme_json_path);
+    rd->control_scheme.controller_name = strdup(control_scheme_name_json->valuestring);
 
   }
   else {
@@ -171,8 +168,7 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   cJSON *setter_scheme_name_json = cJSON_GetObjectItem(json, "setter");
   if (cJSON_IsString(setter_scheme_name_json) && (setter_scheme_name_json->valuestring != NULL)) {
 
-    rd->setter_scheme = calloc(strlen(setter_scheme_name_json->valuestring)+1, sizeof(char));
-    strcpy(rd->setter_scheme, setter_scheme_name_json->valuestring);
+    rd->control_scheme.setter_name = strdup(setter_scheme_name_json->valuestring);
 
   }
   else {
@@ -180,19 +176,16 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
     ferr("read_control_scheme", "control scheme json must name a setter scheme.\n  e.g. { ... \"setter\": \"constant\" ... }");
   }
 
-  rd->control_params->controller = load_controller(rd->control_scheme);
-  rd->control_params->setter = load_setter(rd->setter_scheme);
-
 
   cJSON *control_params_json = cJSON_GetObjectItem(json, "control_params");
   if (cJSON_IsArray(control_params_json)) {
 
-    rd->control_params->control_params = malloc(cJSON_GetArraySize(control_params_json)*sizeof(double));
+    rd->control_scheme.control_params = malloc(cJSON_GetArraySize(control_params_json)*sizeof(double));
     int i = 0;
     for (cJSON *it = control_params_json->child; it != NULL; it = it->next, i++) {
-      rd->control_params->control_params[i] = it->valuedouble;
+      rd->control_scheme.control_params[i] = it->valuedouble;
     }
-    rd->control_params->n_control_params = i;
+    rd->control_scheme.n_control_params = i;
 
   }
   else {
@@ -202,22 +195,20 @@ void read_control_scheme(struct run_data *rd, const char *control_scheme_json_pa
   cJSON *setter_params_json = cJSON_GetObjectItem(json, "setter_params");
   if (cJSON_IsArray(setter_params_json)) {
 
-    rd->control_params->setter_params = malloc(cJSON_GetArraySize(setter_params_json)*sizeof(double));
+    rd->control_scheme.setter_params = malloc(cJSON_GetArraySize(setter_params_json)*sizeof(double));
     int i = 0;
     for (cJSON *it = setter_params_json->child; it != NULL; it = it->next, i++) {
-      rd->control_params->setter_params[i] = it->valuedouble;
+      rd->control_scheme.setter_params[i] = it->valuedouble;
     }
-    rd->control_params->n_setter_params = i;
+    rd->control_scheme.n_setter_params = i;
 
   }
   else {
     warn("read_control_scheme", "could not read setter params: using defaults.");
   }
 
-
-
   // universal (optional) params
-  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ms", "interval between control calculations, milliseconds", NULL, &rd->control_params->sleep_ms, NULL);
+  get_control_scheme_parameter(json, PARAM_OPT, "*", "sleep_ms", "interval between control calculations, milliseconds", NULL, &rd->control_scheme.sleep_ms, NULL);
 
   cJSON_Delete(json);
 

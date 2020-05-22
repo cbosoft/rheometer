@@ -14,39 +14,18 @@ typedef unsigned int (*control_func_t)(struct run_data *);
 typedef double (*setter_func_t)(struct run_data *);
 
 
-typedef struct {
+typedef struct ControllerHandle {
   const char *doc;
   unsigned int (*get_control_action)(struct run_data *rd);
   void *handle;
 } ControllerHandle;
 
 
-typedef struct {
+typedef struct SetterHandle {
   const char *doc;
   double (*get_setpoint)(struct run_data *rd);
   void *handle;
 } SetterHandle;
-
-
-
-struct control_params {
-
-  /* Control information */
-  double *control_params;
-  int n_control_params;
-  unsigned int is_stress_controlled;
-  ControllerHandle *controller;
-
-
-  /* Setter information */
-  double *setter_params;
-  int n_setter_params;
-  double setpoint;
-  SetterHandle *setter;
-
-  /* universal */
-  unsigned int sleep_ms;
-};
 
 
 
