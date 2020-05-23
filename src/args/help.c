@@ -97,5 +97,4 @@ void args_help()
       "    -a | --add       Add the controller/setter and parameter combination to the schedule.\n"
       "\n"
   ); // TODO: config options
-  control_help();
 }
