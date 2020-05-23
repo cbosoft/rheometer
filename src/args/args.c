@@ -69,9 +69,10 @@ struct common_args *parse_common(int *argc, const char ***argv_ptr) {
 
   struct common_args *ca = default_common_args();
   const int i = 0;
+  (*argc)--;
+  (*argv_ptr)++;
+
   while (1) {
-    (*argc)--;
-    (*argv_ptr)++;
 
     if (!*argc) {
       break;
@@ -80,7 +81,7 @@ struct common_args *parse_common(int *argc, const char ***argv_ptr) {
     if (ARGEQ("--quiet")) {
       set_quiet();
     }
-    if (ARGEQ("--silent")) {
+    else if (ARGEQ("--silent")) {
       set_silent();
     }
     else if (ARGEQ("run")) {
@@ -95,6 +96,9 @@ struct common_args *parse_common(int *argc, const char ***argv_ptr) {
     else {
       break;
     }
+
+    (*argc)--;
+    (*argv_ptr)++;
   }
 
   return ca;
