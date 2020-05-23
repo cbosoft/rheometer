@@ -4,27 +4,10 @@
 #include <string.h>
 
 #include "../util/range.h"
+#include "../util/double_array.h"
 
 #include "schedule.h"
 
-
-char *darr2str(double *darr, int n)
-{
-  const int char_per_float = 12;
-  char *rv = malloc((char_per_float*n + 1)*sizeof(char));
-  rv[0] = 0;
-
-  for (int i = 0; i < n; i++) {
-
-    char *fc = calloc(char_per_float+2, sizeof(char));
-    snprintf(fc, char_per_float+1, "%g,", darr[i]);
-    strncat(rv, fc, char_per_float+1);
-    free(fc);
-  }
-  rv[strlen(rv)-1] = 0;
-  rv = realloc(rv, (strlen(rv)+1)*sizeof(char));
-  return rv;
-}
 
 void append_argset(char ****vargv, int **vargc, int *margc,
     char *controller_name, double *controller_params, int n_controller_params,

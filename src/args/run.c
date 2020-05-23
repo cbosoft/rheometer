@@ -6,36 +6,11 @@
 
 #include "../util/error.h"
 #include "../util/help.h"
+#include "../util/double_array.h"
 #include "../log/tag.h"
 #include "../control/control.h"
 
 #include "args.h"
-
-void str2darr(const char *s, double **rv, int *n)
-{
-  int l = strlen(s);
-  char *buffer = calloc(l+3, sizeof(char));
-  int bufferi = 0;
-  for (int i = 0; i < l; i++) {
-
-    if (s[i] == ',') {
-      (*n)++;
-      (*rv) = realloc(*rv, (*n)*sizeof(double));
-      (*rv)[(*n)-1] = atof(buffer);
-      bufferi=0;
-    }
-    else {
-      buffer[bufferi++] = s[i];
-      buffer[bufferi] = 0;
-    }
-    
-  }
-
-  (*n)++;
-  (*rv) = realloc(*rv, (*n)*sizeof(double));
-  (*rv)[(*n)-1] = atof(buffer);
-  bufferi=0;
-}
 
 
 void parse_run_args(int argc, const char **argv, struct run_data *rd) 

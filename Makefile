@@ -40,6 +40,7 @@ SENSORS = $(ADC) $(THERMO) $(LOADCELL) $(ENCODER) $(CAMERA)
 UTIL = \
 			 obj/util/cJSON.o \
 			 obj/util/help.o \
+			 obj/util/double_array.o \
 			 obj/util/json.o \
 			 obj/util/display.o \
 			 obj/util/error.o \
