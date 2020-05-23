@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../util/double_array.h"
 #include "schedule.h"
 
 
@@ -54,6 +55,8 @@ void free_schedule_data(struct schedule_data *sd)
   }
 }
 
+
+
 void sd_add_controller(struct schedule_data *sd, const char *name, double *params, int nparams)
 {
   int n = ++sd->n_controllers;
@@ -62,7 +65,7 @@ void sd_add_controller(struct schedule_data *sd, const char *name, double *param
   sd->controller_names[n-1] = strdup(name);
 
   sd->controller_params = realloc(sd->controller_params, n*sizeof(double *));
-  sd->controller_params[n-1] = params;
+  sd->controller_params[n-1] = darr_copy(params, nparams);
 
   sd->n_controller_params = realloc(sd->n_controller_params, n*sizeof(int));
   sd->n_controller_params[n-1] = nparams;
@@ -77,7 +80,7 @@ void sd_add_setter(struct schedule_data *sd, const char *name, double *params, i
   sd->setter_names[n-1] = strdup(name);
 
   sd->setter_params = realloc(sd->setter_params, n*sizeof(double *));
-  sd->setter_params[n-1] = params;
+  sd->setter_params[n-1] = darr_copy(params, nparams);
 
   sd->n_setter_params = realloc(sd->n_setter_params, n*sizeof(int));
   sd->n_setter_params[n-1] = nparams;
