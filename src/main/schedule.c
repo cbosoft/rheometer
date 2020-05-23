@@ -1,23 +1,53 @@
 #include <stdlib.h>
+#include <stdio.h>
 
+#include "../schedule/schedule.h"
+#include "../args/args.h"
+#include "../util/error.h"
 #include "main.h"
+
+int main(int argc, const char **argv);
 
 int schedule_main(int argc, const char **argv)
 {
   (void) argc;
   (void) argv;
 
-  // TODO: struct schedule_data *sd = default_schedule_data();
-  // TODO: parse_schedule_args(argc, argv, sd);
+  struct schedule_data *sd = get_default_schedule_data();
+  parse_schedule_args(&argc, &argv, sd);
 
-  // TODO: run rheometer under the desired set of parameters
-  // take in a series of controllers, setters, and parameters for both
-  // use to create a list of argv,argc
-  // use to run main() again under each parameter set
-  // use --quiet to cut output
-  // output run number/progress after each completed run
-  // change terminal title too?
+  ArgSet *argset = generate_schedule(sd);
 
-  // TODO: free_schedule_data(sd);
-  return 0;
+  if (!argset->margc) {
+    ferr("schedule_main", "no runs scheduled!");
+  }
+
+  ArgList *head = arglist_new();
+  arglist_add(head, "schedule");
+  arglist_add(head, "--quiet");
+  arglist_add(head, "run");
+
+  ArgList *tail = arglist_new();
+  for (int i = 0; i < argc; i++)
+    arglist_add(tail, argv[i]);
+
+  argset_add_head_tail(&argset, head, tail);
+
+  int rv = 0;
+  for (int i = 0; i < argset->margc; i++) {
+    for (int j = 0; j < argset->vargv[i]->argc; j++) {
+      fprintf(stderr, "%s ", argset->vargv[i]->argv[j]);
+    }
+    fprintf(stderr, "\n");
+    // TODO: print command details
+
+    if (main(argset->vargv[i]->argc, (const char **)argset->vargv[i]->argv)) {
+      rv = 1;
+      break;
+    }
+  }
+
+  free_schedule_data(sd);
+  argset_free(argset);
+  return rv;
 }
