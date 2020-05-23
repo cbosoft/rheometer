@@ -34,3 +34,14 @@ void add_head_tail_to_argset(char ****vargv, int **vargc, int margc,
 }
 
 
+void free_argset(char ***vargv, int *vargc, int margc)
+{
+  for (int i = 0; i < margc; i++) {
+    for (int j = 0; j < vargc[i]; j++) {
+      free(vargv[i][j]);
+    }
+    free(vargv[i]);
+  }
+  free(vargc);
+  free(vargv);
+}
