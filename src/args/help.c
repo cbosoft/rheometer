@@ -19,6 +19,7 @@ void usage(void)
       "    rheometer [run] -l <length> -d <fill-depth> -c <control scheme> -w <hardware version> [-t <tag>] [-n <needle-depth>] [--calm-start] [-v <video-dev>] [-p <photo-dev>]\n"
       "    rheometer config (add|edit|remove) (controlscheme|calibration|schedule)\n"
       "    rheometer schedule <schedule-file>\n"
+      "    rheometer schedule [-c <controller>]... [-s <setter>]... [-p <params>]... [-a]... [run options] \n"
       "    rheometer -h|--help\n"
       "\n"
   );
@@ -73,6 +74,28 @@ void args_help()
       "                     of the name \"${prefix}_photo.mp4\" will be created and stored\n"
       "                     alongside the other log files, taken before the logging begins.\n"
       "\n"
-  ); // TODO: config and schedule options
+      "  "BOLD"Schedule Options:"RESET"\n"
+      "    Schedules are defined by file ('-f') option, or directly on the command line, using the \n"
+      "    '-s', '-c', '-p' and '-a' options. For the latter mode, each time the option appears, it\n"
+      "    overrides a previous option. '-a' adds the current settings to the schedule. Any options\n"
+      "    other than these five are interpreted as the end of the schedule, and are passed to run\n"
+      "    and so should be valid run options.\n"
+      "\n"
+      "    Schedules with concurrent controllers/setters of the same type, with the same numbers of\n"
+      "    parameters are interpolated between. This allows the user to set up a schedule of runs \n"
+      "    where the kp/ki coefficients of the pid controller are varied, and at the same time the \n"
+      "    setpoint is increased from 10 to 100 DC."
+      "\n"
+      "    -p | --params    Set the params for either the setter or controller.\n"
+      "\n"
+      "    -s | --setter    Set the setter module name. Resets params\n"
+      "\n"
+      "    -c | --controller    Set the controller module name. Resets params.\n"
+      "\n"
+      "    -c | --controller    Set the controller module name.\n"
+      "\n"
+      "    -a | --add       Add the controller/setter and parameter combination to the schedule.\n"
+      "\n"
+  ); // TODO: config options
   control_help();
 }
