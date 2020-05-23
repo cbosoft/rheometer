@@ -6,6 +6,7 @@
 
 #include "../util/display.h"
 #include "../util/error.h"
+#include "../util/help.h"
 #include "../log/tag.h"
 #include "../control/control.h"
 #include "../version.h"
@@ -83,6 +84,10 @@ struct common_args *parse_common(int *argc, const char ***argv_ptr) {
     }
     else if (ARGEQ("--silent")) {
       set_silent();
+    }
+    else if (ARGEITHER("-h", "--help")) {
+      show_help();
+      exit(0);
     }
     else if (ARGEQ("run")) {
       ca->rc = RC_RUN;

@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "../util/error.h"
-#include "../util/help.h"
 #include "../util/double_array.h"
 #include "../log/tag.h"
 #include "../control/control.h"
@@ -59,10 +58,6 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       i++;
       CHECK_ARG_HAS_VALUE;
       rd->tag = parse_tag_string(argv[i]);
-    }
-    else if (ARGEITHER("-h", "--help")) {
-      show_help();
-      exit(0);
     }
     else if (ARGEITHER("-d", "--fill-depth")) {
       i++;
