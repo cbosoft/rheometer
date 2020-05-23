@@ -1,5 +1,7 @@
 #pragma once
 
+#include "argset.h"
+
 typedef enum {IT_Linear} InterpolationType;
 
 struct schedule_data {
@@ -25,12 +27,7 @@ struct schedule_data {
 
 struct schedule_data *get_default_schedule_data();
 void free_schedule_data(struct schedule_data *sd);
-void generate_schedule(struct schedule_data *sd, char ****vargv, int **vargc, int *meta_argc);
-
-
-void add_head_tail_to_argset(char ****vargv, int **vargc, int margc,
-    char **headv, int headc, char **tailv, int tailc);
-void free_argset(char ***vargv, int *vargc, int margc);
+ArgSet *generate_schedule(struct schedule_data *sd);
 
 void sd_add_controller(struct schedule_data *sd, const char *name, double *params, int nparams);
 void sd_add_setter(struct schedule_data *sd, const char *name, double *params, int nparams);

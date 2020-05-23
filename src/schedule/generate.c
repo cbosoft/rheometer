@@ -9,7 +9,7 @@
 #include "schedule.h"
 
 
-void append_argset(char ****vargv, int **vargc, int *margc,
+void append_argset(ArgSet *as,
     char *controller_name, double *controller_params, int n_controller_params,
     char *setter_name, double *setter_params, int n_setter_params)
 {
@@ -23,32 +23,32 @@ void append_argset(char ****vargv, int **vargc, int *margc,
   if (!n_setter_params)
     argc -= 2;
 
-  char **new_argset = calloc(argc, sizeof(char*));
-  int i = 0;
-  new_argset[i++] = strdup("--controller");
-  new_argset[i++] = strdup(controller_name);
+  ArgList *al = arglist_new();
+  arglist_add(al, "--controller");
+  arglist_add(al, controller_name);
+
   if (n_controller_params) {
-    new_argset[i++] = strdup("--controller-params");
-    new_argset[i++] = darr2str(controller_params, n_controller_params);
+    arglist_add(al, "--controller-params");
+    char *s = darr2str(controller_params, n_controller_params);
+    arglist_add(al, s);
+    free(s);
   }
-  new_argset[i++] = strdup("--setter");
-  new_argset[i++] = strdup(setter_name);
+
+  arglist_add(al, "--setter");
+  arglist_add(al, setter_name);
+
   if (n_setter_params) {
-    new_argset[i++] = strdup("--setter-params");
-    new_argset[i++] = darr2str(setter_params, n_setter_params);
+    arglist_add(al, "--setter-params");
+    char *s = darr2str(setter_params, n_setter_params);
+    arglist_add(al, s);
+    free(s);
   }
 
-  int n = ++(*margc);
-  (*vargv) = realloc(*vargv, n*sizeof(char**));
-  (*vargv)[(*margc)-1] = new_argset;
-
-  (*vargc) = realloc(*vargc, n*sizeof(int));
-  (*vargc)[(*margc)-1] = argc;
+  argset_add(as, al);
 }
 
 
-void generate_schedule(struct schedule_data *sd, char ****vargv,
-    int **vargc, int *meta_argc)
+ArgSet *generate_schedule(struct schedule_data *sd)
 {
 
   double **controller_interp = NULL;
@@ -60,6 +60,8 @@ void generate_schedule(struct schedule_data *sd, char ****vargv,
   int n_setter_interp = 0;
   int setter_interp_needs_free = 0;
   int n_setter_params = 0;
+
+  ArgSet *rv = argset_new();
 
   for (int cname_i = 0; cname_i < sd->n_controllers; cname_i++) {
     char *controller = sd->controller_names[cname_i];
@@ -103,7 +105,7 @@ void generate_schedule(struct schedule_data *sd, char ****vargv,
 
         for (int str_i = 0; str_i < n_setter_interp; str_i++) {
 
-          append_argset(vargv, vargc, meta_argc,
+          append_argset(rv,
               controller, controller_interp[ctrl_i], n_controller_params,
               setter, setter_interp[str_i], n_setter_params);
 
@@ -133,4 +135,5 @@ void generate_schedule(struct schedule_data *sd, char ****vargv,
 
   }
 
+  return rv;
 }
