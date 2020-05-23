@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 LINK = -lwiringPi -lpthread -lm -ldl
 
 HDR = $(shell ls **/*.h)
@@ -66,6 +66,10 @@ RUN = \
 			obj/run/free.o \
 			obj/run/defaults.o
 
+SCHEDULE = \
+					 obj/schedule/schedule.o \
+					 obj/schedule/generate.o
+
 MAIN = \
 			 obj/main/main.o \
 			 obj/main/run.o \
@@ -86,7 +90,8 @@ RHEO = $(MAIN) \
 			 $(MOTOR) \
 			 $(CONTROL) \
 			 $(UTIL) \
-			 $(SENSORS)
+			 $(SENSORS) \
+			 $(SCHEDULE)
 
 .PHONY: all modules
 
