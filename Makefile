@@ -69,6 +69,7 @@ RUN = \
 
 SCHEDULE = \
 					 obj/schedule/schedule.o \
+					 obj/schedule/argset.o \
 					 obj/schedule/generate.o
 
 MAIN = \
