@@ -46,6 +46,7 @@ UTIL = \
 			 obj/util/unique_name.o \
 			 obj/util/time.o \
 			 obj/util/sleep.o \
+			 obj/util/range.o \
 			 obj/util/nouns.o
 
 CONTROL = \

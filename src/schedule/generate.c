@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../util/range.h"
+
 #include "schedule.h"
 
 
@@ -12,14 +15,13 @@ char *darr2str(double *darr, int n)
   rv[0] = 0;
 
   for (int i = 0; i < n; i++) {
-    char *p = rv + (char_per_float+1)*i;
 
     char *fc = calloc(char_per_float+2, sizeof(char));
-    snprintf(fc, char_per_float+1, "%f,", darr[i]);
-    strncat(p, fc, char_per_float+1);
+    snprintf(fc, char_per_float+1, "%g,", darr[i]);
+    strncat(rv, fc, char_per_float+1);
     free(fc);
   }
-
+  rv[strlen(rv)-1] = 0;
   rv = realloc(rv, (strlen(rv)+1)*sizeof(char));
   return rv;
 }
@@ -80,15 +82,17 @@ void generate_schedule(struct schedule_data *sd, char ****vargv,
     char *controller = sd->controller_names[cname_i];
 
     if ((sd->n_controllers > cname_i+1) &&
+        (sd->n_controller_params[cname_i] == sd->n_controller_params[cname_i+1]) &&
         (strcmp(sd->controller_names[cname_i], sd->controller_names[cname_i+1]) == 0)) {
-      // TODO controller interp here
-      // n is number of interpsteps MINUS ONE as the last step is the start of
-      // the next loop
+      controller_interp = linear_interp_vector(sd->controller_params[cname_i], sd->controller_params[cname_i+1], sd->n_controller_params[cname_i], sd->n_interpolation_points);
+      n_controller_params = sd->n_controller_params[cname_i];
+      n_controller_interp = sd->n_interpolation_points;
+      controller_interp_needs_free = 1;
     }
     else {
       controller_interp = malloc(sizeof(double*));
-      controller_interp[0] = sd->controller_params[0];
-      n_controller_params = sd->n_controller_params[0];
+      controller_interp[0] = sd->controller_params[cname_i];
+      n_controller_params = sd->n_controller_params[cname_i];
       n_controller_interp = 1;
       controller_interp_needs_free = 0;
     }
@@ -99,15 +103,17 @@ void generate_schedule(struct schedule_data *sd, char ****vargv,
         char *setter = sd->setter_names[sname_i];
 
         if ((sd->n_setters > sname_i+1) &&
+            (sd->n_setter_params[cname_i] == sd->n_setter_params[cname_i+1]) &&
             (strcmp(sd->setter_names[sname_i], sd->setter_names[sname_i+1]) == 0)) {
-          // TODO setter interp here
-          // n is number of interpsteps MINUS ONE as the last step is the start of
-          // the next loop
+          setter_interp = linear_interp_vector(sd->setter_params[cname_i], sd->setter_params[cname_i+1], sd->n_setter_params[cname_i], sd->n_interpolation_points);
+          n_setter_params = sd->n_setter_params[cname_i];
+          n_setter_interp = sd->n_interpolation_points;
+          setter_interp_needs_free = 1;
         }
         else {
           setter_interp = malloc(sizeof(double*));
-          setter_interp[0] = sd->setter_params[0];
-          n_setter_params = sd->n_setter_params[0];
+          setter_interp[0] = sd->setter_params[sname_i];
+          n_setter_params = sd->n_setter_params[sname_i];
           n_setter_interp = 1;
           setter_interp_needs_free = 0;
         }
