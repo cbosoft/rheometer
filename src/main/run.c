@@ -69,7 +69,7 @@ void inthandle(int signo)
         "DON'T TAKE THIS WARNING LIGHTLY.\n"
         "\n");
   }
-  else if (cancelled == 1) {
+  else if ((cancelled == 1) && (!get_quiet())) {
     fprintf(stderr, "\n\nInterrupted...\n\n");
   }
 }
@@ -82,7 +82,7 @@ int run_main(int argc, const char ** argv)
 
   parse_run_args((unsigned int)argc, argv, rd);
 
-  info(BOLD"rheometer"RESET" v%s\n", VERSION);
+  fprintf(stderr, "  "BOLD"rheometer"RESET" v%s%c", VERSION, (get_quiet()?'\r':'\n'));
 
   if (signal(SIGINT, inthandle) == SIG_ERR)
     ferr("main", "could not create signal handler");
@@ -192,5 +192,5 @@ int run_main(int argc, const char ** argv)
   free_run_data(rd);
   info("  data free'd");
   info("done!");
-  return 0;
+  return cancelled;
 }
