@@ -14,8 +14,6 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
   int is_controller = -1;
   const int i = 0;
 
-  (void)sd;
-
 #define argc (*argc_ptr)
 #define argv (*argv_ptr)
 #define ADVANCE argc--; argv++;
@@ -59,6 +57,18 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
       else {
         sd_add_setter(sd, name, params, nparams);
       }
+    }
+    else if (ARGEQ("--interp-number")) {
+      ADVANCE;
+      sd->n_interpolation_points = atoi(argv[i]);
+    }
+    else if (ARGEQ("--interp-linear")) {
+      ADVANCE;
+      sd->interpolation_type = IT_Linear;
+    }
+    else if (ARGEQ("--interp-log")) {
+      ADVANCE;
+      sd->interpolation_type = IT_Log;
     }
     else {
       break;

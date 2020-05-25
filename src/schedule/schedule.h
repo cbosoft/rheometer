@@ -2,7 +2,7 @@
 
 #include "argset.h"
 
-typedef enum {IT_Linear} InterpolationType;
+typedef enum {IT_Linear, IT_Log} InterpolationType;
 
 struct schedule_data {
   // define by file maybe?
