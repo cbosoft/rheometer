@@ -13,6 +13,20 @@ ArgList *arglist_new()
   return rv;
 }
 
+ArgList *arglist_from_strvec(const char **sv, int n)
+{
+  ArgList *rv = arglist_new();
+  arglist_add_many(rv, sv, n);
+  return rv;
+}
+
+void arglist_add_many(ArgList *al, const char **sv, int n)
+{
+  for (int i = 0; i < n; i++) {
+    arglist_add(al, sv[i]);
+  }
+}
+
 void arglist_add(ArgList *al, const char *s)
 {
   al->argc++;
