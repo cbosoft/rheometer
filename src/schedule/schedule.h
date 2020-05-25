@@ -29,6 +29,7 @@ struct schedule_data *get_default_schedule_data();
 void free_schedule_data(struct schedule_data *sd);
 ArgSet *generate_schedule(struct schedule_data *sd);
 
+void sd_add_from_file(struct schedule_data *sd, const char *path);
 void sd_add_controller(struct schedule_data *sd, const char *name, double *params, int nparams);
 void sd_add_setter(struct schedule_data *sd, const char *name, double *params, int nparams);
 void sd_set_interpolation(struct schedule_data *sd, InterpolationType type, int n);

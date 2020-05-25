@@ -69,6 +69,10 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
       str2darr(argv[i], &params, &nparams);
       is_params_set = 1;
     }
+    else if (ARGEITHER("-f", "--schedule-file")) {
+      ADVANCE;
+
+      sd_add_from_file(sd, argv[i]);
     }
     else if (ARGEQ("--interp-number")) {
       ADVANCE;
@@ -94,5 +98,6 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
 #undef argv
 #undef argc
 #undef ADVANCE
+#undef CHECK_AND_ADD
 
 }

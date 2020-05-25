@@ -1,8 +1,11 @@
 #define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "../util/double_array.h"
+#include "../util/json.h"
+#include "../util/error.h"
 #include "schedule.h"
 
 
@@ -91,4 +94,110 @@ void sd_set_interpolation(struct schedule_data *sd, InterpolationType type, int 
 {
   sd->interpolation_type = type;
   sd->n_interpolation_points = n;
+}
+
+static cJSON *safe_get(cJSON *obj, const char *s, int only_warn)
+{
+  cJSON *rv = cJSON_GetObjectItem(obj, s);
+  const char *fmt = "%s expected, but not specified in schedule json.";
+
+  if (!rv) {
+    if (only_warn)
+      warn("schedule_add_from_file", fmt, s);
+    else
+      ferr("schedule_add_from_file", fmt, s);
+  }
+
+  return rv;
+}
+
+static const char *sd_json_get_name(cJSON *json)
+{
+  cJSON *name_json = safe_get(json, "name", 0);
+
+  if (cJSON_IsString(name_json)) {
+    return name_json->valuestring;
+  }
+  else {
+    ferr("schedule_add_from_file", "schedule point name should be a string.");
+    return NULL;
+  }
+}
+
+static int sd_json_get_is_controller(cJSON *json)
+{
+  cJSON *type_json = safe_get(json, "type", 0);
+  
+  if (cJSON_IsString(type_json)) {
+    const char *s = type_json->valuestring;
+
+    if (strcmp(s, "controller") == 0) {
+      return 1;
+    }
+    else if (strcmp(s, "setter") == 0) {
+      return 0;
+    }
+    else {
+      ferr("schedule_add_from_file", "schedule point type should be either \"controller\" or \"setter\", not %s", s);
+      return -1;
+    }
+  }
+
+  ferr("schedule_add_from_file", "schedule point type should be a string.");
+  return -1;
+}
+
+static void sd_json_maybe_get_params(cJSON *json, double **arr_ptr, int *n_ptr)
+{
+  cJSON *params_json = safe_get(json, "params", 1);
+  if (cJSON_IsArray(params_json)) {
+    cJSON *elem_json = NULL;
+    cJSON_ArrayForEach(elem_json, params_json) {
+      darr_append(arr_ptr, n_ptr, elem_json->valuedouble);
+    }
+  }
+  else if (cJSON_IsNumber(params_json)) {
+    darr_append(arr_ptr, n_ptr, params_json->valuedouble);
+  }
+}
+
+void sd_add_from_json(struct schedule_data *sd, cJSON *json)
+{
+  fprintf(stderr, "HERE\n");
+  if (cJSON_IsArray(json)) {
+    fprintf(stderr, "HERE\n");
+    cJSON *elem_json = NULL;
+    cJSON_ArrayForEach(elem_json, json) {
+      sd_add_from_json(sd, elem_json);
+    }
+  }
+  else {
+    const char *name = sd_json_get_name(json);
+    int is_controller = sd_json_get_is_controller(json);
+
+    double *params = NULL;
+    int n_params = 0;
+    sd_json_maybe_get_params(json, &params, &n_params);
+
+    if (is_controller) {
+      sd_add_controller(sd, name, params, n_params);
+    }
+    else {
+      sd_add_setter(sd, name, params, n_params);
+    }
+
+
+  }
+}
+
+void sd_add_from_file(struct schedule_data *sd, const char *path)
+{
+  cJSON *json = read_json(path);
+
+  if (!json) {
+    argerr("Error loading schedule json \"%s\"", path);
+  }
+
+  sd_add_from_json(sd, json);
+
 }
