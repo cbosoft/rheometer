@@ -30,7 +30,7 @@ unsigned int parse_length_string(const char *length_s_str)
   }
 
   if (notnumbers > 1) {
-    argerr("length arg must be a number or suffixed by a single 's' or 'm' to explicitly specify 'seconds' or 'minutes'");
+    argerr("length arg must be a number or suffixed by a single 's' or 'm' to explicitly specify 'seconds' or 'minutes' (%s)", length_s_str);
   }
 
   unsigned int toi = atoi(length_s_str);
