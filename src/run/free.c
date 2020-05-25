@@ -3,16 +3,18 @@
 #include "run.h"
 #include "../sensors/adc/adc.h"
 
-void free_run_data(struct run_data *td)
+void free_run_data(struct run_data *rd)
 {
-  adc_close(td->adc_handle);
-  for (unsigned int i = 0; i < td->log_count; i++)
-    free(td->log_paths[i]);
+  adc_close(rd->adc_handle);
+  for (unsigned int i = 0; i < rd->log_count; i++)
+    free(rd->log_paths[i]);
 
-  if (td->log_pref != NULL) free(td->log_pref);
-  if (td->uid != NULL) free(td->uid);
+  if (rd->log_pref != NULL) free(rd->log_pref);
+  if (rd->uid != NULL) free(rd->uid);
  
-  if (td->adc != NULL) free(td->adc);
+  if (rd->adc != NULL) free(rd->adc);
 
-  free(td);
+  free(rd->tag);
+
+  free(rd);
 }

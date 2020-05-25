@@ -1,9 +1,12 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
+#include <string.h>
 
 #include "../util/sleep.h"
 #include "../util/error.h"
 #include "../control/control.h"
 #include "../sensors/adc/adc.h"
+#include "../log/tag.h"
 
 #include "run.h"
 
@@ -43,6 +46,7 @@ struct run_data *init_run_data()
   rd->calm_start = 0;
   rd->mode = MODE_NORMAL;
 
+  rd->tag = strdup(TAGDEFAULT);
   rd->log_paths = NULL;
   rd->log_names = NULL;
   rd->log_count = 0;
