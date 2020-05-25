@@ -152,12 +152,7 @@ void save_run_params_to_json(struct run_data *rd)
   CHECKJSON(hardware_version);
   cJSON_AddItemToObject(params, "hardware_version", hardware_version);
 
-  if (rd->video_device != NULL) {
-    info("video_dev");
-    cJSON *video_device = cJSON_CreateString(rd->video_device);
-    CHECKJSON(video_device);
-    cJSON_AddItemToObject(params, "video_device", video_device);
-
+  if (rd->log_video) {
     info("video_start");
     cJSON *video_start_json = cJSON_CreateNumber(rd->cam_start);
     CHECKJSON(video_start_json);
