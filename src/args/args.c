@@ -7,7 +7,6 @@
 #include "../util/display.h"
 #include "../util/error.h"
 #include "../util/help.h"
-#include "../log/tag.h"
 #include "../control/control.h"
 #include "../version.h"
 

@@ -6,6 +6,7 @@
 #include "../util/double_array.h"
 #include "../util/json.h"
 #include "../util/error.h"
+#include "../defaults.h"
 #include "schedule.h"
 
 
@@ -22,7 +23,7 @@ struct schedule_data *get_default_schedule_data()
   sd->n_setter_params = 0;
 
   sd->interpolation_type = IT_Linear;
-  sd->n_interpolation_points = 5;
+  sd->n_interpolation_points = INTERP_N_DEFAULT;
   return sd;
 }
 

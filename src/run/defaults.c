@@ -6,7 +6,7 @@
 #include "../util/error.h"
 #include "../control/control.h"
 #include "../sensors/adc/adc.h"
-#include "../log/tag.h"
+#include "../defaults.h"
 
 #include "run.h"
 

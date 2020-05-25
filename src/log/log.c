@@ -19,6 +19,7 @@
 #include "../sensors/thermometer/thermometer.h"
 #include "../util/unique_name.h"
 #include "../version.h"
+#include "../defaults.h"
 
 #include "log.h"
 
