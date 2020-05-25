@@ -64,9 +64,8 @@ struct run_data *init_run_data()
   rd->adc_busy = 0;
   rd->adc_dt = 0.0;
 
-  rd->error_string = "all is well";
-  rd->video_device = NULL;
-  rd->photo_device = NULL;
+  rd->log_photo = 0;
+  rd->log_video = 0;
   rd->cam_start = -1;
   rd->cam_end = -1;
 

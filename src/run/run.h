@@ -79,8 +79,8 @@ struct run_data {
   unsigned int stopped;
   unsigned int errored;
   const char *error_string;
-  char *video_device;
-  char *photo_device;
+  int log_video;
+  int log_photo;
   long cam_start;
   long cam_end;
 

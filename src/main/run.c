@@ -105,7 +105,7 @@ int run_main(int argc, const char ** argv)
   opt_setup(rd);
   info("set up optical encoder");
 
-  if (rd->photo_device) {
+  if (rd->log_photo) {
     info("photographing device");
     take_photo(rd);
   }
@@ -119,7 +119,7 @@ int run_main(int argc, const char ** argv)
 
   info("starting logging thread...");
   SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
-  if (rd->video_device != NULL) {
+  if (rd->log_video) {
     SETUP_THREAD(vid_thread, cam_thread_func, "video", rd->cam_ready);
   }
   sleep_ms(DELAY_LOG_MS);
@@ -178,7 +178,7 @@ int run_main(int argc, const char ** argv)
   info("waiting for threads to finish...");
 
   THREAD_JOIN(log_thread, "log");
-  if (rd->video_device != NULL) {
+  if (rd->log_video) {
     THREAD_JOIN(vid_thread, "video");
   }
   THREAD_JOIN(ctl_thread, "control");
