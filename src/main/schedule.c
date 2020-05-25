@@ -22,16 +22,12 @@ int schedule_main(int argc, const char **argv)
     ferr("schedule_main", "no runs scheduled!");
   }
 
-  ArgList *head = arglist_new();
-  arglist_add(head, "schedule");
-  arglist_add(head, "--quiet");
-  arglist_add(head, "run");
-
-  ArgList *tail = arglist_new();
-  for (int i = 0; i < argc; i++)
-    arglist_add(tail, argv[i]);
-
+  const char *head_sv[3] = {"schedule", "--quiet", "run"};
+  ArgList *head = arglist_from_strvec(head_sv, 3);
+  ArgList *tail = arglist_from_strvec(argv, argc);
   argset_add_head_tail(&argset, head, tail);
+  arglist_free(head);
+  arglist_free(tail);
 
   int rv = 0;
   for (int i = 0; i < argset->margc; i++) {
