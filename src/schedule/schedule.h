@@ -4,11 +4,16 @@
 
 typedef enum {IT_Linear, IT_Log} InterpolationType;
 
-struct schedule_data {
-  // define by file maybe?
-  char *schedule_file_path;
+struct schedule_point {
+  char *controller_name;
+  char *setter_name;
+  double *controller_params;
+  double *setter_params;
+  int n_controller_params;
+  int n_setter_params;
+};
 
-  // direct definition
+struct schedule_data {
   char **controller_names;
   double **controller_params;
   int *n_controller_params;
