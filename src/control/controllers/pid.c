@@ -1,16 +1,28 @@
 #include "../../run/run.h"
-#include "../../util/display.h"
 #include "../control.h"
 
+const char *name = "PID Control";
+
+const char *ident = "pid";
+
 const char *doc =
-      "  - "BOLD"PID control"RESET", 'pid'\n"
-      "      Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n"
-      "\n"
-      "        Δcaₙ = (KP×(errₙ - errₙ₋₁) + (KI×errₙ×Δt) + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n"
-      "\n"
-      "      Three tuning parameters (kp, ki, kd) are required, delta time is measured setpoint \n"
-      "      parameter. It is usual to not use all three parts of the algorithm, a section can be \n"
-      "      turned off by setting the relevant coefficient to zero.\n";
+"Uses the velocity PID algoirithm to reject disturbance and maintain a set point:\n"
+"\n"
+"Δcaₙ = (KP×(errₙ - errₙ₋₁)\n"
+"     + (KI×errₙ×Δt)\n"
+"     + (KD×(errₙ - (2×errₙ₋₁) + errₙ₋₂)/Δt)\n"
+"\n"
+"Three tuning parameters (kp, ki, kd) are required, delta time is measured setpoint "
+"parameter. It is usual to not use all three parts of the algorithm, a section can be "
+"turned off by setting the relevant coefficient to zero.";
+
+int n_params = 3;
+
+const char *params[] = {
+  "kp", "0.0",
+  "ki", "0.0",
+  "kd", "0.0"
+};
 
 unsigned int get_control_action(struct run_data *rd)
 {

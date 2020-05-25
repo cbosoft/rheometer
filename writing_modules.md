@@ -40,6 +40,35 @@ void get_time_parts(struct run_data *rd, unsigned long *time_s, unsigned long *t
 unsigned long get_adc(struct run_data *rd, int i);
 ```
 
+## Module structure
+
+Every module must have its function. For controllers, that is:
+
+```c
+unsigned int get_control_action(struct run_data *rd)
+```
+
+and for a setter it's:
+
+```c
+double get_setpoint(struct run_data *rd)
+```
+
+and that's it. To provide yourself or your users with more information about the
+module from the software, you can add documentation strings. 
+
+`const char *doc` is used as a general description of the module, how it works,
+and a description of the parameters. The doc string will be indented and wrapped
+to conform with the rest of the documentation in the software, but you can add
+newlines to enforce formatting if you wish.
+
+`const char *name` is the name of the module, capitalised. `const char *ident`
+is the resulting module identifier - the file name of the source without
+extension e.g. 'constant' for 'constant.c'.
+
+Finally, the parameter names and default values can be given in `const char
+*params[]`, and `int n_params` giving the number of params. The parameter array
+is alternating names of params and their default value.
 
 ## Controller Modules
 
@@ -50,12 +79,52 @@ have a `10-bit` number to work with: integers in the range 0-1023. If the output
 from `get_control_action` is outwith this range, it is silently truncated to
 within the range.
 
+A minimal example of a controller module, excluding documentation:
+
+```c
+#include "../../run.h"
+#include "../control.h"
+
+unsigned int get_control_action(struct run_data *rd)
+{
+  return 3;
+}
+```
+
+This does nothing at all, but shows how simple a module can be.
+
 
 ## Setter Modules
 
 A setter module is called to get the value for setpoint desired for the
 rheometer. Setpoint is either stress or strainrate, depending on the value of
 `int get_is_stress_controlled(struct run_data *rd)`.
+
+An example of a setter module, including all documentation:
+
+```c
+#include "../../run.h"
+#include "../control.h"
+
+const char *name = "Tristable Setter";
+const char *ident = "tristable";
+const char *doc = "Loops through a list of three possible values [a, b, c] at 1hz.";
+int n_params = 3;
+const char *params[] = {
+    "a", "333.3", "b", "666.7", "c", "1000"
+};
+
+double defaults[3] = {333.3, 666.7, 1000};
+
+double get_setpoint(struct run_data *rd)
+{
+  static int i = 0;
+  if (i >= 3)
+    i = 0;
+
+  return GET_SETTER_PARAM_OR_DEFAULT(rd, i, defaults[i]);
+}
+```
 
 
 ## Building

@@ -15,16 +15,24 @@ typedef double (*setter_func_t)(struct run_data *);
 
 
 typedef struct ControllerHandle {
-  const char *doc;
   unsigned int (*get_control_action)(struct run_data *rd);
   void *handle;
+  const char *doc;
+  const char *name;
+  const char *ident;
+  int n_params;
+  const char **params;
 } ControllerHandle;
 
 
 typedef struct SetterHandle {
-  const char *doc;
   double (*get_setpoint)(struct run_data *rd);
   void *handle;
+  const char *doc;
+  const char *name;
+  const char *ident;
+  int n_params;
+  const char **params;
 } SetterHandle;
 
 

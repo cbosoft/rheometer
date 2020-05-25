@@ -1,11 +1,13 @@
 #include "../../run/run.h"
-#include "../../util/display.h"
 #include "../control.h"
 
-const char *doc =
-      "  - "BOLD"Constant value setter"RESET", 'constant'\n"
-      "      A constant setpoint, the only required parameter is \"setpoint\", the constant (double)\n"
-      "      value of stress/strainrate to provide the controller.\n";
+const char *name = "Constant Setter";
+const char *ident = "constant";
+const char *doc = "A constant setpoint, the only parameter is \"setpoint\", the constant (double) value of stress/strainrate to provide the controller.";
+int n_params = 1;
+const char *params[] = {
+    "value", "0.0"
+};
 
 double get_setpoint(struct run_data *rd)
 {

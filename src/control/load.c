@@ -1,5 +1,7 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <dlfcn.h>
 
 #include "../util/error.h"
@@ -16,6 +18,19 @@ ControllerHandle *load_controller(const char *name)
   return rv;
 }
 
+const char *so_get_str(void *handle, const char *name)
+{
+  dlerror();
+  const char **rv = dlsym(handle, name);
+  char *error = NULL;
+  if ((error = dlerror()) != NULL) {
+    warn("load", "%s", error);
+    return NULL;
+  }
+
+  return *rv;
+}
+
 
 ControllerHandle *load_controller_path(const char *path)
 {
@@ -26,13 +41,28 @@ ControllerHandle *load_controller_path(const char *path)
     ferr("load_controller", "%s", dlerror());
   }
 
-  dlerror();
-  char **doc_ptr = dlsym(h->handle, "doc");
+  h->doc = so_get_str(h->handle, "doc");
+  h->name = so_get_str(h->handle, "name");
+  h->ident = so_get_str(h->handle, "ident");
   char *error = NULL;
+
+  dlerror();
+  int *n_params = dlsym(h->handle, "n_params");
   if ((error = dlerror()) != NULL) {
-    ferr("load_controller", "%s", error);
+    warn("load_controller", " Could not load controller number params: %s", error);
+    h->n_params = 0;
   }
-  h->doc = *doc_ptr;
+  else {
+
+    h->n_params = (*n_params);
+    const char **params = dlsym(h->handle, "params");
+    if ((error = dlerror()) != NULL) {
+      warn("load_controller", "Could not load controller params doc: %s", error);
+    }
+    else {
+      h->params = params;
+    }
+  }
 
   h->get_control_action = dlsym(h->handle, "get_control_action");
   if ((error = dlerror()) != NULL) {
@@ -63,13 +93,28 @@ SetterHandle *load_setter_path(const char *path)
     ferr("load_setter", "%s", dlerror());
   }
 
-  dlerror();
-  char **doc_ptr = dlsym(h->handle, "doc");
+  h->doc = so_get_str(h->handle, "doc");
+  h->name = so_get_str(h->handle, "name");
+  h->ident = so_get_str(h->handle, "ident");
   char *error = NULL;
+
+  dlerror();
+  int *n_params = dlsym(h->handle, "n_params");
   if ((error = dlerror()) != NULL) {
-    ferr("load_setter", "%s", error);
+    warn("load_setter", " Could not load setter number params: %s", error);
+    h->n_params = 0;
   }
-  h->doc = *doc_ptr;
+  else {
+
+    h->n_params = (*n_params);
+    const char **params = dlsym(h->handle, "params");
+    if ((error = dlerror()) != NULL) {
+      warn("load_setter", "Could not load setter params doc: %s", error);
+    }
+    else {
+      h->params = params;
+    }
+  }
 
   h->get_setpoint = dlsym(h->handle, "get_setpoint");
   if ((error = dlerror()) != NULL) {

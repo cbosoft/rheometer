@@ -1,13 +1,18 @@
 #include "../../run/run.h"
-#include "../../util/display.h"
 #include "../control.h"
 
+const char *name = "No control";
+const char *ident = "none";
 const char *doc =
-      "  - "BOLD"No control"RESET", 'none'\n"
-      "      None actual controlling of the variable is performed; just a simple conversion from \n"
-      "      the stress/strainrate setpoint to DC. A single required parameter is \"mult\", the \n"
-      "      multiplier which does the conversion. This method is not intended to provide robust \n"
-      "      control, but is intended to take the controller out of the equation.\n";
+"No actual controlling of the variable is performed; just a simple conversion "
+"from stress/strainrate setpoint to motor PWM DC. A single optional parameter is "
+"the multiplier which does the conversion. This method is not intended to "
+"provide robust control, but is intended to take the controller out of the "
+"equation during the investigation of complex systems. ";
+int n_params = 1;
+const char *params[] = {
+  "mult", "1.0"
+};
 
 unsigned int get_control_action(struct run_data *rd)
 {

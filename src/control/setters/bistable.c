@@ -2,9 +2,15 @@
 #include "../../util/display.h"
 #include "../control.h"
 
-const char *doc =
-      "  - "BOLD"Bistable"RESET", 'bistable'\n"
-      "      Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.\n";
+const char *name = "Bistable Setter";
+const char *ident = "bistable";
+const char *doc = "Switch output between two values (\"upper\" and \"lower\") every \"period\" seconds.";
+int n_params = 3;
+const char *params[] = {
+    "upper", "700",
+    "lower", "300",
+    "period", "1"
+};
 
 double get_setpoint(struct run_data *rd)
 {
