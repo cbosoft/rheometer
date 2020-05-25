@@ -13,13 +13,27 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
   int nparams = 0;
   int is_controller = -1;
   const int i = 0;
+  int is_set = 0, is_params_set = 0;
 
 #define argc (*argc_ptr)
 #define argv (*argv_ptr)
 #define ADVANCE argc--; argv++;
+#define CHECK_AND_ADD(S)\
+  if (S) { \
+    if (is_controller) {\
+      sd_add_controller(sd, name, params, nparams);\
+    }\
+    else {\
+      sd_add_setter(sd, name, params, nparams);\
+    }\
+    is_set = 0;\
+    is_params_set = 0;\
+  }
+
   while (argc) {
 
     if (ARGEITHER("-c", "--controller")) {
+      CHECK_AND_ADD(is_set||is_params_set);
       ADVANCE;
       name = argv[i];
       is_controller = 1;
@@ -28,8 +42,10 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
         params = NULL;
          nparams = 0;
       }
+      is_set = 1;
     }
     else if (ARGEITHER("-s", "--setter")) {
+      CHECK_AND_ADD(is_set||is_params_set);
       ADVANCE;
       name = argv[i];
       is_controller = 0;
@@ -38,9 +54,11 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
         params = NULL;
         nparams = 0;
       }
+      is_set = 1;
     }
     else if (ARGEITHER("-p", "--params")) {
       ADVANCE;
+      CHECK_AND_ADD(is_params_set);
 
       if (params) {
         free(params);
@@ -49,14 +67,8 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
       }
 
       str2darr(argv[i], &params, &nparams);
+      is_params_set = 1;
     }
-    else if (ARGEITHER("-a", "--add")) {
-      if (is_controller) {
-        sd_add_controller(sd, name, params, nparams);
-      }
-      else {
-        sd_add_setter(sd, name, params, nparams);
-      }
     }
     else if (ARGEQ("--interp-number")) {
       ADVANCE;
@@ -76,6 +88,9 @@ void parse_schedule_args(int *argc_ptr, const char *** argv_ptr, struct schedule
 
     ADVANCE;
   }
+
+  CHECK_AND_ADD(is_set||is_params_set);
+
 #undef argv
 #undef argc
 #undef ADVANCE
