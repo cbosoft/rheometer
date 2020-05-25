@@ -6,7 +6,6 @@
 
 #include "../util/error.h"
 #include "../util/double_array.h"
-#include "../log/tag.h"
 #include "../control/control.h"
 
 #include "args.h"
@@ -14,7 +13,6 @@
 
 void parse_run_args(int argc, const char **argv, struct run_data *rd) 
 {
-  rd->tag = TAGDEFAULT;
   int l_set=0, d_set=0, hwver_set=0, c_set=0, s_set=0;
 
 
@@ -25,31 +23,31 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       rd->length_s = parse_length_string(argv[i]);
       l_set = 1;
     }
-    else if (ARGEITHER("-c", "--control-scheme")) {
+    else if (ARGEITHER("-j", "--control-scheme")) {
       i++;
       CHECK_ARG_HAS_VALUE;
       read_control_scheme(rd, argv[i]);
       c_set = 1;
       s_set = 1;
     }
-    else if (ARGEQ("--controller")) {
+    else if (ARGEITHER("-c", "--controller")) {
       i++;
       CHECK_ARG_HAS_VALUE;
       rd->control_scheme.controller_name = strdup(argv[i]);
       c_set = 1;
     }
-    else if (ARGEQ("--controller-params")) {
+    else if (ARGEITHER("-pc", "--controller-params")) {
       i++;
       CHECK_ARG_HAS_VALUE;
       str2darr(argv[i], &rd->control_scheme.control_params, &rd->control_scheme.n_control_params);
     }
-    else if (ARGEQ("--setter")) {
+    else if (ARGEITHER("-s", "--setter")) {
       i++;
       CHECK_ARG_HAS_VALUE;
       rd->control_scheme.setter_name = strdup(argv[i]);
       s_set = 1;
     }
-    else if (ARGEQ("--setter-params")) {
+    else if (ARGEITHER("-ps", "--setter-params")) {
       i++;
       CHECK_ARG_HAS_VALUE;
       str2darr(argv[i], &rd->control_scheme.setter_params, &rd->control_scheme.n_setter_params);
@@ -57,6 +55,7 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     else if (ARGEITHER("-t", "--tag")) {
       i++;
       CHECK_ARG_HAS_VALUE;
+      free(rd->tag);
       rd->tag = parse_tag_string(argv[i]);
     }
     else if (ARGEITHER("-d", "--fill-depth")) {
@@ -70,15 +69,11 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       CHECK_ARG_HAS_VALUE;
       rd->needle_depth = atof(argv[i]);
     }
-    else if (ARGEITHER("-v", "--video-device")) {
-      i++;
-      CHECK_ARG_HAS_VALUE;
-      rd->video_device = strdup(argv[i]);
+    else if (ARGEITHER("-v", "--video")) {
+      rd->log_video = 1;
     }
-    else if (ARGEITHER("-p", "--photo-device")) {
-      i++;
-      CHECK_ARG_HAS_VALUE;
-      rd->photo_device = strdup(argv[i]);
+    else if (ARGEITHER("-p", "--photo")) {
+      rd->log_photo = 1;
     }
     else if (ARGEITHER("-w", "--hardware-version")) {
       i++;
