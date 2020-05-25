@@ -3,7 +3,7 @@
 
 #include "../util/display.h"
 #include "../control/control.h"
-#include "../log/tag.h"
+#include "../defaults.h"
 #include "../version.h"
 
 #include "args.h"
@@ -90,18 +90,45 @@ void args_help()
       "    created and stored alongside the other log files, taken before the logging\n"
       "    begins. Uses RPi camera module.\n"
       "\n"                                                                           //
+      "  "BOLD""FGGREEN"Schedules"RESET""BOLD":"RESET"\n"
+      "    Schedules are defined as a series of controllers, and a series of setters.\n"
+      "    Each controller is used in combination with a series of setters. If the\n"
+      "    setter or controller is the same and the number of parameters is the same,\n"
+      "    then the parameters will be interpolated between. An example:\n"
+      "\n"                                                                           //
+      "    For controllers \"none\" and \"pid\", and constant setpoints of 100,200,\n"
+      "    and 2 interpolation points, the schedule looks like:\n"
+      "\n"                                                                           //
+      "      controller: none; setpoint: 100\n"
+      "      controller: none; setpoint: 150\n"
+      "      controller: none; setpoint: 200\n"
+      "      controller: pid; setpoint: 100\n"
+      "      controller: pid; setpoint: 150\n"
+      "      controller: pid; setpoint: 200\n"
+      "\n"                                                                           //
+      "    Schedules are defined by file, or directly on the command line. A schedule\n"
+      "    file is a JSON file; an array of objects where each element defines either\n"
+      "    a controller or setter, e.g.:\n"
+      "\n"                                                                           //
+      FGYELLOW"    [\n"RESET
+      FGYELLOW"      { \n"RESET
+      FGYELLOW"        \"name\":\"pid\", \n"RESET
+      FGYELLOW"        \"type\":\"controller\", \n"RESET
+      FGYELLOW"        \"params\": [0.1, 0.1, 0.0]\n"RESET
+      FGYELLOW"      }, \n"RESET
+      FGYELLOW"      { \n"RESET
+      FGYELLOW"        \"name\":\"constant\", \n"RESET
+      FGYELLOW"        \"type\":\"setter\", \n"RESET
+      FGYELLOW"        \"params\": 1.22 \n"RESET
+      FGYELLOW"      }, \n"RESET
+      FGYELLOW"      { \n"RESET
+      FGYELLOW"        \"name\":\"pid\", \n"RESET
+      FGYELLOW"        \"type\":\"controller\", \n"RESET
+      FGYELLOW"        \"params\": 2.2 \n"RESET
+      FGYELLOW"      }, \n"RESET
+      FGYELLOW"    ]\n"RESET
+      "\n"                                                                           //
       "  "BOLD""FGGREEN"Schedule"RESET""BOLD" Options:"RESET"\n"
-      "    Schedules are defined by file ('-f') option, or directly on the command line, using the \n"
-      "    '-s', '-c', '-p' and '-a' options. For the latter mode, each time the option appears, it\n"
-      "    overrides a previous option. '-a' adds the current settings to the schedule. Any options\n"
-      "    other than these five are interpreted as the end of the schedule, and are passed to run\n"
-      "    and so should be valid run options.\n"
-      "\n"
-      "    Schedules with concurrent controllers/setters of the same type, with the same numbers of\n"
-      "    parameters are interpolated between. This allows the user to set up a schedule of runs \n"
-      "    where the kp/ki coefficients of the pid controller are varied, and at the same time the \n"
-      "    setpoint is increased from 10 to 100 DC, for example."
-      "\n"
       "    "FGBLUE"-p, --params"RESET"\n"
       "    Set the params for either the setter or controller.\n"
       "\n"
@@ -115,16 +142,17 @@ void args_help()
       "    Set the controller module name.\n"
       "\n"
       "    "FGBLUE"-f, --schedule-file"RESET"\n"
-      "    Load a series of schedule points (setters, controllers, parameters) from file."
-      "\n"
+      "    Load a series of schedule points (setters, controllers, parameters) from file.\n"
+      "\n"                                                                           //
       "    "FGBLUE"--interp-number"RESET"\n"
-      "    Number of interpolation points to use.\n"
+      "    Number of interpolation points to use. Set to zero to disable. Optional,\n"
+      "    default is %d.\n"
       "\n"
       "    "FGBLUE"--interp-linear"RESET"\n"
-      "    Use linear interpolation.\n"
+      "    Use linear interpolation. Does nothing, this is the default.\n"
       "\n"
       "    "FGBLUE"--interp-log"RESET"\n"
-      "    Use logarithmic interpolation.\n"
+      "    Use logarithmic interpolation instead of linear.\n"
       "\n"
-  ); // TODO: config options
+  , INTERP_N_DEFAULT); // TODO: config options
 }
