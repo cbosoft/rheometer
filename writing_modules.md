@@ -103,6 +103,7 @@ rheometer. Setpoint is either stress or strainrate, depending on the value of
 An example of a setter module, including all documentation:
 
 ```c
+#include <time.h>
 #include "../../run.h"
 #include "../control.h"
 
@@ -119,8 +120,13 @@ double defaults[3] = {333.3, 666.7, 1000};
 double get_setpoint(struct run_data *rd)
 {
   static int i = 0;
-  if (i >= 3)
-    i = 0;
+  
+  static time_t prev = time(NULL);
+  time_t now = time(NULL);
+  if (now - prev) {
+    i = (i+1)%3;
+    prev = now;
+  }
 
   return GET_SETTER_PARAM_OR_DEFAULT(rd, i, defaults[i]);
 }
