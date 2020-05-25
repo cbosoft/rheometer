@@ -1,0 +1,7 @@
+#pragma once
+
+#define DELAY_THREADS_MS 500
+#define DELAY_LOG_MS 500
+#define DELAY_CONTROL_MS 1000
+#define DELAY_MOTOR_HIGH_MS 1000
+#define DELAY_MOTOR_AFTER_MS 2000

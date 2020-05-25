@@ -2,8 +2,11 @@
 
 #include <wiringPi.h>
 
-#include "motor.h"
 #include "../util/sleep.h"
+#include "../config/config.h"
+#include "../delays.h"
+
+#include "motor.h"
 
 
 
@@ -17,16 +20,16 @@ void motor_setup()
 
 
 
-void motor_warmup(struct run_data *rd, unsigned int target)
+void motor_warmup(struct run_data *rd)
 {
-  // run high for 1.5s, then go to target for 3
+  // run high, then go to target
   if (!rd->calm_start) { 
-    pwmWrite(PWM_PIN, 800);
-    sleep_ms(1.5e3);
+    pwmWrite(PWM_PIN, 1024);
+    sleep_ms(DELAY_MOTOR_HIGH_MS);
   }
-  pwmWrite(PWM_PIN, target);
+  pwmWrite(PWM_PIN, 512);
 #ifndef DEBUG
-  sleep_ms(3e3);
+  sleep_ms(DELAY_MOTOR_LOW_MS);
 #endif
 }
 

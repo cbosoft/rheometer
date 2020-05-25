@@ -26,6 +26,8 @@
 #include "../log/tar.h"
 #include "../version.h"
 #include "../util/display.h"
+#include "../delays.h"
+#include "main.h"
 
 #define SETUP_THREAD(THREADVAR,THREADFUNC,NAME,WATCHVAR) \
   if (pthread_create(& THREADVAR, NULL, THREADFUNC, rd)) \
@@ -113,27 +115,30 @@ int run_main(int argc, const char ** argv)
   SETUP_THREAD(tmp_thread, thermometer_thread_func, "thermometer", rd->tmp_ready);
   SETUP_THREAD(adc_thread, adc_thread_func, "adc", rd->adc_ready);
   SETUP_THREAD(lc_thread, loadcell_thread_func, "loadcell", rd->lc_ready);
-  sleep_ms(500);
+  sleep_ms(DELAY_THREADS_MS);
 
   info("starting logging thread...");
   SETUP_THREAD(log_thread, log_thread_func, "log", rd->log_ready);
   if (rd->video_device != NULL) {
     SETUP_THREAD(vid_thread, cam_thread_func, "video", rd->cam_ready);
   }
-  sleep_ms(500);
+  sleep_ms(DELAY_LOG_MS);
 
   motor_setup();
   rd->phase = PHASE_WARMUP;
   info("warming up motor...");
-  motor_warmup(rd, 512 );
+  motor_warmup(rd);
   info("  motor ready!");
 
   info("starting control thread...");
   rd->phase = PHASE_SETTLE;
   SETUP_THREAD(ctl_thread, ctl_thread_func, "control", rd->ctl_ready);
-  sleep(3);
+
+  if (strcmp(rd->control_scheme.controller_name, "none") != 0)
+    sleep(DELAY_CONTROL_MS);
+
   rd->phase = PHASE_READING;
-  
+
   switch (rd->mode) {
 
     case MODE_TUNING:
