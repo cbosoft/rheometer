@@ -88,10 +88,10 @@ ArgSet *generate_schedule(struct schedule_data *sd)
         char *setter = sd->setter_names[sname_i];
 
         if ((sd->n_setters > sname_i+1) &&
-            (sd->n_setter_params[cname_i] == sd->n_setter_params[cname_i+1]) &&
+            (sd->n_setter_params[sname_i] == sd->n_setter_params[sname_i+1]) &&
             (strcmp(sd->setter_names[sname_i], sd->setter_names[sname_i+1]) == 0)) {
-          setter_interp = linear_interp_vector(sd->setter_params[cname_i], sd->setter_params[cname_i+1], sd->n_setter_params[cname_i], sd->n_interpolation_points);
-          n_setter_params = sd->n_setter_params[cname_i];
+          setter_interp = linear_interp_vector(sd->setter_params[sname_i], sd->setter_params[sname_i+1], sd->n_setter_params[sname_i], sd->n_interpolation_points);
+          n_setter_params = sd->n_setter_params[sname_i];
           n_setter_interp = sd->n_interpolation_points;
           setter_interp_needs_free = 1;
         }
