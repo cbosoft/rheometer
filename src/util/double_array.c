@@ -4,6 +4,13 @@
 
 #include "double_array.h"
 
+void darr_append(double **arr, int *n, double a)
+{
+  (*n)++;
+  (*arr) = realloc((*arr), (*n)*sizeof(double));
+  (*arr)[(*n)-1] = a;
+}
+
 
 double *darr_copy(double *a, int n)
 {
