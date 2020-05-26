@@ -54,6 +54,14 @@ static unsigned int cancelled = 0;
 
 void inthandle(int signo)
 {
+
+#ifdef DEBUG
+
+  (void) signo;
+  exit(1);
+
+#else
+
   if (signo == SIGINT) {
     fprintf(stderr, "\r");
     cancelled ++;
@@ -74,6 +82,7 @@ void inthandle(int signo)
   else if ((cancelled == 1) && (!get_quiet())) {
     fprintf(stderr, "\n\nInterrupted...\n\n");
   }
+#endif
 }
 
 
