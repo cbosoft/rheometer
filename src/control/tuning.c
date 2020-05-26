@@ -114,7 +114,7 @@ void do_tuning(struct run_data *rd) {
         }
       }
       else {
-        strncpy(cmd, input, 99);
+        snprintf(cmd, 100, "%s", input);
       }
 
       if (strcmp(cmd, "help") == 0) {

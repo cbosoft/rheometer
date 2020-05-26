@@ -51,7 +51,7 @@ void str2darr(const char *s, double **rv, int *n)
 
 char *darr2str(double *darr, int n)
 {
-  const int char_per_float = 12;
+  const int char_per_float = 20;
   char *rv = malloc((char_per_float*n + 1)*sizeof(char));
   rv[0] = 0;
 
