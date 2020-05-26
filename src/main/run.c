@@ -163,13 +163,24 @@ int run_main(int argc, const char ** argv)
     case MODE_NORMAL:  /* fall through */
     default:
       info("begin!");
-      unsigned int tish = 0;
       rd_set_start_time(rd);
-      while ( (!cancelled) && (tish <= rd->length_s) ) {
-        sleep(1);
-        tish ++;
-        display_thread_data(rd);
-        display_titles();
+      usleep(10000);
+      int previous_seconds = -5;
+      while ( (!cancelled) ) {
+        usleep(330);
+
+        double time = rd_get_time(rd);
+        int seconds = (int)time;
+
+        if (seconds - previous_seconds) {
+          display_thread_data(rd);
+          display_titles();
+
+          previous_seconds = seconds;
+        }
+
+        if (seconds > (int)rd->length_s)
+          break;
       }
       break;
       
