@@ -103,9 +103,6 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     }
   }
 
-  if (getuid() != 0)
-    argerr("Hardware PWM needs root.");
-
   if (!c_set || !s_set || !l_set || !d_set || !hwver_set)
     argerr("Length, controller and setter (or scheme), hardware_version, and fill depth are required parameters.");
 }

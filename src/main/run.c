@@ -80,6 +80,12 @@ void inthandle(int signo)
 
 int run_main(int argc, const char ** argv)
 {
+
+#ifndef DEBUG
+  if (getuid() != 0)
+    argerr("Hardware PWM needs root.");
+#endif
+
   struct run_data *rd = init_run_data();
 
   parse_run_args((unsigned int)argc, argv, rd);
