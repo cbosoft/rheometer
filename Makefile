@@ -1,10 +1,11 @@
-CC = gcc
+CC ?= gcc
 CFLAGS = -Wall -Wextra -Werror -g
 LINK = -lwiringPi -lpthread -lm -ldl
 
 HDR = $(shell ls **/*.h)
 WPI = wpi/libwiringPi.so
 VERSION = $(shell scripts/get_version.sh)
+PREFIX ?= "/usr"
 
 CONTROLLERS = \
 							controllers/pid.so \
@@ -122,8 +123,8 @@ obj/%.o: src/%.c $(HDR)
 
 wpi/libwiringPi.so: wpi/wiringPi.c wpi/wiringPi.h
 	$(CC) -shared -o $@ $< -lpthread
-	sudo cp wpi/libwiringPi.so /usr/lib/.
-	sudo cp wpi/*.h /usr/include/.
+	sudo cp wpi/libwiringPi.so $(PREFIX)/lib/.
+	sudo cp wpi/*.h $(PREFIX)/include/.
 
 clean:
 	rm -rf obj/* rheometer wpi/*.so controllers/*.so setters/*.so
