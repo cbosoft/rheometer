@@ -138,19 +138,23 @@ double read_cylinder_temperature()
   // https://github.com/adafruit/Adafruit_MCP9600/blob/master/Adafruit_MCP9600.cpp
   // http://wiringpi.com/reference/i2c-library/
   
-  //wiringPiI2CWriteReg8(cyl_thermo_fd, 0x05, 0x00);
   wiringPiI2CWriteReg8(cyl_thermo_fd, 0x06, 0b11000000);
   int rx = wiringPiI2CReadReg16(cyl_thermo_fd, 0x00);
-  int bytes[2] = {0,0};
-  bytes[1] = (rx >> 8) & 255;
-  bytes[0] = rx & 127;
+
+  double f = (double)rx;
+  return f*0.0625;
+
+  // I made this entirely too complicated.
+  //int bytes[2] = {0,0};
+  //bytes[1] = (rx >> 8) & 255;
+  //bytes[0] = rx & 127;
   //int neg = bytes[0] & 0x80;
   //fprintf(stderr, "%d  %d  %d | %d %d %d\n", rx, upper_byte, lower_byte, bytes[0], bytes[1], bytes[2]);
   //if (neg) {
   //  return (((double)bytes[1])*0.0625) + (((double)bytes[0])*16.0) - 4096.0; // sometimes misreads?
   //}
   //else { 
-    return (((double)bytes[1])*0.0625) + (((double)bytes[0])*16.0); // sometimes misreads?
+  //  return (((double)bytes[1])*0.0625) + (((double)bytes[0])*16.0); // sometimes misreads?
   //}
 }
 
