@@ -16,7 +16,7 @@ void usage(void)
       "\n"
       "  "BOLD"Usage:"RESET"\n"
       "    rheometer ["FGYELLOW"common options"RESET"] ["FGGREEN"command"RESET"] ["FGBLUE"command options"RESET"]\n"
-      "    rheometer "FGGREEN"run "FGBLUE"-l <length> -d <fill-depth> ("FGMAGENTA"-c <control scheme> | -c <controller> -s <setter>"FGBLUE") -w <hardware version>"RESET" [more options below]\n"
+      "    rheometer "FGGREEN"run "FGBLUE"-l <length> -d <fill-depth> ("FGMAGENTA"-j <control scheme> | -c <controller> -s <setter>"FGBLUE") -w <hardware version>"RESET" [more options below]\n"
       "    rheometer "FGGREEN"schedule"RESET" ["FGBLUE"schedule options"RESET"] ["FGBLUE"run options"RESET"] \n"
       //"    rheometer config (add|edit|remove) (controlscheme|calibration|schedule)\n"
       "    rheometer --help\n"
