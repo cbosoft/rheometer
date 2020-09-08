@@ -206,11 +206,26 @@ static void sd_json_maybe_get_params(cJSON *json, double **arr_ptr, int *n_ptr)
   if (cJSON_IsArray(params_json)) {
     cJSON *elem_json = NULL;
     cJSON_ArrayForEach(elem_json, params_json) {
-      darr_append(arr_ptr, n_ptr, elem_json->valuedouble);
+      double dv;
+      int okay = 0;
+
+      if (cJSON_IsNumber(elem_json)) {
+        dv = elem_json->valuedouble;
+        okay = 1;
+      }
+      else {
+        warn("setter_add_from_file", "Unexpected param type: params should be numbers."); 
+      }
+
+      if (okay)
+        darr_append(arr_ptr, n_ptr, dv);
     }
   }
   else if (cJSON_IsNumber(params_json)) {
     darr_append(arr_ptr, n_ptr, params_json->valuedouble);
+  }
+  else {
+    warn("setter_add_from_file", "Unexpected param type: params should be numbers."); 
   }
 }
 
