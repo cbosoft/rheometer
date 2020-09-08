@@ -224,6 +224,19 @@ static void sd_json_maybe_get_params(cJSON *json, double **arr_ptr, int *n_ptr)
   else if (cJSON_IsNumber(params_json)) {
     darr_append(arr_ptr, n_ptr, params_json->valuedouble);
   }
+  else if (cJSON_IsString(params_json)) {
+    char *s = params_json->valuestring;
+    int l = strlen(s);
+    // TODO properly check if is number followed by '%' (use regex)
+    if (s[l-1] == '%') {
+      double perc = atof(params_json->valuestring);
+      double dv = perc*0.01*1024.0;
+      darr_append(arr_ptr, n_ptr, dv);
+    }
+    else {
+      warn("setter_add_from_file", "Unexpected string found, and is not a percentage: params should be numbers."); 
+    }
+  }
   else {
     warn("setter_add_from_file", "Unexpected param type: params should be numbers."); 
   }
