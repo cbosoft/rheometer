@@ -27,6 +27,11 @@ void arglist_add_many(ArgList *al, const char **sv, int n)
   }
 }
 
+void arglist_add_from_list(ArgList *al, ArgList *other)
+{
+  arglist_add_many(al, (const char**)other->argv, other->argc);
+}
+
 void arglist_add(ArgList *al, const char *s)
 {
   al->argc++;

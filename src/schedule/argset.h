@@ -9,6 +9,7 @@ ArgList *arglist_new();
 ArgList *arglist_from_strvec(const char **sv, int n);
 void arglist_add(ArgList *al, const char *s);
 void arglist_add_many(ArgList *al, const char **sv, int n);
+void arglist_add_from_list(ArgList *al, ArgList *other);
 ArgList *arglist_copy(ArgList *al);
 void arglist_free(ArgList *al);
 
