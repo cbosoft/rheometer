@@ -41,7 +41,7 @@ struct run_data *init_run_data()
   rd->control_scheme.setter_params = NULL;
   rd->control_scheme.n_setter_params = 0;
 
-  rd->speed_ind_timeout = 0.1;
+  rd->speed_ind_timeout = 0.5;
   rd->last_ca = 0;
   rd->calm_start = 0;
   rd->mode = MODE_NORMAL;
