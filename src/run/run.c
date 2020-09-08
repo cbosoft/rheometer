@@ -25,6 +25,14 @@ void rd_set_speed(struct run_data *rd, double speed)
 }
 
 
+void rd_set_speed_conversion_timeout(struct run_data *rd, double speed_timeout)
+{
+  pthread_mutex_lock(&rd->lock_speed);
+  rd->speed_ind_timeout = speed_timeout;
+  pthread_mutex_unlock(&rd->lock_speed);
+}
+
+
 double rd_get_speed(struct run_data *rd)
 {
   double rv;
@@ -44,9 +52,17 @@ double rd_get_strainrate(struct run_data *rd)
   return rv;
 }
 
+
+double rd_get_speed_conversion_timeout(struct run_data *rd)
+{
+  double rv;
+  pthread_mutex_lock(&rd->lock_speed);
+  rv = rd->speed_ind_timeout;
+  pthread_mutex_unlock(&rd->lock_speed);
+  return rv;
+}
+
 // }}}
-
-
 // Temperature {{{
 
 void rd_set_ambient_temperature(struct run_data *rd, double value)

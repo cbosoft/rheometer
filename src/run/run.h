@@ -103,8 +103,10 @@ void free_run_data(struct run_data *td);
 
 // speed getter/setter
 void rd_set_speed(struct run_data *rd, double value);
+void rd_set_speed_conversion_timeout(struct run_data *rd, double value);
 double rd_get_speed(struct run_data *rd);
 double rd_get_strainrate(struct run_data *rd);
+double rd_get_speed_conversion_timeout(struct run_data *rd);
 double rd_get_fill_depth(struct run_data *rd);
 
 // temperature getter/setter
