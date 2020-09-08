@@ -19,8 +19,13 @@
     "params": "10%"
   },
   {
+    "name": "constant",
+    "type": "setter",
+    "params": "100%"
+  },
+  {
     "type": "params",
-    "each_run_length": 300,
-    "n_interpolation_points": 5
+    "n_interpolation_points": 5,
+    "length": "4.5m"
   }
 ]
