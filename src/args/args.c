@@ -16,33 +16,43 @@
 unsigned int parse_length_string(const char *length_s_str)
 {
   unsigned int len = strlen(length_s_str);
+  // TODO: regex
 
   // is just numbers?
   unsigned int justnumber = 1;
   unsigned int notnumbers = 0;
+  unsigned int isfloat = 0;
   for (unsigned int i = 0; i < len; i++) {
     unsigned int ic = ((unsigned int)length_s_str[i]);
-    if ( ic < 48 || ic > 57) {
-      justnumber = 0;
-      notnumbers ++;
+    if (ic < 48 || ic > 57) {
+      if (ic == '.' || ic == 'e' || ic == '+' || ic == '-') {
+        isfloat = 1;
+      }
+      else{
+        justnumber = 0;
+        notnumbers ++;
+      }
     }
   }
 
   if (notnumbers > 1) {
-    argerr("length arg must be a number or suffixed by a single 's' or 'm' to explicitly specify 'seconds' or 'minutes' (%s)", length_s_str);
+    argerr("length arg must be a number optionally suffixed by a single 's' or 'm' to explicitly specify 'seconds' or 'minutes' (%s)", length_s_str);
   }
 
-  unsigned int toi = atoi(length_s_str);
-
   if (length_s_str[len-1] == 's' || justnumber) {
-    return toi;
+    return atoi(length_s_str);
   }
 
   if (length_s_str[len-1] == 'm') {
-    return toi * 60;
+    if (isfloat) {
+      return (unsigned int)(atof(length_s_str)*60.0);
+    }
+    else {
+      return atoi(length_s_str) * 60;
+    }
   }
 
-  argerr("length arg syntax error");
+  argerr("length arg (\"%s\") syntax error (ensure there are no letters other than 's' or 'm' at the end, or none at all).", length_s_str);
 
   // this will never run, but it makes the linter happy.
   return 1;
