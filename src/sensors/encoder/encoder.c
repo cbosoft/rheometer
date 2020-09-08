@@ -34,6 +34,7 @@ void opt_mark_1(void) { opt_mark(ord, 1); }
 unsigned int tripc[OPTENC_COUNT] = {0};
 struct timeval last_convert = {0, 0};
 int opt_log_idxs[OPTENC_COUNT] = {0};
+static double speed_conversion_timeout = 0.2;
 
 
 
@@ -58,6 +59,8 @@ void opt_setup(struct run_data *rd)
   OPT_SETUP(1);
   gettimeofday(&last_convert, NULL);
   sleep(1);
+
+  speed_conversion_timeout = rd_get_speed_conversion_timeout(rd);
 }
 
 
@@ -91,7 +94,7 @@ double measure_speed()
   double dt = dseconds + (duseconds*0.001*0.001);
   static double last_speed = 0.0;
 
-  if (dt > 0.1) {
+  if (dt > speed_conversion_timeout) {
     last_convert = now;
     int count = 0;
     for (int i = 0; i < OPTENC_COUNT; i++) {
