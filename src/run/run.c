@@ -82,8 +82,6 @@ double rd_get_cylinder_temperature(struct run_data *rd)
 }
 
 // }}}
-
-
 // Loadcell {{{
 
 void rd_set_loadcell_bytes(struct run_data *rd, unsigned long bytes)
@@ -126,8 +124,6 @@ double rd_get_stress(struct run_data *rd)
 }
 
 // }}}
-
-
 // Control {{{
 
 void rd_set_last_control_action(struct run_data *rd, unsigned int value)
@@ -188,7 +184,6 @@ unsigned int rd_get_control_interval(struct run_data *rd)
 }
 
 // }}}
-
 // Time {{{
 
 void rd_set_start_time(struct run_data *rd)
@@ -274,3 +269,4 @@ unsigned long rd_get_adc(struct run_data *rd, int i)
 }
 
 // }}}
+// vim: ft=c foldmethod=marker
