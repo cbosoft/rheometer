@@ -28,7 +28,7 @@ struct schedule_data {
   // settings
   InterpolationType interpolation_type;
   int n_interpolation_points;
-  int each_run_length;
+  ArgList *extra_arguments;
 };
 
 

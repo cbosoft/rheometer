@@ -25,7 +25,7 @@ struct schedule_data *get_default_schedule_data()
 
   sd->interpolation_type = IT_Linear;
   sd->n_interpolation_points = INTERP_N_DEFAULT;
-  sd->each_run_length = -1;
+  sd->extra_arguments = arglist_new();
   return sd;
 }
 
@@ -94,48 +94,74 @@ void sd_add_setter(struct schedule_data *sd, const char *name, double *params, i
 
 void sd_add_params(struct schedule_data *sd, cJSON *json)
 {
-  cJSON *npoints_json = cJSON_GetObjectItem(json, "n_interpolation_points");
-  if (npoints_json != NULL) {
-    if (cJSON_IsNumber(npoints_json)) {
-      sd->n_interpolation_points = npoints_json->valueint;
-    }
-    else {
-      ferr("schedule_add_params", "\"n_interpolation_points\" must be a number.");
-    }
-  }
 
-  cJSON *int_type_json = cJSON_GetObjectItem(json, "interpolation_type");
-  if (int_type_json != NULL) {
-    if (cJSON_IsString(int_type_json)) {
-      char *s = int_type_json->valuestring;
-      if (strcmp(s, "linear") == 0) {
-        sd->interpolation_type = IT_Linear;
-      }
-      else if (strcmp(s, "log") == 0) {
-        sd->interpolation_type = IT_Log;
+  cJSON *elem;
+  cJSON_ArrayForEach(elem, json) {
+    char *key = elem->string;
+
+    if (strcmp(key, "type") == 0) {
+      // do nothing
+    }
+    else if (strcmp(key, "interpolation_type") == 0) {
+      if (cJSON_IsString(elem)) {
+        char *s = elem->valuestring;
+        if (strcmp(s, "linear") == 0) {
+          sd->interpolation_type = IT_Linear;
+        }
+        else if (strcmp(s, "log") == 0) {
+          sd->interpolation_type = IT_Log;
+        }
+        else {
+          ferr("schedule_add_params", "\"interpolation_type\" must be either \"linear\" or \"log\".");
+        }
       }
       else {
         ferr("schedule_add_params", "\"interpolation_type\" must be either \"linear\" or \"log\".");
       }
     }
+    else if (strcmp(key, "n_interpolation_points") == 0) {
+      if (cJSON_IsNumber(elem)) {
+        sd->n_interpolation_points = elem->valueint;
+      }
+      else {
+        ferr("schedule_add_params", "\"n_interpolation_points\" must be a number.");
+      }
+    }
     else {
-      ferr("schedule_add_params", "\"interpolation_type\" must be either \"linear\" or \"log\".");
+      // extra arguments
+      char *arg = NULL;
+      int arg_needs_free = 0, arg_okay = 0;
+
+      if (cJSON_IsString(elem)) {
+        arg = elem->valuestring;
+        arg_okay = 1;
+      }
+      else if (cJSON_IsNumber(elem)) {
+        arg = calloc(10, sizeof(char));
+        arg_needs_free = 1;
+        snprintf(arg, 9, "%f", elem->valuedouble);
+        arg_okay = 1;
+      }
+
+      if (arg_okay) {
+        int argnamelen = strlen(key)+3;
+        char *argname = calloc(argnamelen+1, sizeof(char));
+        snprintf(argname, argnamelen, "--%s", key);
+
+        arglist_add(sd->extra_arguments, argname);
+        arglist_add(sd->extra_arguments, arg);
+
+        free(argname);
+      }
+
+      if (arg_needs_free) {
+        free(arg);
+      }
+
     }
   }
 
-  cJSON *each_run_length_json = cJSON_GetObjectItem(json, "each_run_length");
-  if (each_run_length_json != NULL) {
-    if (cJSON_IsNumber(each_run_length_json)) {
-      sd->each_run_length = each_run_length_json->valueint;
-    }
-    else if (cJSON_IsString(each_run_length_json)) {
-      char *s = each_run_length_json->valuestring;
-      sd->each_run_length = (int)(parse_length_string(s));
-    }
-    else {
-      ferr("schedule_add_params", "\"each_run_length\" must be a number.");
-    }
-  }
+  //ferr("schedule.c", "DEBUG EXIT");
 
 }
 
