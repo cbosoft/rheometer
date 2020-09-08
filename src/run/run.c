@@ -16,7 +16,8 @@
 
 void rd_set_speed(struct run_data *rd, double speed)
 {
-  double strainrate_invs = speed * PI * 2.0 * RI / (RO - RI);
+  const double spd2sr = PI*2.0*RI/(RO - RI);
+  double strainrate_invs = speed*spd2sr;
   pthread_mutex_lock(&rd->lock_speed);
   rd->speed_ind = speed;
   rd->strainrate_ind = strainrate_invs;
