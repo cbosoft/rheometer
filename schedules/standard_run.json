@@ -6,12 +6,17 @@
   {
     "name": "constant",
     "type": "setter",
-    "params": 200
+    "params": 100
   },
   {
     "name": "constant",
     "type": "setter",
     "params": 1024
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": 100
   },
   {
     "type": "params",
