@@ -50,6 +50,9 @@ void opt_setup(struct run_data *rd)
 
     // Create empty log file for appending to later
     FILE *fp = fopen(rd->log_paths[opt_log_idxs[i]], "w");
+    if (fp == NULL) {
+      ferr("opt_setup", "Error creating log file.");
+    }
     fclose(fp);
 
     pinMode(opt_pins[i], INPUT);
