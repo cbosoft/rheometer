@@ -98,6 +98,9 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     else if (ARGEQ("--silent")) {
       set_silent();
     }
+    else if (ARGEQ("--loud")) {
+      set_loud();
+    }
     else {
       argerr("Run argument \"%s\" not understood (is it a misplaced common arg?).", argv[i]);
     }
