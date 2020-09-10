@@ -1,0 +1,207 @@
+#!/usr/bin/env python
+'''
+usage:
+rheosched -f <schedule_json> [-n n_interpolation_points] [-t interpolation_type] -w <hw_ver> -d <fill_depth> [<other run args>]
+'''
+import sys
+import json
+import enum
+import os
+import time
+
+from copy import deepcopy
+
+class InterpolationType(enum.Enum):
+    Linear = enum.auto()
+    Log = enum.auto()
+
+class SchedulePoint:
+
+    def __init__(self, o):
+        self.name = None
+        self.params = []
+        for k,v in o.items():
+            setattr(self, k, v)
+
+        self.params = self.check_params(self.params)
+        if not isinstance(self.params, list):
+            self.params = [self.params]
+
+    def check_params(self, param):
+        if isinstance(param, str):
+            return float(param[:-1])*0.01*1024
+        elif isinstance(param, list):
+            return [self.check_params(p) for p in param]
+        else:
+            return param
+
+    def as_args(self):
+        raise Exception()
+
+class ScheduleSetterPoint(SchedulePoint):
+    
+    def as_args(self):
+        rv = ['-s', self.name]
+        if not self.params:
+            params = False
+        if isinstance(self.params, (list, tuple)):
+            params = ','.join([str(p) for p in self.params])
+        else:
+            params = str(self.params)
+
+        if params:
+            rv.extend(['-ps', params])
+        return rv
+
+class ScheduleControllerPoint(SchedulePoint):
+    
+    def as_args(self):
+        rv = ['-c', self.name]
+        if not self.params:
+            params = False
+        if isinstance(self.params, list):
+            params = ','.join([str(p) for p in self.params])
+        else:
+            params = str(self.params)
+
+        if params:
+            rv.extend(['-pc', params])
+        return rv
+
+
+class Schedule:
+
+    def __init__(self, sched_path):
+        self.n_interpolation_points = 3
+        self.interpolation_type = InterpolationType.Linear
+        self.args = list()
+
+        with open(sched_path) as f:
+            data = json.load(f)
+    
+
+        self.points = list()
+    
+        for pt in data:
+            t = str(pt['type'])
+            del pt['type']
+            if t == 'controller':
+                self.points.append(ScheduleControllerPoint(pt))
+            elif t == 'setter':
+                self.points.append(ScheduleSetterPoint(pt))
+            elif t == 'params':
+                self.update_params(pt)
+
+    def get_sched_points(self):
+        controller = None
+        setter = None
+
+        scheduled_points = list()
+        for point in self.points:
+            if isinstance(point, ScheduleSetterPoint):
+                if setter is not None and controller is not None:
+                    setters = self.interp_between(setter, point)
+                    for s in setters:
+                        scheduled_points.append( (s, controller ) )
+                    setter = setters[-1]
+                else:
+                    setter = point
+                    if controller is not None:
+                        scheduled_points.append( (setter, controller) )
+            elif isinstance(point, ScheduleControllerPoint):
+                controller = point
+        return scheduled_points
+
+    def get_argset(self, extra_args=None):
+        head = ['sudo','./rheometer', 'run', '--quiet']
+        tail = self.args
+        argset = list()
+        for point in self.get_sched_points():
+            arglist = list()
+            arglist.extend(head)
+            for p in point:
+                arglist.extend(p.as_args())
+            arglist.extend(tail)
+            if extra_args:
+                arglist.extend(extra_args)
+            argset.append(arglist)
+        return argset
+
+
+    def interp_between(self, c1, c2):
+        assert c1.name == c2.name
+
+        assert len(c1.params) == len(c2.params)
+
+        paramslist_transposed = list()
+        for (p1, p2) in zip(c1.params, c2.params):
+            l = list()
+            for i in range(self.n_interpolation_points+1):
+                p = p1 + (p2 - p1)/self.n_interpolation_points*(i+1)
+                l.append(p)
+            paramslist_transposed.append(l)
+        paramslist = list(zip(*paramslist_transposed))
+        
+        rv = list()
+        for params in paramslist:
+            o = deepcopy(c1)
+            o.params = params
+            rv.append(o)
+        return rv
+
+
+    def update_params(self, o):
+        for k,v in o.items():
+            if k == 'interpolation_type':
+                self.interpolation_type = InterpolationType.Linear if v == 'linear' else InterpolationType.Log
+            elif k == 'n_interpolation_points':
+                self.n_interpolation_points = v
+            else:
+                self.args.append(f'--{k}')
+                self.args.append(f'{v}')
+
+def parse_time(tstr):
+    mult = 1.0
+    if 's' in tstr:
+        tstr = tstr[:-1]
+    elif 'm' in tstr:
+        mult = 60.0
+        tstr = tstr[:-1]
+    v = float(tstr)
+    return v*mult # time in seconds
+
+def get_tstr(arglist):
+    tstr = None
+    for k, v in zip(arglist, arglist[1:]):
+        if k in ['--length', '-l']:
+            tstr = v
+    if tstr is None:
+        raise Exception('Could not find length spec "-l" or "--length" in args! This is a required param.')
+    return tstr
+
+def fmt_test(test):
+    if test > 60.0:
+        return f'{test/60:.1f} minutes'
+    else:
+        return f'{int(test)} seconds'
+
+if __name__ == "__main__":
+    s = Schedule(sys.argv[1])
+    argset = s.get_argset(sys.argv[2:])
+    l = len(argset)
+    discrepency = 0.0
+    w = 0.7
+    for i, al in enumerate(argset):
+        test = parse_time(get_tstr(al)) + discrepency
+        title = f'({i+1}/{l}) This run will take {fmt_test(test)}. There are {fmt_test((l-i)*test)} remaining in total.'
+        print(title)
+        command = ' '.join(al)
+        print(command)
+        before = time.time()
+        rv = os.system(command)
+        dt = time.time() - before
+        discrepency = (1.0-w)*discrepency + w*(dt - test)
+        if rv:
+            print("Schedule interrupted!")
+            sys.exit(rv)
+
