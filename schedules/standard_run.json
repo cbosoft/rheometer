@@ -25,7 +25,7 @@
   },
   {
     "type": "params",
-    "n_interpolation_points": 5,
+    "n_interpolation_points": 3,
     "length": "4.5m"
   }
 ]
