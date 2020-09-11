@@ -135,9 +135,10 @@ class Schedule:
 
         paramslist_transposed = list()
         for (p1, p2) in zip(c1.params, c2.params):
+            rng = (p2 - p1)/self.n_interpolation_points
             l = list()
-            for i in range(self.n_interpolation_points+1):
-                p = p1 + (p2 - p1)/self.n_interpolation_points*(i+1)
+            for i in range(self.n_interpolation_points):
+                p = p1 + rng*(i+1)
                 l.append(p)
             paramslist_transposed.append(l)
         paramslist = list(zip(*paramslist_transposed))
