@@ -185,12 +185,72 @@ def fmt_test(test):
     else:
         return f'{int(test)} seconds'
 
+def usage():
+    print('')
+    print('  rheosched')
+    print('')
+    print('  rheomter run scheduler. Runs rheometer over a range of control')
+    print('  schemes and set points as laid out in a schedule file.')
+    print('')
+    print('')
+    print('  Usage:')
+    print('')
+    print('    ./rheosched <schedule.json> [schedule options] -w <hw_var> -l <length> -d <depth> [-t tag]')
+    print('    ./rheosched --help')
+    print('')
+    print('  Required arguments (-w, -l, and -d) may be given in the schedule')
+    print('  JSON, but any values given on the command line will override them.')
+    print('')
+    print('  Schedule settings may be set in the JSON file, but again will')
+    print('  be overridden by command line values.')
+    print('')
+    print('')
+    print('  Schedule Options:')
+    print('')
+    print('    --interp-number <number>')
+    print('    Sets the number of interpolation points to use when generating')
+    print('    the schedule. If not given in the JSON, the default is 3.')
+    print('')
+    print('    --interp-linear')
+    print('    Set interpolation method to linear. This is the default.')
+    print('')
+    print('    --interp-log')
+    print('    set interpolation method to log.')
+    print('')
+
 if __name__ == "__main__":
-    s = Schedule(sys.argv[1])
-    argset = s.get_argset(sys.argv[2:])
+
+    dummy = False
+
+    args = sys.argv[1:]
+
+    if len(args) < 1:
+        print('Syntax error: must specify at least a schedule file.')
+        usage()
+        exit(1)
+
+    schedule = Schedule(args[0])
+    args = args[1:]
+
+    extra_args = list()
+    for i, (key, val) in enumerate(zip(args, args[1:])):
+        if key == '--interp-number':
+            schedule.n_interpolation_points = int(val)
+        elif key == '--interp-linear':
+            schedule.interpolation_type = InterpolationType.Linear if val == 'linear' else InterpolationType.Log
+        elif key == '--help':
+            usage()
+            exit()
+        elif key == '--dummy':
+            dummy = not dummy
+        else:
+            extra_args = args[i:]
+            break
+
+    argset = schedule.get_argset(extra_args)
     l = len(argset)
     discrepency = 0.0
-    w = 0.7
+    rv = 0
     for i, al in enumerate(argset):
         test = parse_time(get_tstr(al)) + discrepency
         title = f'({i+1}/{l}) This run will take {fmt_test(test)}. There are {fmt_test((l-i)*test)} remaining in total.'
