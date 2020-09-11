@@ -262,7 +262,7 @@ if __name__ == "__main__":
         if not dummy:
             rv = os.system(command)
         dt = time.time() - before
-        discrepency = (1.0-w)*discrepency + w*(dt - test)
+        discrepency = discrepency + dt - test
         if rv:
             print("Schedule interrupted!")
             sys.exit(rv)
