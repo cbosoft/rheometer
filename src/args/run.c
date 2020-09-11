@@ -106,6 +106,41 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     }
   }
 
+  char *missing_params = calloc(1001, sizeof(char));
+  int add_comma_space = 0;
+
+#define append_to_missing(S)\
+  if (add_comma_space) {\
+    strncat(missing_params, ", ", 1000-strlen(missing_params)-1);\
+  } \
+  else { \
+    add_comma_space = 1; \
+  }\
+  strncat(missing_params, S, 1000-strlen(missing_params)-1);
+
+  if (!c_set) {
+    append_to_missing("controller");
+  }
+
+  if (!s_set) {
+    append_to_missing("setter");
+  }
+
+  if (!l_set) {
+    append_to_missing("length");
+  }
+
+  if (!d_set) {
+    append_to_missing("depth");
+  }
+
+  if (!hwver_set) {
+    append_to_missing("hardware version");
+  }
+#undef append_to_missing
+
   if (!c_set || !s_set || !l_set || !d_set || !hwver_set)
-    argerr("Length, controller and setter (or scheme), hardware_version, and fill depth are required parameters.");
+    argerr("There are missing required parameters: %s." ,missing_params);
+
+  free(missing_params);
 }
