@@ -259,7 +259,8 @@ if __name__ == "__main__":
         command = ' '.join(al)
         print(command)
         before = time.time()
-        rv = os.system(command)
+        if not dummy:
+            rv = os.system(command)
         dt = time.time() - before
         discrepency = (1.0-w)*discrepency + w*(dt - test)
         if rv:
