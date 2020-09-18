@@ -101,6 +101,12 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
     else if (ARGEQ("--loud")) {
       set_loud();
     }
+    else if (ARGEQ("--motor")) {
+      rd->motor_name_set = 1;
+      i++;
+      CHECK_ARG_HAS_VALUE;
+      rd->motor_name = strdup(argv[i]);
+    }
     else {
       argerr("Run argument \"%s\" not understood (is it a misplaced common arg?).", argv[i]);
     }

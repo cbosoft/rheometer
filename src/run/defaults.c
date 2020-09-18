@@ -72,6 +72,8 @@ struct run_data *init_run_data()
   rd->log_video = 0;
   rd->cam_start = -1;
   rd->cam_end = -1;
+  rd->motor_name_set = 0;
+  rd->motor_name = NULL;
 
   INIT_MUTEX(rd->lock_time);
   INIT_MUTEX(rd->lock_adc);

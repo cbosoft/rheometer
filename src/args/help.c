@@ -70,6 +70,9 @@ void args_help()
       "    Hardware version specifying when the hardware was last changed. This should \n"
       "    be given as a ISO8601 date spec without separating dashes (YYYYMMDD).\n"
       "\n"                                                                           //
+      "    "FGBLUE"--motor"RESET"\n"
+      "    Motor name or identifier. Added to resulting run parameters.\n"
+      "\n"
       "    "FGBLUE"-t, --tag"RESET"\n"
       "    A short descriptive name for the test run. Underscores and spaces will be\n"
       "    replaced by hyphens '-'. Optional. Default is \""TAGDEFAULT"\".\n"

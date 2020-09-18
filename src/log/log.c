@@ -164,6 +164,12 @@ void save_run_params_to_json(struct run_data *rd)
     cJSON_AddItemToObject(params, "video_end", video_end_json);
   }
 
+  if (rd->motor_name_set) {
+    cJSON *motor_name_json = cJSON_CreateString(rd->motor_name);
+    CHECKJSON(motor_name_json);
+    cJSON_AddItemToObject(params, "motor", motor_name_json);
+  }
+
   info("saving");
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));
