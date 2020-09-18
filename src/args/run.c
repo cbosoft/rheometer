@@ -13,7 +13,7 @@
 
 void parse_run_args(int argc, const char **argv, struct run_data *rd) 
 {
-  int l_set=0, d_set=0, hwver_set=0, c_set=0, s_set=0;
+  int l_set=0, d_set=0, hwver_set=0, c_set=0, s_set=0, mat_set=0;
 
 
   for (int i = 0; i < argc; i++) {
@@ -107,6 +107,12 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       CHECK_ARG_HAS_VALUE;
       rd->motor_name = strdup(argv[i]);
     }
+    else if (ARGEQ("--material")) {
+      i++;
+      CHECK_ARG_HAS_VALUE;
+      rd->material_name = strdup(argv[i]);
+      mat_set = 1;
+    }
     else {
       argerr("Run argument \"%s\" not understood (is it a misplaced common arg?).", argv[i]);
     }
@@ -143,9 +149,13 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
   if (!hwver_set) {
     append_to_missing("hardware version");
   }
+
+  if (!mat_set) {
+    append_to_missing("material");
+  }
 #undef append_to_missing
 
-  if (!c_set || !s_set || !l_set || !d_set || !hwver_set)
+  if (!c_set || !s_set || !l_set || !d_set || !hwver_set || !mat_set)
     argerr("There are missing required parameters: %s." ,missing_params);
 
   free(missing_params);

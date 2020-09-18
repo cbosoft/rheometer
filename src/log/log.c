@@ -170,6 +170,12 @@ void save_run_params_to_json(struct run_data *rd)
     cJSON_AddItemToObject(params, "motor", motor_name_json);
   }
 
+  if (rd->material_name != NULL) {
+    cJSON *material_name_json = cJSON_CreateString(rd->material_name);
+    CHECKJSON(material_name_json);
+    cJSON_AddItemToObject(params, "material", material_name_json);
+  }
+
   info("saving");
   char *params_json_str = cJSON_Print(params);
   char *params_path = calloc(300, sizeof(char));

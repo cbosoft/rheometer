@@ -85,6 +85,7 @@ struct run_data {
   long cam_end;
   int motor_name_set;
   char *motor_name;
+  char *material_name;
 
   // locks
   pthread_mutex_t lock_time;

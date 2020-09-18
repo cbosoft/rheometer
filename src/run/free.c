@@ -17,6 +17,7 @@ void free_run_data(struct run_data *rd)
   free(rd->tag);
 
   if (rd->motor_name != NULL) free(rd->motor_name);
+  if (rd->material_name != NULL) free(rd->material_name);
 
   free(rd);
 }
