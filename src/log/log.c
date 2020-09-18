@@ -164,7 +164,7 @@ void save_run_params_to_json(struct run_data *rd)
     cJSON_AddItemToObject(params, "video_end", video_end_json);
   }
 
-  if (rd->motor_name_set) {
+  if (rd->motor_name != NULL) {
     cJSON *motor_name_json = cJSON_CreateString(rd->motor_name);
     CHECKJSON(motor_name_json);
     cJSON_AddItemToObject(params, "motor", motor_name_json);

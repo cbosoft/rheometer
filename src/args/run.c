@@ -13,7 +13,7 @@
 
 void parse_run_args(int argc, const char **argv, struct run_data *rd) 
 {
-  int l_set=0, d_set=0, hwver_set=0, c_set=0, s_set=0, mat_set=0;
+  int l_set=0, d_set=0, hwver_set=0, c_set=0, s_set=0, mat_set=0, mot_set=0;
 
 
   for (int i = 0; i < argc; i++) {
@@ -102,10 +102,10 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
       set_loud();
     }
     else if (ARGEQ("--motor")) {
-      rd->motor_name_set = 1;
       i++;
       CHECK_ARG_HAS_VALUE;
       rd->motor_name = strdup(argv[i]);
+      mot_set = 1;
     }
     else if (ARGEQ("--material")) {
       i++;
@@ -153,9 +153,13 @@ void parse_run_args(int argc, const char **argv, struct run_data *rd)
   if (!mat_set) {
     append_to_missing("material");
   }
+
+  if (!mot_set) {
+    append_to_missing("motor");
+  }
 #undef append_to_missing
 
-  if (!c_set || !s_set || !l_set || !d_set || !hwver_set || !mat_set)
+  if (!c_set || !s_set || !l_set || !d_set || !hwver_set || !mat_set || !mot_set)
     argerr("There are missing required parameters: %s." ,missing_params);
 
   free(missing_params);

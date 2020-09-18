@@ -83,7 +83,6 @@ struct run_data {
   int log_photo;
   long cam_start;
   long cam_end;
-  int motor_name_set;
   char *motor_name;
   char *material_name;
 
