@@ -186,6 +186,18 @@ def fmt_test(test):
     else:
         return f'{int(test)} seconds'
 
+def get_discrepancy():
+    try:
+        with open('.disc.txt') as f:
+            return float(f.readline())
+    except:
+        return 0.0
+    
+def set_discrepency(v):
+    with open('.disc.txt', 'w') as f:
+        f.write(f'{v}\n')
+
+
 def usage():
     print('')
     print('  rheosched')
@@ -250,9 +262,10 @@ if __name__ == "__main__":
 
     argset = schedule.get_argset(extra_args)
     l = len(argset)
-    discrepency = 0.0
+    discrepency = get_discrepancy()
     rv = 0
     for i, al in enumerate(argset):
+        # time estimate in seconds
         test = parse_time(get_tstr(al)) + discrepency
         title = f'({i+1}/{l}) This run will take {fmt_test(test)}. There are {fmt_test((l-i)*test)} remaining in total.'
         print(title)
@@ -266,4 +279,6 @@ if __name__ == "__main__":
         if rv:
             print("Schedule interrupted!")
             sys.exit(rv)
+    if not dummy:        
+        set_discrepency(discrepency)
 
