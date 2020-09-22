@@ -124,6 +124,7 @@ class Schedule:
             arglist.extend(tail)
             if extra_args:
                 arglist.extend(extra_args)
+            arglist = [f'"{arg}"' if '(' in arg else arg for arg in arglist]
             argset.append(arglist)
         return argset
 
