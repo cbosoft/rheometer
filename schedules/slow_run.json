@@ -6,22 +6,22 @@
   {
     "name": "constant",
     "type": "setter",
-    "params": "5%"
+    "params": "20%"
   },
   {
     "name": "constant",
     "type": "setter",
-    "params": "30%"
+    "params": "40%"
   },
   {
     "name": "constant",
     "type": "setter",
-    "params": "5%"
+    "params": "20%"
   },
   {
     "name": "constant",
     "type": "setter",
-    "params": "30%"
+    "params": "40%"
   },
   {
     "type": "params",
