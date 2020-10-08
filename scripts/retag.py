@@ -34,7 +34,7 @@ def main(args):
     i = 0
     while i < len(args): 
         key = args[i]
-        value = args[i+1]
+        value = None if i+1==len(args) else args[i+1]
         if key[0] == '-':
             if key in ('--pattern', '-p'):
                 patterns.append(value)
