@@ -14,6 +14,13 @@
 void motor_setup()
 {
   pinMode(PWM_PIN, PWM_OUTPUT);
+
+  // broadcom invented their own "balanced" pwm
+  // method, which is unpredictable. "mark:space" is
+  // the traditional method.
+  pwmSetMode(PWM_MODE_MS);
+  
+  // init to zero speed
   pwmWrite(PWM_PIN, 0);
 }
 
