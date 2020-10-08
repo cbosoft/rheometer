@@ -1,0 +1,31 @@
+[
+  {
+    "name": "none",
+    "type": "controller"
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": "5%"
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": "30%"
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": "5%"
+  },
+  {
+    "name": "constant",
+    "type": "setter",
+    "params": "30%"
+  },
+  {
+    "type": "params",
+    "n_interpolation_points": 3,
+    "length": "3m"
+  }
+]
