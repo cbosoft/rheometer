@@ -104,9 +104,14 @@ COL_SO = $(shell tput setaf 5 2>/dev/null)
 COL_RST = $(shell tput sgr0 2>/dev/null)
 COL_BLD = $(shell tput bold 2>/dev/null)
 
-.PHONY: all modules
+.PHONY: all modules utilities
 
-all: rheometer modules
+all: rheometer modules utilities
+
+utilities: util/pwm
+
+util/pwm: util/pwm.c
+	$(CC) $(CFLAGS) $^ -o $@ $(LINK)
 
 rheometer: $(RHEO) $(HDR)
 	@printf "$(COL_OBJ)LINKING OBJECTS TO EXECUTABLE $@$(COL_RST)\n"
