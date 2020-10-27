@@ -11,7 +11,7 @@
   {
     "name": "constant",
     "type": "setter",
-    "params": "40%"
+    "params": "30%"
   },
   {
     "name": "constant",
@@ -21,7 +21,7 @@
   {
     "name": "constant",
     "type": "setter",
-    "params": "40%"
+    "params": "30%"
   },
   {
     "type": "params",
