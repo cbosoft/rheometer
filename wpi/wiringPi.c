@@ -21,6 +21,12 @@ int pinMode(int pin, int mode)
   return 0;
 }
 
+int pwmSetMode(int mode)
+{
+  (void) mode;
+  return 0;
+}
+
 int pwmWrite(int pin, int value)
 {
   (void) pin;
